@@ -267,10 +267,10 @@ Return ONLY a valid JSON object (no markdown, no code fences):
   "whatsappCta": "WhatsApp floating button text",
   "whatsappMessage": "Pre-filled WhatsApp message (max 100 chars, booking intent, URL-encode ready)",
   "benefits": [
-    "Benefit tagline 1 (5-10 words)",
-    "Benefit tagline 2 (5-10 words)",
-    "Benefit tagline 3 (5-10 words)",
-    "Benefit tagline 4 (5-10 words)"
+    { "icon": "✓", "title": "Benefit title (3-5 words)", "description": "1-2 sentence explanation" },
+    { "icon": "★", "title": "Benefit title (3-5 words)", "description": "1-2 sentence explanation" },
+    { "icon": "⚡", "title": "Benefit title (3-5 words)", "description": "1-2 sentence explanation" },
+    { "icon": "❤", "title": "Benefit title (3-5 words)", "description": "1-2 sentence explanation" }
   ],
   "whyChooseTitle": "Section title for benefits (e.g. 'Why Choose Us?')",
   "whatWeOfferTitle": "Section title for features (e.g. 'What We Offer')",
@@ -321,7 +321,12 @@ function buildMultilingualPrompt(normalized, decisions, langs) {
       footerCta: `[footer CTA heading in ${LANG_LABELS[l] || l}]`,
       whatsappCta: `[WhatsApp CTA in ${LANG_LABELS[l] || l}]`,
       whatsappMessage: `[pre-filled WhatsApp message in ${LANG_LABELS[l] || l}, max 100 chars]`,
-      benefits: [`[benefit 1]`, `[benefit 2]`, `[benefit 3]`, `[benefit 4]`],
+      benefits: [
+        { icon: '✓', title: `[benefit title in ${LANG_LABELS[l] || l}]`, description: `[1-2 sentence description]` },
+        { icon: '★', title: `[benefit title in ${LANG_LABELS[l] || l}]`, description: `[1-2 sentence description]` },
+        { icon: '⚡', title: `[benefit title in ${LANG_LABELS[l] || l}]`, description: `[1-2 sentence description]` },
+        { icon: '❤', title: `[benefit title in ${LANG_LABELS[l] || l}]`, description: `[1-2 sentence description]` },
+      ],
       whyChooseTitle: `[section title in ${LANG_LABELS[l] || l}]`,
       whatWeOfferTitle: `[section title in ${LANG_LABELS[l] || l}]`,
       servicesTitle: `[services section title in ${LANG_LABELS[l] || l}]`,
@@ -354,7 +359,7 @@ ${JSON.stringify(exampleObj, null, 2)}
 
 Rules:
 - Each language version must be fully written in that language (no mixing)
-- benefits must be an array of exactly 4 strings
+- benefits must be an array of exactly 4 objects with keys: icon (emoji), title (3-5 words), description (1-2 sentences)
 - whatsappMessage must be max 100 characters, booking intent, in that language
 - Return ONLY the JSON object, no markdown, no explanation`
 }
@@ -383,7 +388,12 @@ function validateMonolingual(parsed) {
   if (!parsed.headline || !parsed.subheadline || !parsed.ctaText || !Array.isArray(parsed.benefits)) {
     throw new Error('AI response missing required fields: headline, subheadline, ctaText, benefits')
   }
-  const benefits = parsed.benefits.map(b => String(b).trim()).filter(Boolean)
+  const benefits = parsed.benefits.map(b => {
+    if (b && typeof b === 'object' && b.title) {
+      return { icon: String(b.icon || '✓'), title: String(b.title).trim(), description: String(b.description || '').trim() }
+    }
+    return { icon: '✓', title: String(b).trim(), description: '' }
+  }).filter(b => b.title)
   if (benefits.length < 2) throw new Error('AI returned fewer than 2 benefits.')
   return {
     headline: String(parsed.headline).trim(),

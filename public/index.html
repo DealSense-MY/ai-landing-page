@@ -1406,6 +1406,19 @@ Consultation | Free"></textarea>
     }
   })
 
+  // ── Share / Copy demo URL ──
+  document.getElementById('btn-share').addEventListener('click', () => {
+    const demoId = state.demoId
+    if (!demoId) return
+    const url = `${window.location.origin}/demo/${demoId}`
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('btn-share')
+      btn.textContent = '✅ Copied!'
+      showToast(UI[uiLang].toast_copied || 'Link copied! ✓', 'success')
+      setTimeout(() => { btn.textContent = '🔗 Share Link' }, 2000)
+    })
+  })
+
   // ── Editor collapse toggle ──
   const editorToggle = document.getElementById('editor-toggle')
   const editorFields = document.querySelector('.editor-fields')

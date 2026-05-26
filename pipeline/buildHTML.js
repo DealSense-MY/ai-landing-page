@@ -45,14 +45,20 @@ function buildMapIframe(mapQuery, findUsTitle) {
 }
 
 function buildBenefitsSection(benefits, colorTheme, whyChooseTitle) {
-  const icons = ['✓', '★', '⚡', '❤', '🔒', '💡', '🎯', '🏆']
-  const items = benefits.map((b, i) => `
+  const fallbackIcons = ['✓', '★', '⚡', '❤', '🔒', '💡', '🎯', '🏆']
+  const items = benefits.map((b, i) => {
+    const icon = (b && b.icon) ? b.icon : fallbackIcons[i % fallbackIcons.length]
+    const title = (b && b.title) ? b.title : String(b)
+    const desc = (b && b.description) ? b.description : ''
+    return `
       <div class="benefit-card">
         <div class="benefit-icon" style="background: ${colorTheme.primary}20; color: ${colorTheme.primary};">
-          ${icons[i % icons.length]}
+          ${escapeHTML(icon)}
         </div>
-        <p class="benefit-text" data-i18n="benefit_${i}">${escapeHTML(b)}</p>
-      </div>`).join('')
+        <h3 class="benefit-title" data-i18n="benefit_title_${i}">${escapeHTML(title)}</h3>
+        ${desc ? `<p class="benefit-desc" data-i18n="benefit_desc_${i}">${escapeHTML(desc)}</p>` : ''}
+      </div>`
+  }).join('')
 
   return `
     <section class="benefits-section" style="background: ${colorTheme.secondary};">
@@ -222,7 +228,10 @@ function buildI18nScript(multilingual, langs, allBenefitsByLang) {
       footerGetStarted: c.footerGetStarted,
     }
     const benefits = allBenefitsByLang[lang] || []
-    benefits.forEach((b, i) => { T[lang][`benefit_${i}`] = b })
+    benefits.forEach((b, i) => {
+      T[lang][`benefit_title_${i}`] = (b && b.title) ? b.title : String(b)
+      if (b && b.description) T[lang][`benefit_desc_${i}`] = b.description
+    })
   }
 
   return `<script>
@@ -349,6 +358,9 @@ export function buildHTML(normalized, decisions, aiContent) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="${escapeHTML(subheadline)}">
+  <meta property="og:title" content="${escapeHTML(productName)}">
+  <meta property="og:description" content="${escapeHTML(subheadline)}">
+  ${imageUrl ? `<meta property="og:image" content="${escapeHTML(imageUrl)}">` : ''}
   <title>${escapeHTML(pageTitle)}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -494,15 +506,15 @@ export function buildHTML(normalized, decisions, aiContent) {
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); background: #1da851; }
     .hero-image-wrap {
-      flex: 0 0 420px;
-      max-width: 420px;
+      flex: 1;
+      max-width: 50%;
       ${isHeroCenter ? 'width: 100%; max-width: 500px;' : ''}
     }
     .hero-image-wrap img {
       width: 100%;
-      height: 320px;
+      height: 400px;
       object-fit: cover;
-      border-radius: 20px;
+      border-radius: 12px;
       box-shadow: 0 16px 48px rgba(0,0,0,0.3);
     }
 
@@ -542,7 +554,8 @@ export function buildHTML(normalized, decisions, aiContent) {
       font-size: 1.4rem;
       margin: 0 auto 16px;
     }
-    .benefit-text { font-size: 0.97rem; color: #444; font-weight: 500; line-height: 1.5; }
+    .benefit-title { font-size: 1rem; color: var(--text); font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+    .benefit-desc { font-size: 0.88rem; color: #666; font-weight: 400; line-height: 1.5; }
 
     .features-section { padding: 72px 0; background: var(--light); }
     .features-list {
@@ -639,8 +652,15 @@ export function buildHTML(normalized, decisions, aiContent) {
     .footer-cta h2 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 800; margin-bottom: 16px; }
     .footer-cta p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 36px; max-width: 500px; margin-left: auto; margin-right: auto; }
 
-    .footer { background: #1a1a2e; color: #aaa; text-align: center; padding: 24px 20px; font-size: 0.85rem; }
+    .footer { background: #1a1a2e; color: #aaa; padding: 40px 20px 24px; font-size: 0.85rem; }
+    .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1100px; margin: 0 auto 24px; }
+    .footer-col h4 { color: #fff; font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; }
+    .footer-info-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.88rem; color: #999; }
+    .footer-info-item a { color: #bbb; text-decoration: none; }
+    .footer-info-item a:hover { color: #fff; }
+    .footer-copy { text-align: center; border-top: 1px solid #2a2a3e; padding-top: 20px; max-width: 1100px; margin: 0 auto; }
     .footer a { color: var(--primary); text-decoration: none; }
+    @media (max-width: 600px) { .footer-grid { grid-template-columns: 1fr; gap: 20px; } }
 
     /* WhatsApp Float */
     .whatsapp-float {
@@ -747,7 +767,23 @@ export function buildHTML(normalized, decisions, aiContent) {
   </section>
 
   <footer class="footer">
-    <p>&copy; ${new Date().getFullYear()} ${escapeHTML(productName)}${address ? ` · ${escapeHTML(address)}` : ''}${phoneNumber ? ` · <a href="${waLink}" target="_blank">WhatsApp</a>` : ''}</p>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>${escapeHTML(productName)}</h4>
+        ${address ? `<div class="footer-info-item">📍 ${escapeHTML(address)}</div>` : ''}
+        ${normalized.operatingHours ? `<div class="footer-info-item">🕐 ${escapeHTML(normalized.operatingHours)}</div>` : ''}
+        ${normalized.ownerName ? `<div class="footer-info-item">👨‍⚕️ Led by ${escapeHTML(normalized.ownerName)}</div>` : ''}
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        ${phoneNumber ? `<div class="footer-info-item">📱 <a href="${waLink}" target="_blank" rel="noopener">WhatsApp Us</a></div>` : ''}
+        ${normalized.landline ? `<div class="footer-info-item">☎ <a href="tel:${escapeHTML(normalized.landline)}">${escapeHTML(normalized.landline)}</a></div>` : ''}
+        ${normalized.email ? `<div class="footer-info-item">✉ <a href="mailto:${escapeHTML(normalized.email)}">${escapeHTML(normalized.email)}</a></div>` : ''}
+      </div>
+    </div>
+    <div class="footer-copy">
+      <p>&copy; ${new Date().getFullYear()} ${escapeHTML(productName)}. All rights reserved.</p>
+    </div>
   </footer>
 
   ${buildWhatsAppFloat(waLink)}
