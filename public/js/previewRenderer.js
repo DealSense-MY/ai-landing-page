@@ -50,7 +50,8 @@ function buildHTMLFromJSON(d) {
   const isCenter = d.layout === 'hero_center'
 
   const waPhone = (d.phoneNumber || '').replace('+', '')
-  const waLink = waPhone ? `https://wa.me/${waPhone}` : '#'
+  const waMsg = d.whatsappMessage ? `?text=${encodeURIComponent(d.whatsappMessage)}` : ''
+  const waLink = waPhone ? `https://wa.me/${waPhone}${waMsg}` : '#'
   const heroImage = d.imageUrl || '/assets/placeholder.svg'
   const allBenefits = (d.benefits && d.benefits.length > 0)
     ? d.benefits

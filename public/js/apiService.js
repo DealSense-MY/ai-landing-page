@@ -46,6 +46,19 @@ export const apiService = {
         phoneNumber: data.json.phoneNumber || '',
         address: data.json.address || '',
         outputLang: data.json.outputLang || 'en',
+        tagline: data.json.tagline || '',
+        email: data.json.email || '',
+        operatingHours: data.json.operatingHours || '',
+        ownerName: data.json.ownerName || '',
+        yearsInOperation: data.json.yearsInOperation || '',
+        googleRating: data.json.googleRating || '',
+        totalReviews: data.json.totalReviews || '',
+        services: data.json.services || [],
+        customerReviews: data.json.customerReviews || [],
+        logoUrl: data.json.logoUrl || '',
+        galleryImages: data.json.galleryImages || [],
+        beforeAfterImages: data.json.beforeAfterImages || [],
+        whatsappMessage: data.json.whatsappMessage || '',
       }
 
       state.update({
