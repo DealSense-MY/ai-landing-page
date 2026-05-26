@@ -220,6 +220,17 @@
       background: var(--border);
     }
 
+    /* ── REVIEW ENTRIES ── */
+    .review-entries { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .review-entry {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+    .review-entry .form-group { margin-bottom: 8px; }
+    .review-entry .form-group:last-child { margin-bottom: 0; }
+
     /* ── GENERATE BUTTON ── */
     .btn-generate {
       width: 100%;
@@ -714,6 +725,53 @@
           <input type="text" id="field-productName" class="form-control" placeholder="e.g. SmileCare Dental Clinic" required>
         </div>
 
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_tagline">TAGLINE / SLOGAN</label>
+          <input type="text" id="field-tagline" class="form-control" placeholder="e.g. Your Smile, Our Priority">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" data-i18n="label_email">EMAIL</label>
+            <input type="email" id="field-email" class="form-control" placeholder="hello@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="label_landline">PHONE (LANDLINE)</label>
+            <input type="text" id="field-landline" class="form-control" placeholder="e.g. 05-1234567">
+            <div class="form-hint" data-i18n="hint_landline">Optional — for businesses with two numbers</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_hours">OPERATING HOURS</label>
+          <input type="text" id="field-hours" class="form-control" placeholder="e.g. Mon-Sat 9am-6pm, Closed Sunday">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_owner">DOCTOR / OWNER NAME</label>
+          <input type="text" id="field-owner" class="form-control" placeholder="e.g. Dr. Ahmad bin Ali">
+          <div class="form-hint" data-i18n="hint_owner">Optional — adds trust signal in generated copy</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" data-i18n="label_years">YEARS IN OPERATION</label>
+            <input type="text" id="field-years" class="form-control" placeholder="e.g. 10">
+            <div class="form-hint" data-i18n="hint_years">Used in copy as '10+ years experience'</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="label_rating">GOOGLE RATING</label>
+            <input type="text" id="field-rating" class="form-control" placeholder="e.g. 4.9">
+            <div class="form-hint" data-i18n="hint_rating">Star rating shown as social proof badge</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_reviews_count">TOTAL REVIEWS</label>
+          <input type="text" id="field-reviewsCount" class="form-control" placeholder="e.g. 363">
+          <div class="form-hint" data-i18n="hint_reviews_count">Shown alongside Google rating</div>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" data-i18n="label_niche">Niche</label>
@@ -757,6 +815,82 @@
           <div class="form-hint" data-i18n="hint_benefits">Comma-separated or one per line</div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_services">SERVICES</label>
+          <textarea id="field-services" class="form-control" rows="5" placeholder="One per line. Format: Service Name | Price (optional)
+e.g.
+Scaling &amp; Polishing | RM80
+Tooth Extraction | RM50-150
+Consultation | Free"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_cust_reviews">CUSTOMER REVIEWS</label>
+          <div class="form-hint" data-i18n="hint_cust_reviews">Optional — paste real Google reviews or leave blank</div>
+          <div class="review-entries">
+            <div class="review-entry">
+              <div class="form-row">
+                <div class="form-group">
+                  <input type="text" id="field-review1-name" class="form-control" placeholder="Customer name">
+                </div>
+                <div class="form-group">
+                  <select id="field-review1-rating" class="form-control">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <textarea id="field-review1-quote" class="form-control" rows="2" placeholder="What they said..."></textarea>
+              </div>
+              <div class="form-group">
+                <input type="text" id="field-review1-date" class="form-control" placeholder="e.g. 3 months ago">
+              </div>
+            </div>
+            <div class="review-entry">
+              <div class="form-row">
+                <div class="form-group">
+                  <input type="text" id="field-review2-name" class="form-control" placeholder="Customer name">
+                </div>
+                <div class="form-group">
+                  <select id="field-review2-rating" class="form-control">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <textarea id="field-review2-quote" class="form-control" rows="2" placeholder="What they said..."></textarea>
+              </div>
+              <div class="form-group">
+                <input type="text" id="field-review2-date" class="form-control" placeholder="e.g. 3 months ago">
+              </div>
+            </div>
+            <div class="review-entry">
+              <div class="form-row">
+                <div class="form-group">
+                  <input type="text" id="field-review3-name" class="form-control" placeholder="Customer name">
+                </div>
+                <div class="form-group">
+                  <select id="field-review3-rating" class="form-control">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <textarea id="field-review3-quote" class="form-control" rows="2" placeholder="What they said..."></textarea>
+              </div>
+              <div class="form-group">
+                <input type="text" id="field-review3-date" class="form-control" placeholder="e.g. 3 months ago">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <hr class="form-divider">
 
         <!-- Contact & Media -->
@@ -766,6 +900,31 @@
           <label class="form-label" data-i18n="label_image">Image URL</label>
           <input type="url" id="field-imageUrl" class="form-control" placeholder="https://example.com/image.jpg">
           <div class="form-hint" data-i18n="hint_image">Hero image (leave blank for placeholder)</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_logo">LOGO URL</label>
+          <input type="text" id="field-logoUrl" class="form-control" placeholder="https://example.com/logo.png">
+          <div class="form-hint" data-i18n="hint_logo">Optional — your business logo</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_gallery">GALLERY IMAGES</label>
+          <input type="text" id="field-gallery1" class="form-control" style="margin-bottom:8px;" placeholder="https://i.imgur.com/example.jpg">
+          <input type="text" id="field-gallery2" class="form-control" style="margin-bottom:8px;" placeholder="https://i.imgur.com/example.jpg">
+          <input type="text" id="field-gallery3" class="form-control" placeholder="https://i.imgur.com/example.jpg">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_before_after">BEFORE / AFTER</label>
+          <div class="form-row" style="margin-bottom:8px;">
+            <input type="text" id="field-before1" class="form-control" placeholder="Before image URL">
+            <input type="text" id="field-after1" class="form-control" placeholder="After image URL">
+          </div>
+          <div class="form-row">
+            <input type="text" id="field-before2" class="form-control" placeholder="Before image URL">
+            <input type="text" id="field-after2" class="form-control" placeholder="After image URL">
+          </div>
         </div>
 
         <div class="form-group">
@@ -929,7 +1088,30 @@
       hint_image: "Hero image (leave blank for placeholder)",
       hint_phone: "Include country code e.g. +601X-XXXXXXX",
       hint_map: "Google Maps search query (defaults to address)",
+      label_tagline: "TAGLINE / SLOGAN",
+      label_email: "EMAIL",
+      label_landline: "PHONE (LANDLINE)",
+      hint_landline: "Optional — for businesses with two numbers",
+      label_hours: "OPERATING HOURS",
+      label_owner: "DOCTOR / OWNER NAME",
+      hint_owner: "Optional — adds trust signal in generated copy",
+      label_years: "YEARS IN OPERATION",
+      hint_years: "Used in copy as '10+ years experience'",
+      label_rating: "GOOGLE RATING",
+      hint_rating: "Star rating shown as social proof badge",
+      label_reviews_count: "TOTAL REVIEWS",
+      hint_reviews_count: "Shown alongside Google rating",
+      label_services: "SERVICES",
+      label_cust_reviews: "CUSTOMER REVIEWS",
+      hint_cust_reviews: "Optional — paste real Google reviews or leave blank",
+      label_logo: "LOGO URL",
+      hint_logo: "Optional — your business logo",
+      label_gallery: "GALLERY IMAGES",
+      label_before_after: "BEFORE / AFTER",
       ph_name: "e.g. SmileCare Dental Clinic",
+      ph_tagline: "e.g. Your Smile, Our Priority",
+      ph_hours: "e.g. Mon-Sat 9am-6pm, Closed Sunday",
+      ph_owner: "e.g. Dr. Ahmad bin Ali",
       ph_features: "Free consultation, Digital X-Ray, Same day appointment",
       ph_benefits: "Pain-free treatment, 10+ years experience, Kids friendly",
       ph_image: "https://example.com/image.jpg",
@@ -989,7 +1171,30 @@
       hint_image: "Gambar hero (kosongkan untuk guna placeholder)",
       hint_phone: "Termasuk kod negara contoh +601X-XXXXXXX",
       hint_map: "Carian Google Maps (lalai kepada alamat)",
+      label_tagline: "TAGLINE / SLOGAN",
+      label_email: "E-MEL",
+      label_landline: "TELEFON (TALIAN TETAP)",
+      hint_landline: "Pilihan — untuk bisnes dengan dua nombor",
+      label_hours: "JAM OPERASI",
+      label_owner: "NAMA DOKTOR / PEMILIK",
+      hint_owner: "Pilihan — tambah kepercayaan dalam copy",
+      label_years: "TAHUN BEROPERASI",
+      hint_years: "Digunakan sebagai '10+ tahun pengalaman'",
+      label_rating: "RATING GOOGLE",
+      hint_rating: "Rating bintang untuk badge kepercayaan",
+      label_reviews_count: "JUMLAH ULASAN",
+      hint_reviews_count: "Ditunjukkan bersama rating Google",
+      label_services: "PERKHIDMATAN",
+      label_cust_reviews: "ULASAN PELANGGAN",
+      hint_cust_reviews: "Pilihan — tampal ulasan Google sebenar atau kosongkan",
+      label_logo: "URL LOGO",
+      hint_logo: "Pilihan — logo perniagaan anda",
+      label_gallery: "GAMBAR GALERI",
+      label_before_after: "SEBELUM / SELEPAS",
       ph_name: "cth. Klinik Pergigian SmileCare",
+      ph_tagline: "cth. Senyuman Anda, Keutamaan Kami",
+      ph_hours: "cth. Isnin-Sabtu 9pg-6ptg, Ahad Tutup",
+      ph_owner: "cth. Dr. Ahmad bin Ali",
       ph_features: "Konsultasi percuma, X-Ray digital, Temujanji hari sama",
       ph_benefits: "Rawatan tanpa sakit, 10+ tahun pengalaman, Mesra kanak-kanak",
       ph_image: "https://example.com/image.jpg",
@@ -1059,6 +1264,9 @@
     // Update placeholders
     const fields = {
       'field-productName': 'ph_name',
+      'field-tagline': 'ph_tagline',
+      'field-hours': 'ph_hours',
+      'field-owner': 'ph_owner',
       'field-features': 'ph_features',
       'field-benefits': 'ph_benefits',
       'field-imageUrl': 'ph_image',
@@ -1142,13 +1350,42 @@
     const benefits = document.getElementById('field-benefits').value
       .split(/[,\n]/).map(s => s.trim()).filter(Boolean)
 
+    const services = document.getElementById('field-services').value
+      .split('\n').map(s => s.trim()).filter(Boolean)
+    const reviews = [1, 2, 3].map(i => ({
+      name: document.getElementById(`field-review${i}-name`).value.trim(),
+      rating: document.getElementById(`field-review${i}-rating`).value,
+      quote: document.getElementById(`field-review${i}-quote`).value.trim(),
+      date: document.getElementById(`field-review${i}-date`).value.trim(),
+    })).filter(r => r.name || r.quote)
+
     const payload = {
       productName: document.getElementById('field-productName').value.trim(),
+      tagline: document.getElementById('field-tagline').value.trim(),
+      email: document.getElementById('field-email').value.trim(),
+      landline: document.getElementById('field-landline').value.trim(),
+      operatingHours: document.getElementById('field-hours').value.trim(),
+      ownerName: document.getElementById('field-owner').value.trim(),
+      yearsInOperation: document.getElementById('field-years').value.trim(),
+      googleRating: document.getElementById('field-rating').value.trim(),
+      totalReviews: document.getElementById('field-reviewsCount').value.trim(),
       niche: document.getElementById('field-niche').value,
       tone: document.getElementById('field-tone').value,
       features,
       benefits,
+      services,
+      customerReviews: reviews,
       imageUrl: document.getElementById('field-imageUrl').value.trim(),
+      logoUrl: document.getElementById('field-logoUrl').value.trim(),
+      gallery: [
+        document.getElementById('field-gallery1').value.trim(),
+        document.getElementById('field-gallery2').value.trim(),
+        document.getElementById('field-gallery3').value.trim(),
+      ].filter(Boolean),
+      beforeAfter: [
+        { before: document.getElementById('field-before1').value.trim(), after: document.getElementById('field-after1').value.trim() },
+        { before: document.getElementById('field-before2').value.trim(), after: document.getElementById('field-after2').value.trim() },
+      ].filter(p => p.before || p.after),
       phoneNumber: document.getElementById('field-phoneNumber').value.trim(),
       address: document.getElementById('field-address').value.trim(),
       mapQuery: document.getElementById('field-mapQuery').value.trim(),
