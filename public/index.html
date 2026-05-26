@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Landing Page System v2</title>
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0f1a;
+      --surface: #16182a;
+      --surface2: #1e2038;
+      --border: #2a2d4a;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-dim: #6366f120;
+      --accent: #a78bfa;
+      --text: #e2e4f0;
+      --text-muted: #8b8fb5;
+      --text-dim: #5a5e80;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* ── APP SHELL ── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 50;
+    }
+    .app-header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-status {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .header-status .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── UI LANG TOGGLE ── */
+    .ui-lang-btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ui-lang-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .app-layout {
+      display: flex;
+      height: calc(100vh - 57px);
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      width: 360px;
+      min-width: 320px;
+      max-width: 400px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .left-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .left-panel-header h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+    .panel-scroll {
+      overflow-y: auto;
+      flex: 1;
+      padding: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .panel-scroll::-webkit-scrollbar { width: 4px; }
+    .panel-scroll::-webkit-scrollbar-track { background: transparent; }
+    .panel-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── FORM ELEMENTS ── */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .form-label .required { color: var(--error); }
+    .form-control {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-dim);
+    }
+    .form-control::placeholder { color: var(--text-dim); }
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b8fb5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+    .form-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── OUTPUT LANGUAGE SELECTOR ── */
+    .lang-output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .lang-output-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 8px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+    .lang-output-btn:hover { border-color: var(--primary); color: var(--text); }
+    .lang-output-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-dim);
+      color: var(--text);
+    }
+    .lang-output-btn--full { grid-column: span 2; flex-direction: row; gap: 8px; }
+    .lang-flag { font-size: 1.1rem; }
+    .lang-label { font-weight: 600; font-size: 0.8rem; }
+    .lang-sub { font-size: 0.7rem; color: var(--text-dim); }
+
+    /* ── GENERATE BUTTON ── */
+    .btn-generate {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn-generate:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-generate .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-generate.loading .spinner { display: block; }
+    .btn-generate.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-sm);
+      color: #fca5a5;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-banner.show { display: block; }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    /* ── PREVIEW TOOLBAR ── */
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .preview-toolbar-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .preview-toolbar-right { display: flex; align-items: center; gap: 8px; }
+    .preview-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .btn-toolbar {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 14px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-toolbar:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-toolbar.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .btn-toolbar:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .demo-link-badge {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-family: monospace;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── PREVIEW AREA ── */
+    .preview-area {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+      overflow: auto;
+      background: #0a0a14;
+    }
+    .preview-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      color: var(--text-dim);
+      text-align: center;
+      gap: 16px;
+    }
+    .preview-empty .empty-icon { font-size: 3.5rem; opacity: 0.4; }
+    .preview-empty h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); }
+    .preview-empty p { font-size: 0.88rem; max-width: 280px; }
+
+    /* ── DEVICE FRAME ── */
+    #preview-frame-wrap {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 0 2px var(--border), 0 20px 60px rgba(0,0,0,0.5);
+      width: 100%;
+      max-width: 1200px;
+      overflow: hidden;
+      transition: max-width 0.3s ease;
+    }
+    #preview-frame-wrap.mobile-view {
+      max-width: 390px;
+      border-radius: 40px;
+      box-shadow: 0 0 0 8px #1a1a2e, 0 0 0 10px var(--border), 0 20px 60px rgba(0,0,0,0.5);
+    }
+    #preview-iframe {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      display: block;
+    }
+    #preview-frame-wrap.mobile-view #preview-iframe {
+      height: 75vh;
+    }
+
+    /* ── BOTTOM SPLIT (preview + editor) ── */
+    .bottom-split {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── EDITOR PANEL ── */
+    .editor-panel {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      max-height: 280px;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .editor-panel.hidden { max-height: 0; }
+    .editor-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .editor-panel-header h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .editor-panel-header h3::before {
+      content: '✏️';
+      font-size: 0.9rem;
+    }
+    .editor-collapse-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+      transition: transform 0.2s;
+    }
+    .editor-fields {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 16px 20px;
+      overflow-y: auto;
+      max-height: 216px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .editor-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .editor-field label {
+      font-size: 0.73rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .editor-field input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .editor-field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-dim);
+    }
+
+    /* ── LOADING OVERLAY ── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,15,26,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      gap: 20px;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .loading-overlay.show { opacity: 1; pointer-events: all; }
+    .loading-ring {
+      width: 60px; height: 60px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .loading-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .loading-sub {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ── LOADING OVERLAY ── -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-ring"></div>
+  <div class="loading-text" data-i18n="loading_text">Generating your landing page…</div>
+  <div class="loading-sub" data-i18n="loading_sub">Claude AI is crafting the perfect copy ✨</div>
+</div>
+
+<!-- ── APP HEADER ── -->
+<header class="app-header">
+  <div class="app-header-logo">
+    🚀 AI Landing Page System
+    <span class="logo-badge">v2</span>
+  </div>
+  <div class="header-right">
+    <div class="header-status">
+      <span class="dot"></span>Powered by Claude AI
+    </div>
+    <div id="ui-lang-toggle" style="display:flex;gap:6px;margin-left:16px;">
+      <button class="ui-lang-btn active" onclick="setUILang('en')">EN</button>
+      <button class="ui-lang-btn" onclick="setUILang('bm')">BM</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── APP LAYOUT ── -->
+<div class="app-layout">
+
+  <!-- ══ LEFT PANEL: INPUT FORM ══ -->
+  <div class="left-panel">
+    <div class="left-panel-header">
+      <h2 data-i18n="cfg_title">⚙ Configuration</h2>
+    </div>
+    <div class="panel-scroll">
+
+      <div id="error-banner" class="error-banner"></div>
+
+      <form id="generate-form">
+
+        <!-- Business Info -->
+        <div class="form-section-title" data-i18n="section_biz">Business Info</div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_name">Product / Business Name <span class="required">*</span></label>
+          <input type="text" id="field-productName" class="form-control" placeholder="e.g. SmileCare Dental Clinic" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" data-i18n="label_niche">Niche</label>
+            <select id="field-niche" class="form-control">
+              <option value="general" data-i18n-opt="niche_general">General</option>
+              <option value="dental_clinic" data-i18n-opt="niche_dental">Dental Clinic</option>
+              <option value="beauty" data-i18n-opt="niche_beauty">Beauty</option>
+              <option value="F&B" data-i18n-opt="niche_fnb">Food & Beverage</option>
+              <option value="digital" data-i18n-opt="niche_digital">Digital</option>
+              <option value="retail" data-i18n-opt="niche_retail">Retail</option>
+              <option value="education" data-i18n-opt="niche_edu">Education</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="label_tone">Tone</label>
+            <select id="field-tone" class="form-control">
+              <option value="warm_professional" data-i18n-opt="tone_warm">Warm Professional</option>
+              <option value="casual" data-i18n-opt="tone_casual">Casual</option>
+              <option value="urgent" data-i18n-opt="tone_urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Content -->
+        <div class="form-section-title" data-i18n="section_content">Content</div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_features">Features</label>
+          <textarea id="field-features" class="form-control" placeholder="Free consultation, Digital X-Ray, Same day appointment" rows="3"></textarea>
+          <div class="form-hint" data-i18n="hint_features">Comma-separated or one per line</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_benefits">Benefits</label>
+          <textarea id="field-benefits" class="form-control" placeholder="Pain-free treatment, 10+ years experience, Kids friendly" rows="3"></textarea>
+          <div class="form-hint" data-i18n="hint_benefits">Comma-separated or one per line</div>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Contact & Media -->
+        <div class="form-section-title" data-i18n="section_contact">Contact & Media</div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_image">Image URL</label>
+          <input type="url" id="field-imageUrl" class="form-control" placeholder="https://example.com/image.jpg">
+          <div class="form-hint" data-i18n="hint_image">Hero image (leave blank for placeholder)</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_phone">WhatsApp Number</label>
+          <input type="tel" id="field-phoneNumber" class="form-control" placeholder="+60123456789">
+          <div class="form-hint" data-i18n="hint_phone">Include country code e.g. +601X-XXXXXXX</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_address">Address</label>
+          <input type="text" id="field-address" class="form-control" placeholder="No. 1, Jalan Example, KL">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_mapquery">Map Query</label>
+          <input type="text" id="field-mapQuery" class="form-control" placeholder="SmileCare Dental Kuala Lumpur">
+          <div class="form-hint" data-i18n="hint_map">Google Maps search query (defaults to address)</div>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Output Language -->
+        <div class="form-section-title" data-i18n="section_lang">Output Language</div>
+        <div class="lang-output-grid" id="lang-output-selector">
+          <button type="button" class="lang-output-btn active" data-lang="en">
+            <span class="lang-flag">🇬🇧</span>
+            <span class="lang-label">English</span>
+            <span class="lang-sub">EN only</span>
+          </button>
+          <button type="button" class="lang-output-btn" data-lang="bm">
+            <span class="lang-flag">🇲🇾</span>
+            <span class="lang-label">Bahasa Malaysia</span>
+            <span class="lang-sub">BM only</span>
+          </button>
+          <button type="button" class="lang-output-btn" data-lang="zh">
+            <span class="lang-flag">🇨🇳</span>
+            <span class="lang-label">中文</span>
+            <span class="lang-sub">ZH only</span>
+          </button>
+          <button type="button" class="lang-output-btn" data-lang="en+bm">
+            <span class="lang-flag">🇬🇧🇲🇾</span>
+            <span class="lang-label">EN + BM</span>
+            <span class="lang-sub">Bilingual</span>
+          </button>
+          <button type="button" class="lang-output-btn" data-lang="en+zh">
+            <span class="lang-flag">🇬🇧🇨🇳</span>
+            <span class="lang-label">EN + ZH</span>
+            <span class="lang-sub">Bilingual</span>
+          </button>
+          <button type="button" class="lang-output-btn" data-lang="zh+bm">
+            <span class="lang-flag">🇨🇳🇲🇾</span>
+            <span class="lang-label">ZH + BM</span>
+            <span class="lang-sub">Bilingual</span>
+          </button>
+          <button type="button" class="lang-output-btn lang-output-btn--full" data-lang="en+bm+zh">
+            <span class="lang-flag">🌐</span>
+            <span class="lang-label">EN + BM + ZH</span>
+            <span class="lang-sub">Trilingual</span>
+          </button>
+        </div>
+
+        <button type="submit" class="btn-generate" id="btn-generate">
+          <div class="spinner"></div>
+          <span class="btn-text" data-i18n="btn_generate">✨ Generate Landing Page</span>
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ RIGHT PANEL: PREVIEW + EDITOR ══ -->
+  <div class="right-panel">
+
+    <!-- Preview Toolbar -->
+    <div class="preview-toolbar">
+      <div class="preview-toolbar-left">
+        <span class="preview-label" data-i18n="label_preview">Preview:</span>
+        <button class="btn-toolbar active" id="btn-desktop">🖥 Desktop</button>
+        <button class="btn-toolbar" id="btn-mobile">📱 Mobile</button>
+        <span id="demo-link-badge" class="demo-link-badge" style="display:none;"></span>
+      </div>
+      <div class="preview-toolbar-right">
+        <button class="btn-toolbar" id="btn-share" disabled title="Copy demo link">🔗 Share Link</button>
+        <button class="btn-toolbar" id="btn-export" disabled title="Download HTML">⬇ Export HTML</button>
+      </div>
+    </div>
+
+    <!-- Preview Area + Editor Bottom Split -->
+    <div class="bottom-split">
+
+      <!-- Preview Iframe Area -->
+      <div class="preview-area" id="preview-area">
+        <div class="preview-empty" id="preview-empty">
+          <div class="empty-icon">🎨</div>
+          <h3 data-i18n="empty_h3">Your Landing Page Appears Here</h3>
+          <p data-i18n="empty_p">Fill in the form and click Generate to create a beautiful, AI-powered landing page.</p>
+        </div>
+        <div id="preview-frame-wrap" style="display:none;">
+          <iframe id="preview-iframe" title="Landing Page Preview" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+      </div>
+
+      <!-- Live Editor Panel (hidden until generate) -->
+      <div class="editor-panel hidden" id="editor-panel">
+        <div class="editor-panel-header" id="editor-toggle">
+          <h3 data-i18n="editor_title">Live Editor</h3>
+          <button class="editor-collapse-btn" id="editor-collapse-btn" title="Collapse">▼</button>
+        </div>
+        <div class="editor-fields">
+          <div class="editor-field" style="grid-column: span 3;">
+            <label for="edit-headline" data-i18n="edit_headline">Headline</label>
+            <input type="text" id="edit-headline" placeholder="Main headline…">
+          </div>
+          <div class="editor-field" style="grid-column: span 3;">
+            <label for="edit-subheadline" data-i18n="edit_sub">Subheadline</label>
+            <input type="text" id="edit-subheadline" placeholder="Supporting text…">
+          </div>
+          <div class="editor-field">
+            <label for="edit-cta" data-i18n="edit_cta">CTA Button Text</label>
+            <input type="text" id="edit-cta" placeholder="Book Now">
+          </div>
+          <div class="editor-field">
+            <label for="edit-phone" data-i18n="edit_phone">WhatsApp Number</label>
+            <input type="text" id="edit-phone" placeholder="+60123456789">
+          </div>
+          <div class="editor-field">
+            <label for="edit-image" data-i18n="edit_image">Image URL</label>
+            <input type="text" id="edit-image" placeholder="https://…">
+          </div>
+          <div class="editor-field" style="grid-column: span 3;">
+            <label for="edit-address" data-i18n="edit_addr">Address</label>
+            <input type="text" id="edit-address" placeholder="Business address…">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ── MAIN SCRIPT ── -->
+<script type="module">
+  import { state } from './js/stateManager.js'
+  import { apiService } from './js/apiService.js'
+  import { previewRenderer } from './js/previewRenderer.js'
+  import { initEditor, populateEditorFields, showToast } from './js/editorController.js'
+
+  // ── i18n: UI Language System ──────────────────────────────────────────────
+  const UI = {
+    en: {
+      cfg_title: "⚙ Configuration",
+      section_biz: "Business Info",
+      label_name: "Product / Business Name",
+      label_niche: "Niche",
+      label_tone: "Tone",
+      section_content: "Content",
+      label_features: "Features",
+      label_benefits: "Benefits",
+      section_contact: "Contact & Media",
+      label_image: "Image URL",
+      label_phone: "WhatsApp Number",
+      label_address: "Address",
+      label_mapquery: "Map Query",
+      section_lang: "Output Language",
+      btn_generate: "✨ Generate Landing Page",
+      label_preview: "Preview:",
+      editor_title: "Live Editor",
+      edit_headline: "Headline",
+      edit_sub: "Subheadline",
+      edit_cta: "CTA Button Text",
+      edit_phone: "WhatsApp Number",
+      edit_image: "Image URL",
+      edit_addr: "Address",
+      loading_text: "Generating your landing page…",
+      loading_sub: "Claude AI is crafting the perfect copy ✨",
+      empty_h3: "Your Landing Page Appears Here",
+      empty_p: "Fill in the form and click Generate to create a beautiful, AI-powered landing page.",
+      hint_features: "Comma-separated or one per line",
+      hint_benefits: "Comma-separated or one per line",
+      hint_image: "Hero image (leave blank for placeholder)",
+      hint_phone: "Include country code e.g. +601X-XXXXXXX",
+      hint_map: "Google Maps search query (defaults to address)",
+      ph_name: "e.g. SmileCare Dental Clinic",
+      ph_features: "Free consultation, Digital X-Ray, Same day appointment",
+      ph_benefits: "Pain-free treatment, 10+ years experience, Kids friendly",
+      ph_image: "https://example.com/image.jpg",
+      ph_phone: "+60123456789",
+      ph_address: "No. 1, Jalan Example, KL",
+      ph_map: "SmileCare Dental Kuala Lumpur",
+      toast_generated: "Landing page generated! ✨",
+      toast_copied: "Link copied! ✓",
+      err_name: "Please enter a business name!",
+      niche_general: "General",
+      niche_dental: "Dental Clinic",
+      niche_beauty: "Beauty",
+      niche_fnb: "Food & Beverage",
+      niche_digital: "Digital",
+      niche_retail: "Retail",
+      niche_edu: "Education",
+      tone_warm: "Warm Professional",
+      tone_casual: "Casual",
+      tone_urgent: "Urgent"
+    },
+    bm: {
+      cfg_title: "⚙ Konfigurasi",
+      section_biz: "Maklumat Perniagaan",
+      label_name: "Nama Produk / Perniagaan",
+      label_niche: "Niche",
+      label_tone: "Nada",
+      section_content: "Kandungan",
+      label_features: "Ciri-ciri",
+      label_benefits: "Manfaat",
+      section_contact: "Hubungi & Media",
+      label_image: "URL Gambar",
+      label_phone: "Nombor WhatsApp",
+      label_address: "Alamat",
+      label_mapquery: "Carian Peta",
+      section_lang: "Bahasa Output",
+      btn_generate: "✨ Jana Halaman Landing",
+      label_preview: "Pratonton:",
+      editor_title: "Editor Langsung",
+      edit_headline: "Tajuk Utama",
+      edit_sub: "Tajuk Kecil",
+      edit_cta: "Teks Butang CTA",
+      edit_phone: "Nombor WhatsApp",
+      edit_image: "URL Gambar",
+      edit_addr: "Alamat",
+      loading_text: "Sedang menjana halaman landing anda…",
+      loading_sub: "Claude AI sedang menghasilkan salinan terbaik ✨",
+      empty_h3: "Halaman Landing Anda Akan Muncul Di Sini",
+      empty_p: "Isi borang dan klik Jana untuk cipta halaman landing berkuasa AI.",
+      hint_features: "Pisahkan dengan koma atau satu setiap baris",
+      hint_benefits: "Pisahkan dengan koma atau satu setiap baris",
+      hint_image: "Gambar hero (kosongkan untuk guna placeholder)",
+      hint_phone: "Termasuk kod negara contoh +601X-XXXXXXX",
+      hint_map: "Carian Google Maps (lalai kepada alamat)",
+      ph_name: "cth. Klinik Pergigian SmileCare",
+      ph_features: "Konsultasi percuma, X-Ray digital, Temujanji hari sama",
+      ph_benefits: "Rawatan tanpa sakit, 10+ tahun pengalaman, Mesra kanak-kanak",
+      ph_image: "https://example.com/image.jpg",
+      ph_phone: "+60123456789",
+      ph_address: "No. 1, Jalan Contoh, KL",
+      ph_map: "Klinik Pergigian SmileCare Kuala Lumpur",
+      toast_generated: "Halaman landing berjaya dijana! ✨",
+      toast_copied: "Pautan disalin! ✓",
+      err_name: "Sila masukkan nama perniagaan!",
+      niche_general: "Umum",
+      niche_dental: "Klinik Pergigian",
+      niche_beauty: "Kecantikan",
+      niche_fnb: "Makanan & Minuman",
+      niche_digital: "Digital",
+      niche_retail: "Runcit",
+      niche_edu: "Pendidikan",
+      tone_warm: "Profesional Mesra",
+      tone_casual: "Santai",
+      tone_urgent: "Segera"
+    }
+  }
+
+  let uiLang = 'en'
+  window.setUILang = function(l) {
+    if (uiLang === l) return
+    uiLang = l
+    document.querySelectorAll('.ui-lang-btn').forEach(b =>
+      b.classList.toggle('active', b.textContent.trim().toLowerCase() === l)
+    )
+    const t = UI[l]
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n')
+      if (t[k] !== undefined) el.textContent = t[k]
+    })
+    // Update select option text
+    document.querySelectorAll('[data-i18n-opt]').forEach(opt => {
+      const k = opt.getAttribute('data-i18n-opt')
+      if (t[k] !== undefined) opt.textContent = t[k]
+    })
+    // Update placeholders
+    const fields = {
+      'field-productName': 'ph_name',
+      'field-features': 'ph_features',
+      'field-benefits': 'ph_benefits',
+      'field-imageUrl': 'ph_image',
+      'field-phoneNumber': 'ph_phone',
+      'field-address': 'ph_address',
+      'field-mapQuery': 'ph_map'
+    }
+    Object.entries(fields).forEach(([id, key]) => {
+      const el = document.getElementById(id)
+      if (el && t[key]) el.placeholder = t[key]
+    })
+  }
+
+  // ── Output Language Selector ──────────────────────────────────────────────
+  let selectedOutputLang = 'en'
+  document.querySelectorAll('.lang-output-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.lang-output-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      selectedOutputLang = btn.dataset.lang
+    })
+  })
+
+  // ── Init preview renderer ──
+  const previewIframe = document.getElementById('preview-iframe')
+  previewRenderer.init(previewIframe)
+
+  // ── Init editor bindings ──
+  initEditor()
+
+  // ── State subscriber: update UI on state changes ──
+  state.subscribe((s) => {
+    // Loading overlay
+    const overlay = document.getElementById('loading-overlay')
+    const btn = document.getElementById('btn-generate')
+    overlay.classList.toggle('show', s.isLoading)
+    if (btn) {
+      btn.disabled = s.isLoading
+      btn.classList.toggle('loading', s.isLoading)
+    }
+
+    // Error banner
+    const errBanner = document.getElementById('error-banner')
+    if (s.error) {
+      errBanner.textContent = '⚠️ ' + s.error
+      errBanner.classList.add('show')
+    } else {
+      errBanner.classList.remove('show')
+    }
+
+    // Show preview after successful generate
+    if (s.generatedHTML) {
+      document.getElementById('preview-empty').style.display = 'none'
+      document.getElementById('preview-frame-wrap').style.display = 'block'
+
+      // Enable toolbar buttons
+      document.getElementById('btn-share').disabled = false
+      document.getElementById('btn-export').disabled = false
+
+      // Show editor panel
+      document.getElementById('editor-panel').classList.remove('hidden')
+
+      // Show demo link badge
+      if (s.demoId) {
+        const badge = document.getElementById('demo-link-badge')
+        badge.textContent = `/demo/${s.demoId}`
+        badge.style.display = 'inline-block'
+        badge.title = `${window.location.origin}/demo/${s.demoId}`
+      }
+
+      // Populate editor fields
+      populateEditorFields({ ...s.normalizedData, ...s.editedValues })
+    }
+  })
+
+  // ── Generate form submit ──
+  document.getElementById('generate-form').addEventListener('submit', async (e) => {
+    e.preventDefault()
+
+    const t = UI[uiLang]
+    const features = document.getElementById('field-features').value
+      .split(/[,\n]/).map(s => s.trim()).filter(Boolean)
+    const benefits = document.getElementById('field-benefits').value
+      .split(/[,\n]/).map(s => s.trim()).filter(Boolean)
+
+    const payload = {
+      productName: document.getElementById('field-productName').value.trim(),
+      niche: document.getElementById('field-niche').value,
+      tone: document.getElementById('field-tone').value,
+      features,
+      benefits,
+      imageUrl: document.getElementById('field-imageUrl').value.trim(),
+      phoneNumber: document.getElementById('field-phoneNumber').value.trim(),
+      address: document.getElementById('field-address').value.trim(),
+      mapQuery: document.getElementById('field-mapQuery').value.trim(),
+      outputLang: selectedOutputLang,
+    }
+
+    if (!payload.productName) {
+      showToast(t.err_name, 'error')
+      document.getElementById('field-productName').focus()
+      return
+    }
+
+    try {
+      await apiService.generate(payload)
+      showToast(t.toast_generated, 'success')
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
+  })
+
+  // ── Editor collapse toggle ──
+  const editorToggle = document.getElementById('editor-toggle')
+  const editorFields = document.querySelector('.editor-fields')
+  let editorCollapsed = false
+  editorToggle.addEventListener('click', () => {
+    editorCollapsed = !editorCollapsed
+    editorFields.style.display = editorCollapsed ? 'none' : 'grid'
+    document.getElementById('editor-collapse-btn').style.transform = editorCollapsed ? 'rotate(-90deg)' : ''
+  })
+</script>
+
+</body>
+</html>

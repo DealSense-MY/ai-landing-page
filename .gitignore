@@ -1,0 +1,13 @@
+.env
+node_modules/
+demo-storage/
+*.log
+
+# Old project copy and local planning files
+ai-landing-page/
+SPRINT_PROMPT .md.txt
+*.pdf
+ai_landing_page_generation_system.html
+Final_Blueprint_LandingPageSystem_v2.html
+Frontend_Blueprint_LandingPageEditor.html
+frontend_blueprint_flow.svg
