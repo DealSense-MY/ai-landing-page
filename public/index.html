@@ -663,6 +663,112 @@
         flex-shrink: 0;
       }
     }
+
+    /* ── HISTORY PANEL ── */
+    .history-panel {
+      width: 360px;
+      min-width: 320px;
+      max-width: 400px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    @media (max-width: 768px) {
+      .history-panel {
+        width: 100%;
+        min-width: unset;
+        max-width: unset;
+        border-right: none;
+      }
+    }
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .history-header h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+    .refresh-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: border-color 0.15s;
+    }
+    .refresh-btn:hover { border-color: var(--primary); }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .history-empty {
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      text-align: center;
+      padding: 24px 0;
+    }
+    .history-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+    .history-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+    .history-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-meta {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .history-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .history-actions button {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: border-color 0.15s;
+    }
+    .history-actions button:hover { border-color: var(--primary); }
+    .btn-delete:hover { border-color: var(--error) !important; }
   </style>
 </head>
 <body>
@@ -700,6 +806,10 @@
   <button class="mobile-tab disabled" id="tab-preview"
     onclick="setMobileTab('preview')" disabled>
     👁 <span data-i18n="tab_preview">Preview</span>
+  </button>
+  <button class="mobile-tab" id="tab-history"
+    onclick="setMobileTab('history')">
+    🕐 <span data-i18n="tab_history">History</span>
   </button>
 </div>
 
@@ -972,6 +1082,17 @@ Consultation | Free"></textarea>
     </div>
   </div>
 
+  <!-- ══ HISTORY PANEL ══ -->
+  <div id="history-panel" class="history-panel" style="display:none;">
+    <div class="history-header">
+      <h3 data-i18n="history_title">Generated Pages</h3>
+      <button onclick="loadHistory()" class="refresh-btn">🔄</button>
+    </div>
+    <div id="history-list" class="history-list">
+      <p class="history-empty">Loading...</p>
+    </div>
+  </div>
+
   <!-- ══ RIGHT PANEL: PREVIEW + EDITOR ══ -->
   <div class="right-panel">
 
@@ -1120,6 +1241,8 @@ Consultation | Free"></textarea>
       ph_map: "SmileCare Dental Kuala Lumpur",
       tab_form: "Form",
       tab_preview: "Preview",
+      tab_history: "History",
+      history_title: "Generated Pages",
       toast_generated: "Landing page generated! ✨",
       toast_copied: "Link copied! ✓",
       err_name: "Please enter a business name!",
@@ -1203,6 +1326,8 @@ Consultation | Free"></textarea>
       ph_map: "Klinik Pergigian SmileCare Kuala Lumpur",
       tab_form: "Borang",
       tab_preview: "Pratonton",
+      tab_history: "Sejarah",
+      history_title: "Halaman Dijana",
       toast_generated: "Halaman landing berjaya dijana! ✨",
       toast_copied: "Pautan disalin! ✓",
       err_name: "Sila masukkan nama perniagaan!",
@@ -1228,18 +1353,28 @@ Consultation | Free"></textarea>
 
     document.getElementById('tab-form').classList.toggle('active', tab === 'form');
     document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
+    document.getElementById('tab-history').classList.toggle('active', tab === 'history');
 
     const formPanel = document.querySelector('.left-panel');
     const previewPanel = document.querySelector('.right-panel');
+    const historyPanel = document.getElementById('history-panel');
     const stickyGenerate = document.getElementById('sticky-generate');
 
-    if (tab === 'form') {
+    if (tab === 'history') {
+      formPanel.style.display = 'none';
+      previewPanel.style.display = 'none';
+      historyPanel.style.display = 'block';
+      if (stickyGenerate) stickyGenerate.style.display = 'none';
+      loadHistory();
+    } else if (tab === 'form') {
       formPanel.style.display = 'block';
       previewPanel.style.display = 'none';
+      historyPanel.style.display = 'none';
       if (stickyGenerate) stickyGenerate.style.display = 'block';
     } else {
       formPanel.style.display = 'none';
       previewPanel.style.display = 'block';
+      historyPanel.style.display = 'none';
       if (stickyGenerate) stickyGenerate.style.display = 'none';
     }
   }
@@ -1405,6 +1540,87 @@ Consultation | Free"></textarea>
       showToast(err.message, 'error')
     }
   })
+
+  // ── History Panel ──
+  function formatDate(iso) {
+    const d = new Date(iso)
+    return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+  function buildHistoryEntry(e) {
+    const entry = document.createElement('div')
+    entry.className = 'history-entry'
+
+    const info = document.createElement('div')
+    info.className = 'history-info'
+    const name = document.createElement('span')
+    name.className = 'history-name'
+    name.textContent = e.businessName
+    const meta = document.createElement('span')
+    meta.className = 'history-meta'
+    meta.textContent = `${e.niche} · ${formatDate(e.createdAt)}`
+    info.appendChild(name)
+    info.appendChild(meta)
+
+    const actions = document.createElement('div')
+    actions.className = 'history-actions'
+
+    const btnCopy = document.createElement('button')
+    btnCopy.className = 'btn-copy'
+    btnCopy.title = 'Copy URL'
+    btnCopy.textContent = '📋'
+    btnCopy.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.origin + e.demoUrl).then(() => {
+        showToast('URL copied!', 'success')
+      })
+    })
+
+    const btnView = document.createElement('button')
+    btnView.className = 'btn-view'
+    btnView.title = 'View'
+    btnView.textContent = '👁'
+    btnView.addEventListener('click', () => window.open(e.demoUrl, '_blank'))
+
+    const btnDel = document.createElement('button')
+    btnDel.className = 'btn-delete'
+    btnDel.title = 'Delete'
+    btnDel.textContent = '🗑'
+    btnDel.addEventListener('click', async () => {
+      if (!confirm('Delete this page?')) return
+      await fetch(`/history/${encodeURIComponent(e.id)}`, { method: 'DELETE' })
+      loadHistory()
+    })
+
+    actions.appendChild(btnCopy)
+    actions.appendChild(btnView)
+    actions.appendChild(btnDel)
+    entry.appendChild(info)
+    entry.appendChild(actions)
+    return entry
+  }
+  window.loadHistory = async function() {
+    const list = document.getElementById('history-list')
+    const loading = document.createElement('p')
+    loading.className = 'history-empty'
+    loading.textContent = 'Loading...'
+    list.replaceChildren(loading)
+    try {
+      const res = await fetch('/history')
+      const entries = await res.json()
+      if (!entries.length) {
+        const empty = document.createElement('p')
+        empty.className = 'history-empty'
+        empty.textContent = 'No pages generated yet.'
+        list.replaceChildren(empty)
+        return
+      }
+      list.replaceChildren(...entries.map(buildHistoryEntry))
+    } catch {
+      const err = document.createElement('p')
+      err.className = 'history-empty'
+      err.textContent = 'Failed to load history.'
+      list.replaceChildren(err)
+    }
+  }
 
   // ── Share / Copy demo URL ──
   document.getElementById('btn-share').addEventListener('click', () => {

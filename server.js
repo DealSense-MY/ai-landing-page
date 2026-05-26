@@ -1,5 +1,5 @@
 import express from 'express'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { nanoid } from 'nanoid'
@@ -29,11 +29,13 @@ app.get('/', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-// Ensure demo-storage directory exists
-const demoStorageDir = path.join(__dirname, 'demo-storage')
-if (!existsSync(demoStorageDir)) {
-  mkdirSync(demoStorageDir, { recursive: true })
-}
+// Persistent storage — Railway Volume must be mounted at /app/data
+const DATA_DIR = process.env.DATA_DIR || '/app/data'
+const DEMO_DIR = path.join(DATA_DIR, 'demos')
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json')
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true })
+if (!existsSync(DEMO_DIR)) mkdirSync(DEMO_DIR, { recursive: true })
 
 // x-api-key middleware — guards POST /generate
 // If APP_API_KEY is set in env, the client must send it as x-api-key header.
@@ -56,10 +58,26 @@ app.post('/generate', requireApiKey, async (req, res) => {
     const json = buildJSON(normalized, decisions, aiContent)
     const id = nanoid(10)
 
-    // Save demo file — path is resolved inside demoStorageDir only
+    // Save demo file — path is resolved inside DEMO_DIR only
     const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '')
-    const demoPath = path.join(demoStorageDir, `${safeId}.html`)
+    const demoPath = path.join(DEMO_DIR, `${safeId}.html`)
     writeFileSync(demoPath, html, 'utf8')
+
+    // Append to history index
+    const historyEntry = {
+      id: safeId,
+      businessName: normalized.productName || '',
+      niche: normalized.niche || '',
+      outputLang: normalized.outputLang || 'en',
+      demoUrl: `/demo/${safeId}`,
+      createdAt: new Date().toISOString(),
+    }
+    let history = []
+    if (existsSync(HISTORY_FILE)) {
+      try { history = JSON.parse(readFileSync(HISTORY_FILE, 'utf8')) } catch { history = [] }
+    }
+    history.unshift(historyEntry)
+    writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), 'utf8')
 
     const warnings = qa(html)
     if (warnings.length) console.warn('QA warnings:', warnings)
@@ -76,10 +94,10 @@ app.get('/demo/:id', (req, res) => {
   const id = req.params.id.replace(/[^a-zA-Z0-9_-]/g, '')
   if (!id) return res.status(400).send('Invalid ID')
 
-  const file = path.join(demoStorageDir, `${id}.html`)
-  // Path traversal guard: resolved path must stay inside demoStorageDir
+  const file = path.join(DEMO_DIR, `${id}.html`)
+  // Path traversal guard: resolved path must stay inside DEMO_DIR
   const resolved = path.resolve(file)
-  const safeBase = path.resolve(demoStorageDir)
+  const safeBase = path.resolve(DEMO_DIR)
   if (!resolved.startsWith(safeBase + path.sep) && resolved !== safeBase) {
     return res.status(400).send('Invalid ID')
   }
@@ -89,6 +107,39 @@ app.get('/demo/:id', (req, res) => {
   } else {
     res.status(404).send('Demo not found')
   }
+})
+
+app.get('/history', (req, res) => {
+  if (!existsSync(HISTORY_FILE)) return res.json([])
+  try {
+    const history = JSON.parse(readFileSync(HISTORY_FILE, 'utf8'))
+    res.json(Array.isArray(history) ? history : [])
+  } catch {
+    res.json([])
+  }
+})
+
+app.delete('/history/:id', (req, res) => {
+  const id = req.params.id.replace(/[^a-zA-Z0-9_-]/g, '')
+  if (!id) return res.status(400).json({ error: 'Invalid ID' })
+
+  // Remove from history index
+  let history = []
+  if (existsSync(HISTORY_FILE)) {
+    try { history = JSON.parse(readFileSync(HISTORY_FILE, 'utf8')) } catch { history = [] }
+  }
+  history = history.filter(e => e.id !== id)
+  writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), 'utf8')
+
+  // Delete demo file
+  const demoPath = path.join(DEMO_DIR, `${id}.html`)
+  const resolved = path.resolve(demoPath)
+  const safeBase = path.resolve(DEMO_DIR)
+  if (resolved.startsWith(safeBase + path.sep) && existsSync(resolved)) {
+    unlinkSync(resolved)
+  }
+
+  res.json({ success: true })
 })
 
 const PORT = process.env.PORT || 4200
