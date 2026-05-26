@@ -59,6 +59,18 @@ export const apiService = {
 
       previewRenderer.setHTML(data.html)
 
+      // Enable preview tab
+      const tabPreview = document.getElementById('tab-preview')
+      if (tabPreview) {
+        tabPreview.disabled = false
+        tabPreview.classList.remove('disabled')
+      }
+
+      // Auto switch to preview on mobile
+      if (window.innerWidth < 769 && window.setMobileTab) {
+        window.setMobileTab('preview')
+      }
+
       return data
     } catch (err) {
       state.update({ isLoading: false, error: err.message })

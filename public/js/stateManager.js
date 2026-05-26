@@ -20,6 +20,7 @@ export const state = {
     outputLang: 'en',
   },
 
+  activeMobileTab: 'form',
   activeView: 'desktop', // 'desktop' | 'mobile'
   isLoading: false,
   error: null,
@@ -54,6 +55,7 @@ export const state = {
         address: '',
         outputLang: 'en',
       },
+      activeMobileTab: 'form',
       isLoading: false,
       error: null,
     })
