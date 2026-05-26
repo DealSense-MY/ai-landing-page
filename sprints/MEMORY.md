@@ -4,7 +4,7 @@
 
 PHASE 1 — DONE ✅ commit: 5040642 notes: niche 10-item upgrade + output lang dropdown
 PHASE 2 — DONE ✅ commit: 18cc817 notes: 13 new fields — tagline, email, landline, hours, owner, years, rating, reviews_count, services, 3x customer reviews, logo, gallery, before/after
-PHASE 3 — PENDING (Pipeline: normalize + generate + buildHTML)
+PHASE 3 — DONE ✅ commit: [pending] notes: normalize new fields+validation, generate 8 niche seeds+context block+whatsappMessage, buildHTML 10 new sections+WA float+social proof badge
 PHASE 4 — PENDING (WhatsApp CTA Upgrade)
 PHASE 5 — PENDING (UI Polish)
 PHASE 6 — PENDING (Reviews + Social Proof)

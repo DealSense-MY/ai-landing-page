@@ -23,8 +23,48 @@ function parseArrayField(value) {
   return []
 }
 
+function parseServicesField(value) {
+  if (!value) return []
+  if (Array.isArray(value)) return value
+  if (typeof value !== 'string') return []
+  return value
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const [name, price = ''] = line.split('|').map(s => s.trim())
+      return { name, price }
+    })
+    .filter(s => s.name)
+}
+
+function parseCustomerReviews(value) {
+  if (!Array.isArray(value)) return []
+  return value
+    .filter(r => r && (String(r.name || '').trim() || String(r.quote || '').trim()))
+    .map(r => ({
+      name: String(r.name || '').trim(),
+      rating: String(r.rating || '5').trim(),
+      quote: String(r.quote || '').trim(),
+      date: String(r.date || '').trim(),
+    }))
+}
+
+function validateEmail(email) {
+  if (!email) return ''
+  const trimmed = String(email).trim()
+  if (trimmed && (!trimmed.includes('@') || !trimmed.includes('.'))) {
+    throw new Error(`Invalid email format: "${trimmed}".`)
+  }
+  return trimmed
+}
+
 const VALID_TONES = ['warm_professional', 'casual', 'urgent']
-const VALID_NICHES = ['dental_clinic', 'beauty', 'F&B', 'digital', 'retail', 'education', 'general']
+const VALID_NICHES = [
+  'dental_clinic', 'clinic_gp', 'clinic_aesthetic',
+  'aircond_service', 'bengkel_kereta', 'katering_event',
+  'restoran_cafe', 'saloon_barbershop', 'pusat_tuisyen', 'general',
+]
 const VALID_OUTPUT_LANGS = ['en', 'bm', 'zh', 'en+bm', 'en+zh', 'zh+bm', 'en+bm+zh']
 
 export function normalize(input) {
@@ -46,7 +86,31 @@ export function normalize(input) {
   const features = parseArrayField(input.features)
   const benefits = parseArrayField(input.benefits)
 
+  const tagline = String(input.tagline || '').trim()
+  const email = validateEmail(input.email)
+  const landline = String(input.landline || '').trim()
+  const operatingHours = String(input.operatingHours || '').trim()
+  const ownerName = String(input.ownerName || '').trim()
+  const yearsInOperation = String(input.yearsInOperation || '').trim()
+  const googleRating = String(input.googleRating || '').trim()
+  const totalReviews = String(input.totalReviews || '').trim()
+
+  const services = parseServicesField(input.services)
+  const customerReviews = parseCustomerReviews(input.customerReviews)
+
   const imageUrl = String(input.imageUrl || '').trim()
+  const logoUrl = String(input.logoUrl || '').trim()
+
+  const galleryImages = Array.isArray(input.gallery)
+    ? input.gallery.map(u => String(u).trim()).filter(Boolean).slice(0, 3)
+    : []
+
+  const beforeAfterImages = Array.isArray(input.beforeAfter)
+    ? input.beforeAfter
+        .filter(p => p && (String(p.before || '').trim() || String(p.after || '').trim()))
+        .map(p => ({ before: String(p.before || '').trim(), after: String(p.after || '').trim() }))
+        .slice(0, 2)
+    : []
 
   let phoneNumber = ''
   if (input.phoneNumber) {
@@ -61,11 +125,24 @@ export function normalize(input) {
 
   return {
     productName,
+    tagline,
+    email,
+    landline,
+    operatingHours,
+    ownerName,
+    yearsInOperation,
+    googleRating,
+    totalReviews,
     niche,
     tone,
     features,
     benefits,
+    services,
+    customerReviews,
     imageUrl,
+    logoUrl,
+    galleryImages,
+    beforeAfterImages,
     phoneNumber,
     address,
     mapQuery,
