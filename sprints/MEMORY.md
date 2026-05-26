@@ -2,7 +2,7 @@
 # Update this file after each phase completes.
 # Format: PHASE N — STATUS commit: HASH notes: ...
 
-PHASE 1 — DONE ✅ commit: [pending] notes: niche 10-item upgrade + output lang dropdown
+PHASE 1 — DONE ✅ commit: 5040642 notes: niche 10-item upgrade + output lang dropdown
 PHASE 2 — PENDING (Form Fields Baru)
 PHASE 3 — PENDING (Pipeline: normalize + generate + buildHTML)
 PHASE 4 — PENDING (WhatsApp CTA Upgrade)
