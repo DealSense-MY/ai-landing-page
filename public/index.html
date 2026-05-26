@@ -220,39 +220,6 @@
       background: var(--border);
     }
 
-    /* ── OUTPUT LANGUAGE SELECTOR ── */
-    .lang-output-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .lang-output-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      padding: 10px 8px;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-size: 0.78rem;
-      text-align: center;
-    }
-    .lang-output-btn:hover { border-color: var(--primary); color: var(--text); }
-    .lang-output-btn.active {
-      border-color: var(--primary);
-      background: var(--primary-dim);
-      color: var(--text);
-    }
-    .lang-output-btn--full { grid-column: span 2; flex-direction: row; gap: 8px; }
-    .lang-flag { font-size: 1.1rem; }
-    .lang-label { font-weight: 600; font-size: 0.8rem; }
-    .lang-sub { font-size: 0.7rem; color: var(--text-dim); }
-
     /* ── GENERATE BUTTON ── */
     .btn-generate {
       width: 100%;
@@ -751,13 +718,16 @@
           <div class="form-group">
             <label class="form-label" data-i18n="label_niche">Niche</label>
             <select id="field-niche" class="form-control">
-              <option value="general" data-i18n-opt="niche_general">General</option>
-              <option value="dental_clinic" data-i18n-opt="niche_dental">Dental Clinic</option>
-              <option value="beauty" data-i18n-opt="niche_beauty">Beauty</option>
-              <option value="F&B" data-i18n-opt="niche_fnb">Food & Beverage</option>
-              <option value="digital" data-i18n-opt="niche_digital">Digital</option>
-              <option value="retail" data-i18n-opt="niche_retail">Retail</option>
-              <option value="education" data-i18n-opt="niche_edu">Education</option>
+              <option value="dental_clinic" data-i18n-opt="niche_dental_clinic">Klinik Pergigian</option>
+              <option value="clinic_gp" data-i18n-opt="niche_clinic_gp">Klinik Am / GP</option>
+              <option value="clinic_aesthetic" data-i18n-opt="niche_clinic_aesthetic">Klinik Kecantikan / Aesthetic</option>
+              <option value="aircond_service" data-i18n-opt="niche_aircond_service">Aircond Service</option>
+              <option value="bengkel_kereta" data-i18n-opt="niche_bengkel_kereta">Bengkel Kereta</option>
+              <option value="katering_event" data-i18n-opt="niche_katering_event">Katering &amp; Event</option>
+              <option value="restoran_cafe" data-i18n-opt="niche_restoran_cafe">Restoran &amp; Café</option>
+              <option value="saloon_barbershop" data-i18n-opt="niche_saloon_barbershop">Saloon &amp; Barbershop</option>
+              <option value="pusat_tuisyen" data-i18n-opt="niche_pusat_tuisyen">Pusat Tuisyen</option>
+              <option value="general" data-i18n-opt="niche_general">Umum / General</option>
             </select>
           </div>
           <div class="form-group">
@@ -819,42 +789,17 @@
 
         <!-- Output Language -->
         <div class="form-section-title" data-i18n="section_lang">Output Language</div>
-        <div class="lang-output-grid" id="lang-output-selector">
-          <button type="button" class="lang-output-btn active" data-lang="en">
-            <span class="lang-flag">🇬🇧</span>
-            <span class="lang-label">English</span>
-            <span class="lang-sub">EN only</span>
-          </button>
-          <button type="button" class="lang-output-btn" data-lang="bm">
-            <span class="lang-flag">🇲🇾</span>
-            <span class="lang-label">Bahasa Malaysia</span>
-            <span class="lang-sub">BM only</span>
-          </button>
-          <button type="button" class="lang-output-btn" data-lang="zh">
-            <span class="lang-flag">🇨🇳</span>
-            <span class="lang-label">中文</span>
-            <span class="lang-sub">ZH only</span>
-          </button>
-          <button type="button" class="lang-output-btn" data-lang="en+bm">
-            <span class="lang-flag">🇬🇧🇲🇾</span>
-            <span class="lang-label">EN + BM</span>
-            <span class="lang-sub">Bilingual</span>
-          </button>
-          <button type="button" class="lang-output-btn" data-lang="en+zh">
-            <span class="lang-flag">🇬🇧🇨🇳</span>
-            <span class="lang-label">EN + ZH</span>
-            <span class="lang-sub">Bilingual</span>
-          </button>
-          <button type="button" class="lang-output-btn" data-lang="zh+bm">
-            <span class="lang-flag">🇨🇳🇲🇾</span>
-            <span class="lang-label">ZH + BM</span>
-            <span class="lang-sub">Bilingual</span>
-          </button>
-          <button type="button" class="lang-output-btn lang-output-btn--full" data-lang="en+bm+zh">
-            <span class="lang-flag">🌐</span>
-            <span class="lang-label">EN + BM + ZH</span>
-            <span class="lang-sub">Trilingual</span>
-          </button>
+        <div class="form-group">
+          <label class="form-label" data-i18n="section_lang">Output Language</label>
+          <select id="output-lang-select" class="form-control">
+            <option value="en">🇬🇧 English</option>
+            <option value="bm">🇲🇾 Bahasa Malaysia</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="en+bm">EN + BM (Bilingual)</option>
+            <option value="en+zh">EN + ZH (Bilingual)</option>
+            <option value="zh+bm">ZH + BM (Bilingual)</option>
+            <option value="en+bm+zh">🌐 EN + BM + ZH (Trilingual)</option>
+          </select>
         </div>
 
         <div id="sticky-generate">
@@ -996,13 +941,16 @@
       toast_generated: "Landing page generated! ✨",
       toast_copied: "Link copied! ✓",
       err_name: "Please enter a business name!",
-      niche_general: "General",
-      niche_dental: "Dental Clinic",
-      niche_beauty: "Beauty",
-      niche_fnb: "Food & Beverage",
-      niche_digital: "Digital",
-      niche_retail: "Retail",
-      niche_edu: "Education",
+      niche_dental_clinic: "Klinik Pergigian",
+      niche_clinic_gp: "Klinik Am / GP",
+      niche_clinic_aesthetic: "Klinik Kecantikan / Aesthetic",
+      niche_aircond_service: "Aircond Service",
+      niche_bengkel_kereta: "Bengkel Kereta",
+      niche_katering_event: "Katering & Event",
+      niche_restoran_cafe: "Restoran & Café",
+      niche_saloon_barbershop: "Saloon & Barbershop",
+      niche_pusat_tuisyen: "Pusat Tuisyen",
+      niche_general: "Umum / General",
       tone_warm: "Warm Professional",
       tone_casual: "Casual",
       tone_urgent: "Urgent"
@@ -1022,6 +970,7 @@
       label_address: "Alamat",
       label_mapquery: "Carian Peta",
       section_lang: "Bahasa Output",
+      label_lang: "Bahasa Output",
       btn_generate: "✨ Jana Halaman Landing",
       label_preview: "Pratonton:",
       editor_title: "Editor Langsung",
@@ -1052,13 +1001,16 @@
       toast_generated: "Halaman landing berjaya dijana! ✨",
       toast_copied: "Pautan disalin! ✓",
       err_name: "Sila masukkan nama perniagaan!",
-      niche_general: "Umum",
-      niche_dental: "Klinik Pergigian",
-      niche_beauty: "Kecantikan",
-      niche_fnb: "Makanan & Minuman",
-      niche_digital: "Digital",
-      niche_retail: "Runcit",
-      niche_edu: "Pendidikan",
+      niche_dental_clinic: "Klinik Pergigian",
+      niche_clinic_gp: "Klinik Am / GP",
+      niche_clinic_aesthetic: "Klinik Kecantikan / Aesthetic",
+      niche_aircond_service: "Servis Aircond",
+      niche_bengkel_kereta: "Bengkel Kereta",
+      niche_katering_event: "Katering & Event",
+      niche_restoran_cafe: "Restoran & Kafe",
+      niche_saloon_barbershop: "Saloon & Barbershop",
+      niche_pusat_tuisyen: "Pusat Tuisyen",
+      niche_general: "Umum / General",
       tone_warm: "Profesional Mesra",
       tone_casual: "Santai",
       tone_urgent: "Segera"
@@ -1122,12 +1074,10 @@
 
   // ── Output Language Selector ──────────────────────────────────────────────
   let selectedOutputLang = 'en'
-  document.querySelectorAll('.lang-output-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.lang-output-btn').forEach(b => b.classList.remove('active'))
-      btn.classList.add('active')
-      selectedOutputLang = btn.dataset.lang
-    })
+  const outputLangSelect = document.getElementById('output-lang-select')
+  outputLangSelect.value = 'en'
+  outputLangSelect.addEventListener('change', () => {
+    selectedOutputLang = outputLangSelect.value
   })
 
   // ── Init preview renderer ──
