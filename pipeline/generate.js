@@ -244,6 +244,10 @@ function buildMonolingualPrompt(normalized, decisions, lang) {
     : ''
 
   const contextBlock = buildContextBlock(normalized)
+  const hasUserReviews = normalized.customerReviews && normalized.customerReviews.length > 0
+  const reviewsInstruction = hasUserReviews
+    ? `- "reviews": Format the ${normalized.customerReviews.length} provided customer reviews as-is into the reviews array`
+    : `- "reviews": Generate 3 realistic customer reviews for a ${niche.replace(/_/g, ' ')} business. Use realistic Malaysian names, niche-specific quotes (2-3 sentences each), rating: 5, dates like "1 month ago", "2 months ago", "3 months ago". Write in ${LANG_LABELS[lang] || 'English'}.`
 
   return `You are an expert conversion copywriter specializing in Malaysian small business landing pages.
 
@@ -280,8 +284,14 @@ Return ONLY a valid JSON object (no markdown, no code fences):
   "reviewsTitle": "Section title for testimonials (e.g. 'What Our Customers Say')",
   "findUsTitle": "Map section title (e.g. 'Find Us')",
   "footerGetStarted": "Footer CTA subtitle (max 15 words)",
-  "readyTitle": "Footer CTA main heading (max 8 words)"
+  "readyTitle": "Footer CTA main heading (max 8 words)",
+  "reviews": [
+    { "name": "Customer name", "rating": 5, "quote": "Review quote (2-3 sentences)", "date": "X months ago" }
+  ]
 }
+
+Additional instructions:
+${reviewsInstruction}
 
 Return ONLY the JSON, nothing else.`
 }
@@ -336,9 +346,19 @@ function buildMultilingualPrompt(normalized, decisions, langs) {
       findUsTitle: `[map title in ${LANG_LABELS[l] || l}]`,
       readyTitle: `[footer heading in ${LANG_LABELS[l] || l}]`,
       footerGetStarted: `[footer subtitle in ${LANG_LABELS[l] || l}]`,
+      reviews: [
+        { name: '[Malaysian name]', rating: 5, quote: `[review quote in ${LANG_LABELS[l] || l}]`, date: '1 month ago' },
+        { name: '[Malaysian name]', rating: 5, quote: `[review quote in ${LANG_LABELS[l] || l}]`, date: '2 months ago' },
+        { name: '[Malaysian name]', rating: 5, quote: `[review quote in ${LANG_LABELS[l] || l}]`, date: '3 months ago' },
+      ],
     }
     return acc
   }, {})
+
+  const hasUserReviewsML = normalized.customerReviews && normalized.customerReviews.length > 0
+  const reviewsInstructionML = hasUserReviewsML
+    ? `- reviews: Format the ${normalized.customerReviews.length} provided customer reviews as-is. The quotes may stay in original language.`
+    : `- reviews: Generate 3 realistic reviews per language using Malaysian names, niche-specific quotes (2-3 sentences), rating: 5, dates like "1 month ago".`
 
   return `You are an expert multilingual conversion copywriter for Malaysian small businesses.
 
@@ -360,6 +380,8 @@ ${JSON.stringify(exampleObj, null, 2)}
 Rules:
 - Each language version must be fully written in that language (no mixing)
 - benefits must be an array of exactly 4 objects with keys: icon (emoji), title (3-5 words), description (1-2 sentences)
+- reviews must be an array of exactly 3 objects with keys: name, rating (number), quote, date
+- ${reviewsInstructionML}
 - whatsappMessage must be max 100 characters, booking intent, in that language
 - Return ONLY the JSON object, no markdown, no explanation`
 }
@@ -413,6 +435,16 @@ function validateMonolingual(parsed) {
     readyTitle: String(parsed.readyTitle || 'Ready to Get Started?').trim(),
     footerGetStarted: String(parsed.footerGetStarted || 'Contact us now and let us help you.').trim(),
     benefits,
+    reviews: Array.isArray(parsed.reviews)
+      ? parsed.reviews
+          .filter(r => r && (String(r.name || '').trim() || String(r.quote || '').trim()))
+          .map(r => ({
+            name: String(r.name || '').trim(),
+            rating: String(r.rating || '5'),
+            quote: String(r.quote || '').trim(),
+            date: String(r.date || '').trim(),
+          }))
+      : [],
   }
 }
 

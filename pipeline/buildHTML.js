@@ -154,14 +154,14 @@ function buildBeforeAfterSection(pairs, resultsTitle) {
 
 function buildReviewsSection(reviews, reviewsTitle) {
   if (!reviews || reviews.length === 0) return ''
-  const stars = n => '⭐'.repeat(Math.min(5, Math.max(1, parseInt(n) || 5)))
+  const stars = n => `<span style="color:#FFD700;">${'★'.repeat(Math.min(5, Math.max(1, parseInt(n) || 5)))}</span>`
   const cards = reviews.map(r => `
       <div class="review-card">
         <div class="review-stars">${stars(r.rating)}</div>
         <p class="review-quote">"${escapeHTML(r.quote)}"</p>
-        <div class="review-meta">
+        <div class="review-footer">
           <span class="review-name">${escapeHTML(r.name)}</span>
-          ${r.date ? `<span class="review-date"> · ${escapeHTML(r.date)}</span>` : ''}
+          ${r.date ? `<span class="review-date">${escapeHTML(r.date)}</span>` : ''}
         </div>
       </div>`).join('')
 
@@ -178,8 +178,14 @@ function buildReviewsSection(reviews, reviewsTitle) {
 
 function buildSocialProofBadge(googleRating, totalReviews) {
   if (!googleRating) return ''
-  const reviewText = totalReviews ? ` · ${escapeHTML(totalReviews)} Google Reviews` : ' Google Rating'
-  return `<div class="social-proof-badge">⭐ ${escapeHTML(googleRating)}${reviewText}</div>`
+  const reviewText = totalReviews
+    ? `<span class="review-count" data-i18n="googleReviewsText">· ${escapeHTML(totalReviews)} Google Reviews</span>`
+    : ''
+  return `<div class="social-proof-badge">
+    <span class="star-icon">⭐</span>
+    <strong>${escapeHTML(googleRating)}</strong>
+    ${reviewText}
+  </div>`
 }
 
 function buildUrgencyBadge(urgencyBadge) {
@@ -210,6 +216,7 @@ function buildI18nScript(multilingual, langs, allBenefitsByLang) {
   const T = {}
   for (const lang of langs) {
     const c = multilingual[lang]
+    const googleReviewsText = { en: 'Google Reviews', bm: 'Ulasan Google', zh: '谷歌评价' }
     T[lang] = {
       headline: c.headline,
       subheadline: c.subheadline,
@@ -226,6 +233,7 @@ function buildI18nScript(multilingual, langs, allBenefitsByLang) {
       findUsTitle: c.findUsTitle,
       readyTitle: c.readyTitle,
       footerGetStarted: c.footerGetStarted,
+      googleReviewsText: googleReviewsText[lang] || 'Google Reviews',
     }
     const benefits = allBenefitsByLang[lang] || []
     benefits.forEach((b, i) => {
@@ -284,7 +292,7 @@ export function buildHTML(normalized, decisions, aiContent) {
     whyChooseTitle, whatWeOfferTitle, servicesTitle, galleryTitle, resultsTitle, reviewsTitle,
     findUsTitle, readyTitle, footerGetStarted,
     whatsappMessage,
-    benefits: aiBenefits, multilingual, langs,
+    benefits: aiBenefits, reviews: aiReviews, multilingual, langs,
   } = aiContent
 
   const heroImage = imageUrl || '/assets/placeholder.svg'
@@ -295,6 +303,11 @@ export function buildHTML(normalized, decisions, aiContent) {
   const allBenefits = aiBenefits && aiBenefits.length > 0
     ? aiBenefits
     : (inputBenefits.length > 0 ? inputBenefits : ['Quality Service', 'Trusted Expertise', 'Great Results', 'Customer Satisfaction'])
+
+  // User-provided reviews take priority; fall back to AI-generated
+  const resolvedReviews = customerReviews && customerReviews.length > 0
+    ? customerReviews
+    : (aiReviews && aiReviews.length > 0 ? aiReviews : [])
 
   const allBenefitsByLang = {}
   if (isMultilingual) {
@@ -459,17 +472,20 @@ export function buildHTML(normalized, decisions, aiContent) {
       margin-bottom: 20px;
     }
     .social-proof-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       background: rgba(255,255,255,0.15);
       border: 1px solid rgba(255,255,255,0.3);
       color: #fff;
-      padding: 5px 14px;
-      border-radius: 50px;
-      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.88rem;
       font-weight: 600;
       margin-bottom: 16px;
-      margin-left: 8px;
     }
+    .social-proof-badge .star-icon { color: #FFD700; }
+    .social-proof-badge .review-count { opacity: 0.85; font-weight: 400; }
     .hero-headline {
       font-size: clamp(2rem, 5vw, 3.2rem);
       font-weight: 800;
@@ -621,17 +637,20 @@ export function buildHTML(normalized, decisions, aiContent) {
 
     /* Reviews */
     .reviews-section { padding: 72px 0; background: var(--light, #f8f9ff); }
-    .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .review-card {
       background: #fff;
-      border-radius: 16px;
-      padding: 28px 24px;
+      border-radius: 12px;
+      padding: 24px 20px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
     }
-    .review-stars { font-size: 1rem; margin-bottom: 12px; }
-    .review-quote { font-size: 0.97rem; color: #444; font-style: italic; line-height: 1.6; margin-bottom: 16px; }
-    .review-meta { font-size: 0.88rem; color: #777; }
-    .review-name { font-weight: 700; color: var(--text); }
+    .review-stars { font-size: 1.1rem; margin-bottom: 12px; }
+    .review-quote { font-size: 0.94rem; color: #444; font-style: italic; line-height: 1.6; margin-bottom: 16px; flex: 1; }
+    .review-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .review-name { font-weight: 700; color: var(--text); font-size: 0.9rem; }
+    .review-date { color: #999; font-size: 0.8rem; }
 
     /* Contact details */
     .contact-details { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
@@ -700,7 +719,7 @@ export function buildHTML(normalized, decisions, aiContent) {
       .btn-primary { padding: 14px 24px; font-size: 0.95rem; }
       .gallery-grid { grid-template-columns: 1fr; }
       .services-grid { grid-template-columns: 1fr; }
-      .reviews-grid { grid-template-columns: 1fr; }
+      .reviews-grid { grid-template-columns: 1fr !important; }
     }
   </style>
 </head>
@@ -750,7 +769,7 @@ export function buildHTML(normalized, decisions, aiContent) {
 
   ${buildBeforeAfterSection(beforeAfterImages, resolvedResultsTitle)}
 
-  ${buildReviewsSection(customerReviews, resolvedReviewsTitle)}
+  ${buildReviewsSection(resolvedReviews, resolvedReviewsTitle)}
 
   ${buildMapIframe(mapQuery, resolvedFindUsTitle)}
 
