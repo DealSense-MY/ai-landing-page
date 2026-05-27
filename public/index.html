@@ -770,6 +770,33 @@
     }
     .history-actions button:hover { border-color: var(--primary); }
     .btn-delete:hover { border-color: var(--error) !important; }
+
+    /* ── COLOR PICKER ── */
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .color-presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      max-width: 200px;
+    }
+    .color-swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active {
+      border-color: white;
+      transform: scale(1.2);
+    }
   </style>
 </head>
 <body>
@@ -907,6 +934,18 @@
               <option value="casual" data-i18n-opt="tone_casual">Casual</option>
               <option value="urgent" data-i18n-opt="tone_urgent">Urgent</option>
             </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_color">BRAND COLOR</label>
+          <div class="color-picker-row">
+            <input type="color" id="brand-color" value="#2563eb"
+              style="width:44px;height:44px;border:none;cursor:pointer;
+              border-radius:8px;padding:2px;background:none;">
+            <div class="color-presets" id="color-presets"></div>
+            <span id="color-hex-display"
+              style="font-size:13px;opacity:0.7;">#2563eb</span>
           </div>
         </div>
 
@@ -1260,7 +1299,8 @@ Consultation | Free"></textarea>
       niche_general: "Umum / General",
       tone_warm: "Warm Professional",
       tone_casual: "Casual",
-      tone_urgent: "Urgent"
+      tone_urgent: "Urgent",
+      label_color: "BRAND COLOR"
     },
     bm: {
       cfg_title: "⚙ Konfigurasi",
@@ -1345,7 +1385,8 @@ Consultation | Free"></textarea>
       niche_general: "Umum / General",
       tone_warm: "Profesional Mesra",
       tone_casual: "Santai",
-      tone_urgent: "Segera"
+      tone_urgent: "Segera",
+      label_color: "WARNA JENAMA"
     }
   }
 
@@ -1646,6 +1687,59 @@ Consultation | Free"></textarea>
       setTimeout(() => { btn.textContent = '🔗 Share Link' }, 2000)
     })
   })
+
+  // ── Color Picker ──
+  const COLOR_PRESETS = [
+    '#2563eb','#1d4ed8','#0ea5e9','#0891b2','#06b6d4',
+    '#16a34a','#15803d','#65a30d','#84cc16','#10b981',
+    '#dc2626','#b91c1c','#be185d','#db2777','#f43f5e',
+    '#9333ea','#7c3aed','#6d28d9','#8b5cf6','#a855f7',
+    '#ea580c','#d97706','#f59e0b','#eab308','#f97316',
+    '#0d9488','#0f766e','#4f46e5','#4338ca','#3730a3',
+    '#1e293b','#334155','#475569','#64748b','#0f172a',
+    '#7f1d1d','#14532d','#1e3a5f','#4a1d96','#7c2d12',
+    '#c8102e','#003580','#cc0001','#006847','#ffcc00',
+  ]
+
+  function setBrandColor(hex) {
+    const input = document.getElementById('brand-color')
+    const display = document.getElementById('color-hex-display')
+    if (input) input.value = hex
+    if (display) display.textContent = hex
+    updateSwatchActive(hex)
+  }
+
+  function updateSwatchActive(hex) {
+    document.querySelectorAll('.color-swatch').forEach(s => {
+      s.classList.toggle('active', s.dataset.color.toLowerCase() === hex.toLowerCase())
+    })
+  }
+
+  function initColorPicker() {
+    const container = document.getElementById('color-presets')
+    const colorInput = document.getElementById('brand-color')
+    const hexDisplay = document.getElementById('color-hex-display')
+    if (!container) return
+
+    COLOR_PRESETS.forEach(hex => {
+      const swatch = document.createElement('div')
+      swatch.className = 'color-swatch'
+      swatch.style.backgroundColor = hex
+      swatch.dataset.color = hex
+      swatch.title = hex
+      swatch.onclick = () => setBrandColor(hex)
+      container.appendChild(swatch)
+    })
+
+    colorInput.addEventListener('input', (e) => {
+      hexDisplay.textContent = e.target.value
+      updateSwatchActive(e.target.value)
+    })
+
+    updateSwatchActive('#2563eb')
+  }
+
+  initColorPicker()
 
   // ── Editor collapse toggle ──
   const editorToggle = document.getElementById('editor-toggle')
