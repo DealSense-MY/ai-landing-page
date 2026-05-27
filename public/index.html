@@ -529,6 +529,7 @@
       }
       .header-status { display: none; }
       .logo-badge { display: none; }
+      #desktop-history-btn { display: none; }
     }
 
     /* ── MOBILE: STICKY GENERATE BUTTON ── */
@@ -790,7 +791,8 @@
     <div class="header-status">
       <span class="dot"></span>Powered by Aukiy
     </div>
-    <div id="ui-lang-toggle" style="display:flex;gap:6px;margin-left:16px;">
+    <button id="desktop-history-btn" class="ui-lang-btn" onclick="toggleDesktopHistory()" title="History">🕐 History</button>
+    <div id="ui-lang-toggle" style="display:flex;gap:6px;margin-left:4px;">
       <button class="ui-lang-btn active" onclick="setUILang('en')">EN</button>
       <button class="ui-lang-btn" onclick="setUILang('bm')">BM</button>
     </div>
@@ -1620,6 +1622,16 @@ Consultation | Free"></textarea>
       err.textContent = 'Failed to load history.'
       list.replaceChildren(err)
     }
+  }
+
+  // ── Desktop History toggle ──
+  window.toggleDesktopHistory = function() {
+    const panel = document.getElementById('history-panel')
+    const btn = document.getElementById('desktop-history-btn')
+    const isVisible = panel.style.display !== 'none'
+    panel.style.display = isVisible ? 'none' : 'flex'
+    btn.classList.toggle('active', !isVisible)
+    if (!isVisible) loadHistory()
   }
 
   // ── Share / Copy demo URL ──
