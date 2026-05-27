@@ -657,6 +657,9 @@ export function buildHTML(normalized, decisions, aiContent) {
     .contact-detail { font-size: 0.95rem; color: #666; }
     .contact-detail a { color: var(--primary); text-decoration: none; }
     .contact-detail a:hover { text-decoration: underline; }
+    .footer-cta .contact-detail { color: rgba(255,255,255,0.9); }
+    .footer-cta .contact-detail a { color: rgba(255,255,255,0.7); }
+    .footer-cta .contact-detail a:hover { color: #fff; }
 
     .map-section { padding: 72px 0; background: #fff; }
     .map-wrapper { border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
