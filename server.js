@@ -109,7 +109,7 @@ app.get('/demo/:id', (req, res) => {
   }
 })
 
-app.get('/history', (req, res) => {
+app.get('/history', requireApiKey, (req, res) => {
   if (!existsSync(HISTORY_FILE)) return res.json([])
   try {
     const history = JSON.parse(readFileSync(HISTORY_FILE, 'utf8'))
@@ -119,7 +119,7 @@ app.get('/history', (req, res) => {
   }
 })
 
-app.delete('/history/:id', (req, res) => {
+app.delete('/history/:id', requireApiKey, (req, res) => {
   const id = req.params.id.replace(/[^a-zA-Z0-9_-]/g, '')
   if (!id) return res.status(400).json({ error: 'Invalid ID' })
 
