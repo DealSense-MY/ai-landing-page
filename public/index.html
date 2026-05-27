@@ -1568,6 +1568,7 @@ Consultation | Free"></textarea>
       address: document.getElementById('field-address').value.trim(),
       mapQuery: document.getElementById('field-mapQuery').value.trim(),
       outputLang: selectedOutputLang,
+      brandColor: document.getElementById('brand-color')?.value || '#2563eb',
     }
 
     if (!payload.productName) {

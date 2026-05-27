@@ -31,6 +31,7 @@ export const state = {
     galleryImages: [],
     beforeAfterImages: [],
     whatsappMessage: '',
+    brandColor: '#2563eb',
   },
 
   activeMobileTab: 'form',
@@ -80,6 +81,7 @@ export const state = {
         galleryImages: [],
         beforeAfterImages: [],
         whatsappMessage: '',
+        brandColor: '#2563eb',
       },
       activeMobileTab: 'form',
       isLoading: false,

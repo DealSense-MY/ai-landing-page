@@ -135,6 +135,10 @@ export function normalize(input) {
   let outputLang = String(input.outputLang || 'en').trim().toLowerCase()
   if (!VALID_OUTPUT_LANGS.includes(outputLang)) outputLang = 'en'
 
+  const brandColor = (input.brandColor && /^#[0-9a-fA-F]{6}$/.test(input.brandColor))
+    ? input.brandColor
+    : '#2563eb'
+
   return {
     productName,
     tagline,
@@ -159,5 +163,6 @@ export function normalize(input) {
     address,
     mapQuery,
     outputLang,
+    brandColor,
   }
 }

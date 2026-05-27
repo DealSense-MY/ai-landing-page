@@ -3,6 +3,15 @@
  * Supports monolingual and multilingual (bilingual/trilingual) output.
  */
 
+function darkenHex(hex, percent) {
+  const num = parseInt(hex.replace('#', ''), 16)
+  const amt = Math.round(2.55 * percent)
+  const r = Math.min(255, Math.max(0, (num >> 16) - amt))
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) - amt))
+  const b = Math.min(255, Math.max(0, (num & 0xff) - amt))
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')
+}
+
 function escapeHTML(str) {
   if (!str) return ''
   return String(str)
@@ -284,8 +293,9 @@ export function buildHTML(normalized, decisions, aiContent) {
     productName, tagline, niche, features, benefits: inputBenefits,
     imageUrl, logoUrl, phoneNumber, address, mapQuery, outputLang,
     services, customerReviews, galleryImages, beforeAfterImages,
-    googleRating, totalReviews,
+    googleRating, totalReviews, brandColor: rawBrandColor,
   } = normalized
+  const brandColor = rawBrandColor || '#2563eb'
   const { colorTheme, layout, fontFamily, urgencyBadge } = decisions
   const {
     headline, subheadline, ctaText, navbarCta, footerCta, whatsappCta,
@@ -379,12 +389,15 @@ export function buildHTML(normalized, decisions, aiContent) {
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: ${colorTheme.primary};
+      --primary: ${brandColor};
       --secondary: ${colorTheme.secondary};
-      --accent: ${colorTheme.accent};
+      --accent: ${darkenHex(brandColor, 15)};
       --text: ${colorTheme.text};
       --light: ${colorTheme.light};
       --font: ${fontFamily};
+      --color-primary: ${brandColor};
+      --color-primary-dark: ${darkenHex(brandColor, 15)};
+      --color-primary-light: ${darkenHex(brandColor, -15)};
     }
 
     body {
@@ -674,7 +687,7 @@ export function buildHTML(normalized, decisions, aiContent) {
     .footer-cta h2 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 800; margin-bottom: 16px; }
     .footer-cta p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 36px; max-width: 500px; margin-left: auto; margin-right: auto; }
 
-    .footer { background: #1a1a2e; color: #aaa; padding: 40px 20px 24px; font-size: 0.85rem; }
+    .footer { background: var(--color-primary-dark); color: #aaa; padding: 40px 20px 24px; font-size: 0.85rem; }
     .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1100px; margin: 0 auto 24px; }
     .footer-col h4 { color: #fff; font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; }
     .footer-info-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.88rem; color: #999; }
