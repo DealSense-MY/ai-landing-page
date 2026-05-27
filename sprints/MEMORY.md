@@ -10,7 +10,7 @@ PHASE 5 — DONE ✅ commit: 8fb6d78 notes: benefit cards {icon,title,desc}, her
 PHASE 6 — DONE ✅ commit: e768847 notes: social proof badge inline-flex+gold star, reviews 3-col grid+gold stars+review-footer, AI generates reviews when none provided, validateMonolingual extracts reviews
 PHASE 7 — DONE ✅ commit: 560d8b0 notes: persistent DATA_DIR+DEMO_DIR+HISTORY_FILE, GET/DELETE /history endpoints, history panel 3rd tab, DOM-safe entry builder, loadHistory auto on tab open
 PHASE 8 — DONE ✅ commit: 560d8b0 notes: GET / injects window._appApiKey at serve time, apiService sends x-api-key header, requireApiKey middleware guards POST /generate
-PHASE 9 — PENDING (Deploy + Verify)
+PHASE 9 — DONE ✅ commit: e1ce289 notes: pushed to GitHub, deployed to Railway, security fix applied (requireApiKey on GET/DELETE /history)
 
 ---
 LAST UPDATED: not started
