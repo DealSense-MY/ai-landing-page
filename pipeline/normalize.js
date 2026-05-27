@@ -25,7 +25,19 @@ function parseArrayField(value) {
 
 function parseServicesField(value) {
   if (!value) return []
-  if (Array.isArray(value)) return value
+  if (Array.isArray(value)) {
+    return value
+      .map(item => {
+        if (typeof item === 'string') {
+          const [name, price = ''] = item.split('|').map(s => s.trim())
+          return { name, price }
+        }
+        const name = String(item.name || item.title || '').trim()
+        const price = String(item.price || item.cost || '').trim()
+        return { name, price }
+      })
+      .filter(s => s.name)
+  }
   if (typeof value !== 'string') return []
   return value
     .split('\n')
