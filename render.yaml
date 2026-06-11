@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: nexus-landing-engine
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: APP_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000

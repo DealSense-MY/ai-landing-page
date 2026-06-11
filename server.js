@@ -16,6 +16,11 @@ const __dirname = path.dirname(__filename)
 const app = express()
 app.use(express.json({ limit: '1mb' }))
 
+// Health check — untuk UptimeRobot keep-alive
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', ts: Date.now() })
+})
+
 // Serve index.html dynamically so APP_API_KEY can be injected into the page.
 // All other static files are served normally by express.static below.
 app.get('/', (req, res) => {
