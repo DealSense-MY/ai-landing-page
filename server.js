@@ -34,8 +34,8 @@ app.get('/', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-// Persistent storage — Railway Volume must be mounted at /app/data
-const DATA_DIR = process.env.DATA_DIR || '/app/data'
+// Persistent storage — Railway Volume path via env, falls back to ./data locally
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data')
 const DEMO_DIR = path.join(DATA_DIR, 'demos')
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json')
 
