@@ -3,6 +3,7 @@ services:
     name: nexus-landing-engine
     env: node
     plan: free
+    rootDir: .
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -14,3 +15,5 @@ services:
         sync: false
       - key: PORT
         value: 10000
+      - key: DATA_DIR
+        value: /tmp/data
