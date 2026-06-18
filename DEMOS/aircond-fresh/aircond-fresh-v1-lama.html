@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aircond Fresh Services — Servis | Repair | Pasang Aircond</title>
+  <meta name="description" content="Aircond Fresh Services — Pakar Servis, Repair & Pasang Aircond di Malaysia. KT0545349-H Berdaftar. Hubungi kami sekarang!" />
+
+  <style>
+    /* ===========================
+       CSS RESET & VARIABLES
+    =========================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark-green: #0d2a1a;
+      --mid-green:  #1a4a2e;
+      --lime-green: #7bc043;
+      --lime-light: #9dd660;
+      --yellow:     #ffc107;
+      --yellow-light: #ffd54f;
+      --white:      #ffffff;
+      --off-white:  #f4f9f0;
+      --text-dark:  #1a1a1a;
+      --text-muted: #6b7280;
+      --card-bg:    #ffffff;
+      --shadow-sm:  0 2px 8px rgba(0,0,0,.08);
+      --shadow-md:  0 8px 30px rgba(0,0,0,.12);
+      --shadow-lg:  0 20px 60px rgba(0,0,0,.18);
+      --radius:     14px;
+      --radius-lg:  22px;
+      --transition: .3s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-dark);
+      background: var(--white);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ===========================
+       SCROLL ANIMATIONS
+    =========================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal-left.visible { opacity: 1; transform: translateX(0); }
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+    /* delay helpers */
+    .delay-1 { transition-delay: .1s; }
+    .delay-2 { transition-delay: .2s; }
+    .delay-3 { transition-delay: .3s; }
+    .delay-4 { transition-delay: .4s; }
+
+    /* ===========================
+       NAVIGATION
+    =========================== */
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 999;
+      background: rgba(13,42,26,.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(123,192,67,.2);
+      padding: 14px 0;
+      transition: var(--transition);
+    }
+    nav.scrolled {
+      padding: 10px 0;
+      background: rgba(13,42,26,.98);
+      box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none;
+    }
+    .nav-logo-circle {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--lime-green), #5aa832);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 0 3px rgba(123,192,67,.3);
+      flex-shrink: 0;
+    }
+    .nav-brand-text { color: var(--white); }
+    .nav-brand-text strong {
+      display: block; font-size: 15px; font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .nav-brand-text span {
+      display: block; font-size: 11px; color: var(--lime-green); letter-spacing: .5px;
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 28px; list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,.85); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--lime-green); }
+    .nav-cta {
+      background: var(--lime-green) !important;
+      color: var(--dark-green) !important;
+      padding: 9px 20px !important;
+      border-radius: 8px !important;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      white-space: nowrap;
+    }
+    .nav-cta:hover { background: var(--lime-light) !important; }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 4px;
+    }
+    .hamburger span {
+      width: 24px; height: 2px;
+      background: var(--white); border-radius: 2px;
+      transition: var(--transition);
+    }
+    .mobile-menu {
+      display: none;
+      position: fixed; top: 72px; left: 0; right: 0;
+      background: var(--dark-green);
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(123,192,67,.2);
+      z-index: 998;
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu ul { list-style: none; }
+    .mobile-menu ul li { border-bottom: 1px solid rgba(255,255,255,.08); }
+    .mobile-menu ul li a {
+      display: block; padding: 14px 0;
+      color: var(--white); text-decoration: none;
+      font-size: 15px; font-weight: 500;
+    }
+    .mobile-menu ul li:last-child { border-bottom: none; }
+
+    /* ===========================
+       HERO SECTION
+    =========================== */
+    #hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #071510 0%, var(--dark-green) 40%, #133d22 100%);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+    /* Animated background circles */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(123,192,67,.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(123,192,67,.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255,193,7,.04) 0%, transparent 60%);
+    }
+    /* Grid pattern overlay */
+    #hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(123,192,67,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(123,192,67,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: 820px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(123,192,67,.15);
+      border: 1px solid rgba(123,192,67,.35);
+      color: var(--lime-green);
+      padding: 7px 18px; border-radius: 50px;
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 28px;
+      letter-spacing: .5px;
+      animation: fadeDown .8s ease both;
+    }
+    .hero-badge span { animation: pulse 2s ease infinite; }
+    .hero-logo {
+      width: 100px; height: 100px;
+      background: linear-gradient(135deg, var(--lime-green), #5aa832);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+      margin: 0 auto 28px;
+      box-shadow: 0 0 0 6px rgba(123,192,67,.2), 0 0 0 12px rgba(123,192,67,.08);
+      animation: fadeDown .8s .2s ease both;
+    }
+    .hero-title {
+      font-size: clamp(38px, 7vw, 72px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 12px;
+      animation: fadeUp .8s .3s ease both;
+    }
+    .hero-title .highlight {
+      color: var(--lime-green);
+      position: relative;
+    }
+    .hero-title .highlight::after {
+      content: '';
+      position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 3px; background: var(--lime-green);
+      border-radius: 2px;
+      animation: expandWidth 1s 1s ease both;
+    }
+    .hero-tagline {
+      font-size: clamp(15px, 2.5vw, 22px);
+      color: rgba(255,255,255,.7);
+      margin-bottom: 16px;
+      font-weight: 400;
+      animation: fadeUp .8s .4s ease both;
+    }
+    .hero-subtitle-container {
+      height: 36px; overflow: hidden;
+      margin-bottom: 36px;
+      animation: fadeUp .8s .5s ease both;
+    }
+    .hero-subtitle {
+      font-size: clamp(16px, 2.8vw, 24px);
+      font-weight: 700;
+      color: var(--yellow);
+      animation: slideWords 9s ease infinite;
+    }
+    .hero-btns {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      justify-content: center;
+      animation: fadeUp .8s .6s ease both;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--lime-green);
+      color: var(--dark-green);
+      padding: 16px 32px; border-radius: 50px;
+      font-size: 16px; font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 8px 30px rgba(123,192,67,.4);
+      transition: var(--transition);
+      border: none; cursor: pointer;
+      letter-spacing: .3px;
+    }
+    .btn-primary:hover {
+      background: var(--lime-light);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(123,192,67,.5);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: transparent;
+      color: var(--white);
+      padding: 15px 30px; border-radius: 50px;
+      font-size: 16px; font-weight: 700;
+      text-decoration: none;
+      border: 2px solid rgba(255,255,255,.35);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.1);
+      border-color: var(--white);
+      transform: translateY(-3px);
+    }
+    .hero-scroll {
+      position: absolute; bottom: 36px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      animation: bounce 2s ease infinite;
+    }
+    .hero-scroll a { color: rgba(255,255,255,.4); text-decoration: none; font-size: 28px; }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+      margin-top: 48px;
+      animation: fadeUp .8s .7s ease both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat strong {
+      display: block; font-size: 30px; font-weight: 900;
+      color: var(--lime-green); line-height: 1;
+    }
+    .hero-stat span { font-size: 13px; color: rgba(255,255,255,.55); margin-top: 4px; display: block; }
+
+    /* ===========================
+       TRUST BADGES
+    =========================== */
+    #trust {
+      background: var(--mid-green);
+      padding: 20px 0;
+      border-top: 1px solid rgba(123,192,67,.25);
+      border-bottom: 1px solid rgba(123,192,67,.25);
+    }
+    .trust-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; flex-wrap: wrap; gap: 0;
+      justify-content: center;
+    }
+    .trust-badge {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 28px;
+      border-right: 1px solid rgba(255,255,255,.1);
+      flex: 1; min-width: 180px; max-width: 260px;
+      justify-content: center;
+    }
+    .trust-badge:last-child { border-right: none; }
+    .trust-icon { font-size: 22px; }
+    .trust-text strong {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--white); letter-spacing: .3px;
+    }
+    .trust-text span { font-size: 11px; color: var(--lime-green); }
+
+    /* ===========================
+       SECTION COMMONS
+    =========================== */
+    section { padding: 90px 24px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 56px; }
+    .section-chip {
+      display: inline-block;
+      background: rgba(123,192,67,.12);
+      color: var(--lime-green);
+      border: 1px solid rgba(123,192,67,.3);
+      padding: 5px 16px; border-radius: 50px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 900; color: var(--dark-green);
+      line-height: 1.2; margin-bottom: 14px;
+    }
+    .section-desc {
+      font-size: 16px; color: var(--text-muted);
+      max-width: 520px; margin: 0 auto;
+    }
+    .section-title em { color: var(--lime-green); font-style: normal; }
+
+    /* ===========================
+       SERVICES SECTION
+    =========================== */
+    #services { background: var(--off-white); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+    .service-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid transparent;
+      transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--lime-green), var(--yellow));
+      transform: scaleX(0);
+      transition: transform var(--transition);
+      transform-origin: left;
+    }
+    .service-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(123,192,67,.3);
+    }
+    .service-card:hover::before { transform: scaleX(1); }
+    .service-icon-wrap {
+      width: 68px; height: 68px;
+      background: linear-gradient(135deg, rgba(123,192,67,.15), rgba(123,192,67,.05));
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(123,192,67,.2);
+    }
+    .service-name {
+      font-size: 18px; font-weight: 800;
+      color: var(--dark-green); margin-bottom: 8px;
+    }
+    .service-desc {
+      font-size: 14px; color: var(--text-muted);
+      line-height: 1.6; margin-bottom: 16px;
+    }
+    .service-price {
+      font-size: 13px; font-weight: 700;
+      color: var(--lime-green);
+      background: rgba(123,192,67,.1);
+      padding: 5px 12px; border-radius: 50px;
+      display: inline-block; margin-bottom: 20px;
+    }
+    .btn-book {
+      display: block; width: 100%;
+      background: var(--dark-green);
+      color: var(--white);
+      padding: 12px; border-radius: 10px;
+      font-size: 14px; font-weight: 700;
+      text-decoration: none; text-align: center;
+      transition: all var(--transition);
+      border: none; cursor: pointer;
+    }
+    .btn-book:hover {
+      background: var(--lime-green);
+      color: var(--dark-green);
+      transform: none;
+    }
+
+    /* ===========================
+       HOW IT WORKS
+    =========================== */
+    #how { background: var(--white); }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 32px;
+      position: relative;
+    }
+    .step-card {
+      text-align: center; padding: 40px 28px;
+      border-radius: var(--radius-lg);
+      background: var(--off-white);
+      position: relative;
+    }
+    .step-number {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--lime-green), #5aa832);
+      color: var(--dark-green);
+      font-size: 22px; font-weight: 900;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 6px 20px rgba(123,192,67,.35);
+    }
+    .step-icon { font-size: 40px; margin-bottom: 16px; }
+    .step-title {
+      font-size: 20px; font-weight: 800;
+      color: var(--dark-green); margin-bottom: 10px;
+    }
+    .step-desc { font-size: 15px; color: var(--text-muted); }
+    .step-arrow {
+      display: none;
+    }
+
+    /* ===========================
+       PRICING PACKAGES
+    =========================== */
+    #pricing { background: var(--dark-green); }
+    #pricing .section-title { color: var(--white); }
+    #pricing .section-desc { color: rgba(255,255,255,.6); }
+    #pricing .section-chip {
+      background: rgba(123,192,67,.2);
+      border-color: rgba(123,192,67,.4);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: rgba(255,255,255,.06);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .pricing-card.popular {
+      background: var(--white);
+      border-color: var(--lime-green);
+      transform: scale(1.03);
+      box-shadow: 0 30px 80px rgba(123,192,67,.25);
+    }
+    .pricing-card:hover:not(.popular) {
+      background: rgba(255,255,255,.1);
+      border-color: rgba(123,192,67,.4);
+      transform: translateY(-6px);
+    }
+    .popular-tag {
+      position: absolute; top: 18px; right: -28px;
+      background: var(--yellow);
+      color: var(--dark-green);
+      font-size: 11px; font-weight: 800;
+      padding: 5px 40px;
+      transform: rotate(45deg);
+      letter-spacing: .5px;
+    }
+    .pricing-name {
+      font-size: 14px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .pricing-card:not(.popular) .pricing-name { color: var(--lime-green); }
+    .pricing-card.popular .pricing-name { color: var(--lime-green); }
+    .pricing-price {
+      font-size: 44px; font-weight: 900;
+      line-height: 1; margin-bottom: 4px;
+    }
+    .pricing-card:not(.popular) .pricing-price { color: var(--white); }
+    .pricing-card.popular .pricing-price { color: var(--dark-green); }
+    .pricing-price span {
+      font-size: 16px; font-weight: 400; vertical-align: top;
+      margin-top: 8px; display: inline-block;
+    }
+    .pricing-period {
+      font-size: 13px; margin-bottom: 24px;
+    }
+    .pricing-card:not(.popular) .pricing-period { color: rgba(255,255,255,.5); }
+    .pricing-card.popular .pricing-period { color: var(--text-muted); }
+    .pricing-divider {
+      height: 1px;
+      margin-bottom: 24px;
+    }
+    .pricing-card:not(.popular) .pricing-divider { background: rgba(255,255,255,.1); }
+    .pricing-card.popular .pricing-divider { background: rgba(0,0,0,.1); }
+    .pricing-features { list-style: none; margin-bottom: 28px; }
+    .pricing-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; padding: 7px 0;
+    }
+    .pricing-card:not(.popular) .pricing-features li { color: rgba(255,255,255,.8); }
+    .pricing-card.popular .pricing-features li { color: var(--text-dark); }
+    .pricing-features li::before {
+      content: '✓';
+      width: 20px; height: 20px;
+      background: rgba(123,192,67,.2);
+      color: var(--lime-green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .btn-pricing {
+      display: block; width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px; font-weight: 800;
+      text-decoration: none; text-align: center;
+      transition: all var(--transition);
+      border: none; cursor: pointer;
+    }
+    .pricing-card:not(.popular) .btn-pricing {
+      background: rgba(123,192,67,.15);
+      color: var(--lime-green);
+      border: 1.5px solid rgba(123,192,67,.3);
+    }
+    .pricing-card:not(.popular) .btn-pricing:hover {
+      background: var(--lime-green);
+      color: var(--dark-green);
+    }
+    .pricing-card.popular .btn-pricing {
+      background: var(--lime-green);
+      color: var(--dark-green);
+      box-shadow: 0 6px 20px rgba(123,192,67,.4);
+    }
+    .pricing-card.popular .btn-pricing:hover {
+      background: var(--lime-light);
+      transform: translateY(-2px);
+    }
+
+    /* ===========================
+       WHY CHOOSE US
+    =========================== */
+    #why { background: var(--off-white); }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 28px;
+    }
+    .why-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      transition: all var(--transition);
+    }
+    .why-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+    }
+    .why-icon {
+      font-size: 44px; margin-bottom: 16px;
+      display: block;
+    }
+    .why-title {
+      font-size: 18px; font-weight: 800;
+      color: var(--dark-green); margin-bottom: 10px;
+    }
+    .why-desc {
+      font-size: 14px; color: var(--text-muted); line-height: 1.7;
+    }
+
+    /* ===========================
+       TESTIMONIALS
+    =========================== */
+    #testimonials { background: var(--white); }
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 28px;
+    }
+    .testi-card {
+      background: var(--off-white);
+      border-radius: var(--radius-lg);
+      padding: 30px 26px;
+      border: 1.5px solid transparent;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .testi-card:hover {
+      border-color: rgba(123,192,67,.3);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+    .quote-mark {
+      font-size: 60px; line-height: .8;
+      color: var(--lime-green); opacity: .3;
+      font-family: Georgia, serif;
+      margin-bottom: -10px;
+    }
+    .testi-text {
+      font-size: 15px; color: #444;
+      line-height: 1.75; margin-bottom: 20px;
+      font-style: italic;
+    }
+    .testi-author {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .testi-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .testi-avatar.av1 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .testi-avatar.av2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .testi-avatar.av3 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .testi-name { font-size: 15px; font-weight: 800; color: var(--dark-green); }
+    .testi-location { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .testi-stars {
+      font-size: 14px; color: var(--yellow);
+      margin-top: 4px; letter-spacing: 1px;
+    }
+
+    /* ===========================
+       SERVICE AREA
+    =========================== */
+    #area { background: var(--dark-green); }
+    #area .section-title { color: var(--white); }
+    #area .section-desc { color: rgba(255,255,255,.6); }
+    #area .section-chip { background: rgba(123,192,67,.2); border-color: rgba(123,192,67,.4); }
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+      max-width: 900px; margin: 0 auto;
+    }
+    .area-item {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,.85);
+      font-size: 14px; font-weight: 500;
+      transition: all var(--transition);
+      cursor: default;
+    }
+    .area-item:hover {
+      background: rgba(123,192,67,.15);
+      border-color: rgba(123,192,67,.4);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+    .area-item span { font-size: 16px; }
+    .area-note {
+      text-align: center; margin-top: 28px;
+      color: rgba(255,255,255,.5); font-size: 14px;
+    }
+    .area-note strong { color: var(--lime-green); }
+
+    /* ===========================
+       CONTACT / BOOKING
+    =========================== */
+    #contact { background: var(--off-white); }
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .contact-left h2 {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 900; color: var(--dark-green);
+      margin-bottom: 16px; line-height: 1.2;
+    }
+    .contact-left h2 em { color: var(--lime-green); font-style: normal; }
+    .contact-left p {
+      font-size: 15px; color: var(--text-muted);
+      line-height: 1.7; margin-bottom: 28px;
+    }
+    .contact-info { list-style: none; margin-bottom: 32px; }
+    .contact-info li {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(0,0,0,.07);
+    }
+    .contact-info li:last-child { border-bottom: none; }
+    .ci-icon {
+      width: 42px; height: 42px;
+      background: rgba(123,192,67,.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .ci-text strong { display: block; font-size: 13px; color: var(--text-muted); font-weight: 600; }
+    .ci-text span { font-size: 16px; font-weight: 700; color: var(--dark-green); }
+    .contact-right {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      border: 1.5px solid rgba(123,192,67,.15);
+    }
+    .contact-right h3 {
+      font-size: 22px; font-weight: 800;
+      color: var(--dark-green); margin-bottom: 10px;
+    }
+    .contact-right p {
+      font-size: 14px; color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    .btn-wa-big {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      background: #25d366;
+      color: var(--white);
+      padding: 18px 36px; border-radius: 50px;
+      font-size: 18px; font-weight: 800;
+      text-decoration: none;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(37,211,102,.35);
+      transition: all var(--transition);
+      margin-bottom: 16px;
+    }
+    .btn-wa-big:hover {
+      background: #1db954;
+      transform: translateY(-3px);
+      box-shadow: 0 18px 50px rgba(37,211,102,.45);
+    }
+    .btn-wa-big .wa-icon { font-size: 24px; }
+    .btn-phone {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--off-white);
+      color: var(--dark-green);
+      padding: 15px 28px; border-radius: 50px;
+      font-size: 16px; font-weight: 700;
+      text-decoration: none;
+      width: 100%;
+      border: 1.5px solid rgba(0,0,0,.1);
+      transition: all var(--transition);
+      margin-bottom: 24px;
+    }
+    .btn-phone:hover {
+      background: var(--dark-green);
+      color: var(--white);
+      border-color: transparent;
+    }
+    .hours-box {
+      background: var(--off-white);
+      border-radius: 12px; padding: 18px 20px;
+      text-align: left;
+    }
+    .hours-title {
+      font-size: 13px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .5px;
+      margin-bottom: 12px;
+    }
+    .hours-row {
+      display: flex; justify-content: space-between;
+      font-size: 14px; padding: 5px 0;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-row .day { color: var(--text-muted); }
+    .hours-row .time { font-weight: 700; color: var(--dark-green); }
+    .open-badge {
+      display: inline-block;
+      background: rgba(123,192,67,.1);
+      color: var(--lime-green);
+      font-size: 12px; font-weight: 700;
+      padding: 3px 10px; border-radius: 50px;
+      border: 1px solid rgba(123,192,67,.3);
+    }
+
+    /* ===========================
+       FOOTER
+    =========================== */
+    footer {
+      background: var(--dark-green);
+      padding: 60px 24px 30px;
+      color: rgba(255,255,255,.7);
+    }
+    .footer-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .footer-brand { }
+    .footer-logo {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .footer-logo-circle {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--lime-green), #5aa832);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .footer-logo-text strong {
+      display: block; font-size: 17px; font-weight: 800;
+      color: var(--white);
+    }
+    .footer-logo-text span { font-size: 12px; color: var(--lime-green); }
+    .footer-tagline {
+      font-size: 14px; line-height: 1.7; margin-bottom: 16px;
+    }
+    .footer-reg {
+      font-size: 12px; color: rgba(255,255,255,.4);
+    }
+    .footer-heading {
+      font-size: 14px; font-weight: 800;
+      color: var(--white); margin-bottom: 16px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 10px; }
+    .footer-links a {
+      color: rgba(255,255,255,.6); text-decoration: none;
+      font-size: 14px; transition: color var(--transition);
+    }
+    .footer-links a:hover { color: var(--lime-green); }
+    .footer-bottom {
+      max-width: 1200px; margin: 28px auto 0;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      font-size: 13px;
+    }
+    .footer-bottom a { color: var(--lime-green); text-decoration: none; }
+    .social-row { display: flex; gap: 12px; }
+    .social-btn {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,.08);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .social-btn:hover { background: var(--lime-green); }
+
+    /* ===========================
+       WHATSAPP FAB
+    =========================== */
+    .wa-fab {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      width: 62px; height: 62px;
+      background: #25d366;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 6px 30px rgba(37,211,102,.5);
+      text-decoration: none;
+      transition: all var(--transition);
+      animation: fabPulse 3s ease infinite;
+    }
+    .wa-fab:hover {
+      transform: scale(1.12);
+      box-shadow: 0 12px 40px rgba(37,211,102,.6);
+    }
+    .wa-fab-tooltip {
+      position: absolute; right: 76px; top: 50%;
+      transform: translateY(-50%);
+      background: var(--dark-green);
+      color: var(--white);
+      font-size: 13px; font-weight: 600;
+      padding: 7px 14px; border-radius: 8px;
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition);
+    }
+    .wa-fab-tooltip::after {
+      content: '';
+      position: absolute; left: 100%; top: 50%;
+      transform: translateY(-50%);
+      border: 6px solid transparent;
+      border-left-color: var(--dark-green);
+    }
+    .wa-fab:hover .wa-fab-tooltip { opacity: 1; }
+
+    /* ===========================
+       DIVIDER WAVE
+    =========================== */
+    .wave-divider { line-height: 0; }
+    .wave-divider svg { display: block; width: 100%; }
+
+    /* ===========================
+       KEYFRAME ANIMATIONS
+    =========================== */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes expandWidth {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+    @keyframes slideWords {
+      0%   { transform: translateY(0); }
+      28%  { transform: translateY(0); }
+      33%  { transform: translateY(-36px); }
+      61%  { transform: translateY(-36px); }
+      66%  { transform: translateY(-72px); }
+      94%  { transform: translateY(-72px); }
+      99%  { transform: translateY(0); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 6px 30px rgba(37,211,102,.5); }
+      50% { box-shadow: 0 6px 30px rgba(37,211,102,.5), 0 0 0 12px rgba(37,211,102,.15); }
+    }
+
+    /* ===========================
+       RESPONSIVE
+    =========================== */
+    @media (max-width: 900px) {
+      .contact-wrapper { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+    @media (max-width: 680px) {
+      nav .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .trust-badge { border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+      .trust-badge:last-child { border-bottom: none; }
+      .hero-btns { flex-direction: column; align-items: center; }
+      .btn-primary, .btn-secondary { width: 100%; max-width: 320px; justify-content: center; }
+      section { padding: 70px 20px; }
+      .pricing-card.popular { transform: scale(1); }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .hero-stats { gap: 20px; }
+      .hero-stat strong { font-size: 24px; }
+      .area-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f0f0f0; }
+    ::-webkit-scrollbar-thumb { background: var(--lime-green); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- =====================
+     NAVIGATION
+===================== -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-logo-circle">❄️</div>
+      <div class="nav-brand-text">
+        <strong>Aircond Fresh Services</strong>
+        <span>Servis · Repair · Pasang</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#pricing">Packages</a></li>
+      <li><a href="#why">Kenapa Kami</a></li>
+      <li><a href="#area">Coverage</a></li>
+      <li><a href="#contact" class="nav-cta">📲 Tempah Sekarang</a></li>
+    </ul>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="#services" onclick="toggleMenu()">Services</a></li>
+    <li><a href="#pricing" onclick="toggleMenu()">Packages</a></li>
+    <li><a href="#why" onclick="toggleMenu()">Kenapa Kami</a></li>
+    <li><a href="#area" onclick="toggleMenu()">Coverage</a></li>
+    <li><a href="#contact" onclick="toggleMenu()">📲 Tempah Sekarang</a></li>
+  </ul>
+</div>
+
+<!-- =====================
+     HERO
+===================== -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>🟢</span> KT0545349-H Berdaftar · Dipercayai Sejak Hari Pertama
+    </div>
+    <div class="hero-logo">❄️</div>
+    <h1 class="hero-title">
+      <span class="highlight">Aircond Fresh</span><br>Services
+    </h1>
+    <p class="hero-tagline">We Offer Repair · Service · Installation</p>
+
+    <div class="hero-subtitle-container">
+      <div class="hero-subtitle">
+        ❄️ Aircond Kotor? Kami Bersihkan!<br>
+        🔧 Rosak? Kami Repair Cepat!<br>
+        ⚡ Kerja Elektrik? Kami Ada!
+      </div>
+    </div>
+
+    <div class="hero-btns">
+      <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20nak%20tempah%20servis%20aircond" class="btn-primary">
+        💬 Tempah Sekarang
+      </a>
+      <a href="#services" class="btn-secondary">
+        🔍 Tengok Services ↓
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <strong>500+</strong>
+        <span>Pelanggan Berpuas Hati</span>
+      </div>
+      <div class="hero-stat">
+        <strong>5★</strong>
+        <span>Rating Google</span>
+      </div>
+      <div class="hero-stat">
+        <strong>24/7</strong>
+        <span>Servis Kecemasan</span>
+      </div>
+      <div class="hero-stat">
+        <strong>100%</strong>
+        <span>Dijamin Memuaskan</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <a href="#trust">⌄</a>
+  </div>
+</section>
+
+<!-- =====================
+     TRUST BADGES
+===================== -->
+<div id="trust">
+  <div class="trust-inner">
+    <div class="trust-badge">
+      <div class="trust-icon">🏛️</div>
+      <div class="trust-text">
+        <strong>KT0545349-H</strong>
+        <span>Syarikat Berdaftar Rasmi</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon">⭐</div>
+      <div class="trust-text">
+        <strong>5★ Rating</strong>
+        <span>Penilaian Pelanggan</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon">🕐</div>
+      <div class="trust-text">
+        <strong>24/7 Service</strong>
+        <span>Kecemasan Dilayan</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon">🛡️</div>
+      <div class="trust-text">
+        <strong>Dijamin Puas</strong>
+        <span>Satisfaction Guaranteed</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================
+     SERVICES
+===================== -->
+<section id="services">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-chip">🔧 Our Services</div>
+      <h2 class="section-title">Servis Yang Kami <em>Tawarkan</em></h2>
+      <p class="section-desc">Dari servis rutin hingga repair kecemasan — kami sedia bantu dengan profesional dan harga yang berpatutan.</p>
+    </div>
+    <div class="services-grid">
+
+      <div class="service-card reveal delay-1">
+        <div class="service-icon-wrap">❄️</div>
+        <h3 class="service-name">Aircond Service / Cuci</h3>
+        <p class="service-desc">Cuci dan servis menyeluruh unit aircond anda. Termasuk buang habuk, cuci filter, dan semak fungsi keseluruhan.</p>
+        <div class="service-price">💰 Dari RM80 – RM120 / unit</div>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20nak%20tempah%20Aircond%20Service" class="btn-book">📲 Book Sekarang</a>
+      </div>
+
+      <div class="service-card reveal delay-2">
+        <div class="service-icon-wrap">🔧</div>
+        <h3 class="service-name">Aircond Repair</h3>
+        <p class="service-desc">Aircond tak sejuk, bocor, atau berbunyi pelik? Teknisyen berpengalaman kami akan diagnos dan repair dengan cepat.</p>
+        <div class="service-price">💰 Dari RM150</div>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20nak%20tempah%20Aircond%20Repair" class="btn-book">📲 Book Sekarang</a>
+      </div>
+
+      <div class="service-card reveal delay-3">
+        <div class="service-icon-wrap">🔩</div>
+        <h3 class="service-name">Aircond Pasang</h3>
+        <p class="service-desc">Pemasangan unit aircond baru — split unit, cassette, atau ceiling mounted. Kemas dan profesional.</p>
+        <div class="service-price">💰 Dari RM350 (unit standard)</div>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20nak%20tempah%20Pasang%20Aircond" class="btn-book">📲 Book Sekarang</a>
+      </div>
+
+      <div class="service-card reveal delay-4">
+        <div class="service-icon-wrap">🧪</div>
+        <h3 class="service-name">Gas Top-Up</h3>
+        <p class="service-desc">Aircond tak sejuk atau beku? Mungkin gas refrigerant rendah. Kami top-up gas dengan peralatan bertauliah.</p>
+        <div class="service-price">💰 Dari RM120</div>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20nak%20tempah%20Gas%20Top-Up" class="btn-book">📲 Book Sekarang</a>
+      </div>
+
+      <div class="service-card reveal delay-1">
+        <div class="service-icon-wrap">⚡</div>
+        <h3 class="service-name">Kerja Elektrik</h3>
+        <p class="service-desc">Pendawaian, penukaran plug, pemasangan socket, dan semua kerja elektrik rumah atau pejabat anda.</p>
+        <div class="service-price">💰 Harga Ikut Skop Kerja</div>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20nak%20tanya%20pasal%20Kerja%20Elektrik" class="btn-book">📲 Tanya Harga</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     HOW IT WORKS
+===================== -->
+<section id="how">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-chip">📋 Prosedur Mudah</div>
+      <h2 class="section-title">Macam Mana Nak <em>Tempah?</em></h2>
+      <p class="section-desc">Proses tempahan kami mudah dan pantas. 3 langkah je!</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal delay-1">
+        <div class="step-number">1</div>
+        <div class="step-icon">📱</div>
+        <h3 class="step-title">Hubungi Kami</h3>
+        <p class="step-desc">WhatsApp atau call kami. Beritahu jenis servis yang diperlukan, lokasi, dan masa yang sesuai untuk anda.</p>
+      </div>
+      <div class="step-card reveal delay-2">
+        <div class="step-number">2</div>
+        <div class="step-icon">🚐</div>
+        <h3 class="step-title">Teknisyen Datang</h3>
+        <p class="step-desc">Teknisyen kami yang berpengalaman akan tiba tepat pada masa. Kami bring semua peralatan yang diperlukan.</p>
+      </div>
+      <div class="step-card reveal delay-3">
+        <div class="step-number">3</div>
+        <div class="step-icon">✅</div>
+        <h3 class="step-title">Kerja Siap & Bayar</h3>
+        <p class="step-desc">Kerja siap, kami terangkan apa yang dah buat. Bayar selepas kerja selesai dan anda berpuas hati.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     PRICING
+===================== -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-chip">💎 Packages</div>
+      <h2 class="section-title">Pakej <em>Servis Aircond</em></h2>
+      <p class="section-desc">Pilih pakej yang sesuai dengan keperluan anda. Lebih banyak unit, lebih jimat kos per unit.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Basic -->
+      <div class="pricing-card reveal delay-1">
+        <p class="pricing-name">Pakej Basic</p>
+        <div class="pricing-price"><span>RM</span>80</div>
+        <p class="pricing-period">/ 1 unit aircond</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Cuci Filter & Indoor Unit</li>
+          <li>Semak Paras Gas</li>
+          <li>Semak Fungsi Remote</li>
+          <li>Semak Kapasitor</li>
+          <li>Laporan Kesihatan Aircond</li>
+        </ul>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20berminat%20dengan%20Pakej%20Basic" class="btn-pricing">Pilih Pakej Ini</a>
+      </div>
+
+      <!-- Standard — POPULAR -->
+      <div class="pricing-card popular reveal delay-2">
+        <div class="popular-tag">POPULAR</div>
+        <p class="pricing-name">Pakej Standard</p>
+        <div class="pricing-price"><span>RM</span>150</div>
+        <p class="pricing-period">/ 2 unit aircond</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Semua dalam Pakej Basic</li>
+          <li>Cuci Evaporator Coil</li>
+          <li>Cuci Drain Pan</li>
+          <li>Semak Outdoor Unit</li>
+          <li>Tighten Wiring & Connections</li>
+          <li>Jimat RM10 berbanding 2x Basic</li>
+        </ul>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20berminat%20dengan%20Pakej%20Standard" class="btn-pricing">Pilih Pakej Ini</a>
+      </div>
+
+      <!-- Premium -->
+      <div class="pricing-card reveal delay-3">
+        <p class="pricing-name">Pakej Premium</p>
+        <div class="pricing-price"><span>RM</span>200</div>
+        <p class="pricing-period">/ 3 unit aircond</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Semua dalam Pakej Standard</li>
+          <li>Deep Chemical Wash (1 unit)</li>
+          <li>Full Diagnostic Report</li>
+          <li>Semak & Top-Up Gas (jika perlu)</li>
+          <li>6 Bulan Warranty Servis</li>
+          <li>Jimat lebih 20% vs individual</li>
+        </ul>
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%2C%20saya%20berminat%20dengan%20Pakej%20Premium" class="btn-pricing">Pilih Pakej Ini</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     WHY CHOOSE US
+===================== -->
+<section id="why">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-chip">🏆 Kenapa Kami</div>
+      <h2 class="section-title">Sebab Pelanggan <em>Pilih Kami</em></h2>
+      <p class="section-desc">Kami bukan sekadar servis — kami jaga aircond anda seperti milik kami sendiri.</p>
+    </div>
+    <div class="why-grid">
+
+      <div class="why-card reveal delay-1">
+        <span class="why-icon">👨‍🔧</span>
+        <h3 class="why-title">Teknisyen Bertauliah</h3>
+        <p class="why-desc">Semua teknisyen kami terlatih dan berpengalaman. Kerja dilakukan dengan betul pada kali pertama.</p>
+      </div>
+
+      <div class="why-card reveal delay-2">
+        <span class="why-icon">⚡</span>
+        <h3 class="why-title">Respon Pantas</h3>
+        <p class="why-desc">Hantar WhatsApp, kami balas dalam masa 15 minit. Booking hari ini, teknisyen boleh datang esok atau bila anda free.</p>
+      </div>
+
+      <div class="why-card reveal delay-3">
+        <span class="why-icon">💰</span>
+        <h3 class="why-title">Harga Telus & Berpatutan</h3>
+        <p class="why-desc">Tiada hidden charges. Kami quote harga lebih awal sebelum kerja bermula. Bayar apa yang disetujui sahaja.</p>
+      </div>
+
+      <div class="why-card reveal delay-4">
+        <span class="why-icon">🛡️</span>
+        <h3 class="why-title">Jaminan Kepuasan</h3>
+        <p class="why-desc">Kalau ada masalah selepas servis, kami akan kembali dan betulkan tanpa caj tambahan. Kami bertanggungjawab.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     TESTIMONIALS
+===================== -->
+<section id="testimonials">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-chip">💬 Testimoni</div>
+      <h2 class="section-title">Apa Kata <em>Pelanggan Kami</em></h2>
+      <p class="section-desc">Lebih 500 pelanggan yang berpuas hati. Jangan percaya kami — percaya mereka.</p>
+    </div>
+    <div class="testi-grid">
+
+      <div class="testi-card reveal delay-1">
+        <div class="quote-mark">"</div>
+        <p class="testi-text">Aircond rumah saya dah tak sejuk sebulan. Hubungi Aircond Fresh, technician datang pagi tadi dan dalam masa sejam semua dah selesai. Gas yang rendah dah top up, sekarang sejuk balik macam baru beli. Harga pun sangat berpatutan, tak tipu!</p>
+        <div class="testi-author">
+          <div class="testi-avatar av1">A</div>
+          <div>
+            <div class="testi-name">Ahmad Fadzillah</div>
+            <div class="testi-location">📍 Kota Bharu, Kelantan</div>
+            <div class="testi-stars">★★★★★</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card reveal delay-2">
+        <div class="quote-mark">"</div>
+        <p class="testi-text">Saya panggil Aircond Fresh untuk pasang 3 unit aircond baru kat rumah baru. Kerja kemas dan cepat, tak buat banyak habuk. Semua selesai dalam satu hari. Rasa berbaloi sangat dengan harga yang dicharge. Highly recommended!</p>
+        <div class="testi-author">
+          <div class="testi-avatar av2">S</div>
+          <div>
+            <div class="testi-name">Siti Norzahirah</div>
+            <div class="testi-location">📍 Pasir Mas, Kelantan</div>
+            <div class="testi-stars">★★★★★</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card reveal delay-3">
+        <div class="quote-mark">"</div>
+        <p class="testi-text">Aircond kedai saya rosak tengah-tengah hari panas. Terus WhatsApp Aircond Fresh, reply dalam 10 minit. Technician sampai 2 jam kemudian, repair dalam masa sejam. Serius laju dan profesional. Dah jadi pelanggan tetap sekarang!</p>
+        <div class="testi-author">
+          <div class="testi-avatar av3">R</div>
+          <div>
+            <div class="testi-name">Rahman Mohd Zakir</div>
+            <div class="testi-location">📍 Kuala Krai, Kelantan</div>
+            <div class="testi-stars">★★★★★</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     SERVICE AREA
+===================== -->
+<section id="area">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-chip">📍 Kawasan Servis</div>
+      <h2 class="section-title">Kawasan <em>Liputan Kami</em></h2>
+      <p class="section-desc">Kami beroperasi di seluruh Kelantan dan kawasan sekitar. Tak jumpa lokasi anda? Hubungi kami untuk sahkan.</p>
+    </div>
+    <div class="area-grid">
+      <div class="area-item reveal delay-1"><span>📍</span> Kota Bharu</div>
+      <div class="area-item reveal delay-1"><span>📍</span> Pasir Mas</div>
+      <div class="area-item reveal delay-2"><span>📍</span> Tumpat</div>
+      <div class="area-item reveal delay-2"><span>📍</span> Pengkalan Chepa</div>
+      <div class="area-item reveal delay-3"><span>📍</span> Bachok</div>
+      <div class="area-item reveal delay-3"><span>📍</span> Pasir Puteh</div>
+      <div class="area-item reveal delay-1"><span>📍</span> Machang</div>
+      <div class="area-item reveal delay-2"><span>📍</span> Kuala Krai</div>
+      <div class="area-item reveal delay-3"><span>📍</span> Gua Musang</div>
+      <div class="area-item reveal delay-1"><span>📍</span> Tanah Merah</div>
+      <div class="area-item reveal delay-2"><span>📍</span> Rantau Panjang</div>
+      <div class="area-item reveal delay-3"><span>📍</span> Tok Bali</div>
+    </div>
+    <p class="area-note reveal">🚐 Kami boleh travel ke luar kawasan — <strong>hubungi kami untuk caj perjalanan</strong></p>
+  </div>
+</section>
+
+<!-- =====================
+     CONTACT
+===================== -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-wrapper">
+      <div class="contact-left reveal-left">
+        <h2>Hubungi Kami <em>Sekarang</em> — Kami Sedia Bantu!</h2>
+        <p>Jangan tunggu aircond anda jadi lebih teruk. WhatsApp kami sekarang untuk dapatkan sebut harga percuma dan penghantaran pantas ke lokasi anda.</p>
+        <ul class="contact-info">
+          <li>
+            <div class="ci-icon">📞</div>
+            <div class="ci-text">
+              <strong>Telefon / WhatsApp</strong>
+              <!-- ⚠️ EDIT NOMBOR DI SINI -->
+              <span>+60XX-XXXXXXX</span>
+            </div>
+          </li>
+          <li>
+            <div class="ci-icon">📘</div>
+            <div class="ci-text">
+              <strong>Facebook</strong>
+              <span>@aircondfreshservices</span>
+            </div>
+          </li>
+          <li>
+            <div class="ci-icon">🏛️</div>
+            <div class="ci-text">
+              <strong>No. Pendaftaran</strong>
+              <span>KT0545349-H</span>
+            </div>
+          </li>
+          <li>
+            <div class="ci-icon">📍</div>
+            <div class="ci-text">
+              <strong>Kawasan Operasi</strong>
+              <span>Kelantan & Sekitar</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="contact-right reveal-right">
+        <h3>📲 Tempah Servis Sekarang!</h3>
+        <p>Hantar WhatsApp terus kepada kami. Kami reply dalam masa 15 minit!</p>
+
+        <!-- ⚠️ EDIT NOMBOR WHATSAPP DI SINI (format: 601XXXXXXXX) -->
+        <a href="https://wa.me/60XXXXXXXXX?text=Salam%20Aircond%20Fresh%20Services%2C%20saya%20nak%20tempah%20servis%20aircond%20🙏" class="btn-wa-big">
+          <span class="wa-icon">💬</span> WhatsApp Sekarang
+        </a>
+
+        <!-- ⚠️ EDIT NOMBOR TELEFON DI SINI -->
+        <a href="tel:+60XXXXXXXXX" class="btn-phone">
+          📞 +60XX-XXXXXXX
+        </a>
+
+        <div class="hours-box">
+          <div class="hours-title">⏰ Waktu Operasi</div>
+          <div class="hours-row">
+            <span class="day">Isnin – Jumaat</span>
+            <span class="time">8:00am – 6:00pm</span>
+          </div>
+          <div class="hours-row">
+            <span class="day">Sabtu</span>
+            <span class="time">8:00am – 4:00pm</span>
+          </div>
+          <div class="hours-row">
+            <span class="day">Ahad</span>
+            <span class="time">9:00am – 2:00pm</span>
+          </div>
+          <div class="hours-row" style="padding-top:10px;">
+            <span class="day">Kecemasan</span>
+            <span class="time"><span class="open-badge">24/7 Ada</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     FOOTER
+===================== -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="footer-logo-circle">❄️</div>
+        <div class="footer-logo-text">
+          <strong>Aircond Fresh Services</strong>
+          <span>KT0545349-H</span>
+        </div>
+      </div>
+      <p class="footer-tagline">Pakar Servis, Repair & Pemasangan Aircond di Kelantan. Kami komited memberikan servis terbaik dengan harga yang berpatutan dan jujur.</p>
+      <p class="footer-reg">No. Pendaftaran: KT0545349-H · Beroperasi di Kelantan, Malaysia</p>
+      <div class="social-row" style="margin-top:16px;">
+        <a href="https://facebook.com/aircondfreshservices" class="social-btn" title="Facebook">📘</a>
+        <a href="https://wa.me/60XXXXXXXXX" class="social-btn" title="WhatsApp">💬</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="footer-heading">Services</div>
+      <ul class="footer-links">
+        <li><a href="#services">❄️ Aircond Service</a></li>
+        <li><a href="#services">🔧 Aircond Repair</a></li>
+        <li><a href="#services">🔩 Aircond Pasang</a></li>
+        <li><a href="#services">🧪 Gas Top-Up</a></li>
+        <li><a href="#services">⚡ Kerja Elektrik</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="footer-heading">Quick Links</div>
+      <ul class="footer-links">
+        <li><a href="#pricing">💎 Packages & Harga</a></li>
+        <li><a href="#why">🏆 Kenapa Pilih Kami</a></li>
+        <li><a href="#area">📍 Kawasan Coverage</a></li>
+        <li><a href="#testimonials">💬 Testimoni</a></li>
+        <li><a href="#contact">📞 Hubungi Kami</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div>© 2025 Aircond Fresh Services · KT0545349-H · All Rights Reserved</div>
+    <div>Made with ❤️ for Malaysia</div>
+  </div>
+</footer>
+
+<!-- =====================
+     WHATSAPP FAB
+===================== -->
+<!-- ⚠️ EDIT NOMBOR WHATSAPP DI SINI -->
+<a href="https://wa.me/60XXXXXXXXX?text=Salam%20Aircond%20Fresh%20Services%2C%20saya%20nak%20tanya%20pasal%20servis%20aircond%20🙏" class="wa-fab" title="WhatsApp Kami">
+  <div class="wa-fab-tooltip">💬 WhatsApp Kami!</div>
+  💬
+</a>
+
+<!-- =====================
+     JAVASCRIPT
+===================== -->
+<script>
+  // ---- Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // ---- Mobile menu toggle
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+  }
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobileMenu');
+    const hamburger = document.getElementById('hamburger');
+    if (menu.classList.contains('open') && !menu.contains(e.target) && !hamburger.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+
+  // ---- Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(el => observer.observe(el));
+
+  // ---- Smooth hover on service cards
+  document.querySelectorAll('.service-card, .pricing-card, .why-card, .testi-card, .step-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.willChange = 'transform';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.willChange = 'auto';
+    });
+  });
+
+  // ---- Active nav link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current
+        ? 'var(--lime-green)'
+        : '';
+    });
+  });
+</script>
+
+</body>
+</html>

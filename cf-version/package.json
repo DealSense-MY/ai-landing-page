@@ -1,0 +1,23 @@
+{
+  "name": "nexus-landing-engine-cf",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "kv:create-demo": "wrangler kv:namespace create DEMO_STORE",
+    "kv:create-history": "wrangler kv:namespace create HISTORY_STORE",
+    "kv:create-demo-preview": "wrangler kv:namespace create DEMO_STORE --preview",
+    "kv:create-history-preview": "wrangler kv:namespace create HISTORY_STORE --preview",
+    "secret:anthropic": "wrangler secret put ANTHROPIC_API_KEY",
+    "secret:appkey": "wrangler secret put APP_API_KEY"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "nanoid": "^5.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}

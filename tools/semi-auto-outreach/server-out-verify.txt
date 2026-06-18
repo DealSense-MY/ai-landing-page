@@ -1,0 +1,6 @@
+[Migration] 5 record(s) migrated to new schema.
+
+✅ DealSense Approval Sender Lite
+📋 Dashboard: http://localhost:3777
+⚠  Human approval required before any message is sent.
+

@@ -1,0 +1,24 @@
+name = "nexus-landing-engine"
+main = "src/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "DEMO_STORE"
+id = "f02bf14ff77748cba0a0db3402c3b729"
+preview_id = "eab9da8c2a904e698d8cbcdf5c667e60"
+
+[[kv_namespaces]]
+binding = "HISTORY_STORE"
+id = "68191dfff11f454fbbffbcc8a9718c7c"
+preview_id = "af2f989f03c442378c20be09bd503a5d"
+
+[vars]
+# Non-secret env vars. Secrets go via: wrangler secret put ANTHROPIC_API_KEY
+# APP_API_KEY is a secret — do not put it here.
+
+# Workers Sites: serves ./public/ as static assets via env.ASSETS
+# wrangler auto-creates __STATIC_CONTENT KV namespace on first deploy.
+# env.ASSETS.fetch(request) is available in worker.js without manual binding.
+[site]
+bucket = "./public"

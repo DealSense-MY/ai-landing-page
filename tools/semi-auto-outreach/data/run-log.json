@@ -1,0 +1,453 @@
+[
+  {
+    "id": "CTA_APPROVED-1781320470797",
+    "type": "CTA_APPROVED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-13T03:14:30.797Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "messageLength": 42
+    }
+  },
+  {
+    "id": "WHATSAPP_OPENED-1781320481593",
+    "type": "WHATSAPP_OPENED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-13T03:14:41.593Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "via": "wa.me"
+    }
+  },
+  {
+    "id": "SENT_MANUAL_CONFIRMED-1781320481647",
+    "type": "SENT_MANUAL_CONFIRMED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-13T03:14:41.647Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "CTA_APPROVED-1781320751874",
+    "type": "CTA_APPROVED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-13T03:19:11.874Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "messageLength": 639
+    }
+  },
+  {
+    "id": "WHATSAPP_OPENED-1781320751990",
+    "type": "WHATSAPP_OPENED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-13T03:19:11.990Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "via": "wa.me"
+    }
+  },
+  {
+    "id": "CLOSED_WON-1781322154055",
+    "type": "CLOSED_WON",
+    "leadId": "locktest-business-1781322153980",
+    "leadName": "LockTest Business",
+    "timestamp": "2026-06-13T03:42:34.055Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "LOCKED-1781322154056",
+    "type": "LOCKED",
+    "leadId": "locktest-business-1781322153980",
+    "leadName": "LockTest Business",
+    "timestamp": "2026-06-13T03:42:34.055Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "lockReason": "CLOSED_WON"
+    }
+  },
+  {
+    "id": "AMENDMENT_ADDED-1781322169958",
+    "type": "AMENDMENT_ADDED",
+    "leadId": "locktest-business-1781322153980",
+    "leadName": "LockTest Business",
+    "timestamp": "2026-06-13T03:42:49.958Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "amendmentId": "amend-1781322169958",
+      "note": "Correction: manual note added after lock."
+    }
+  },
+  {
+    "id": "LEAD_IMPORTED-1781371204480-0",
+    "type": "LEAD_IMPORTED",
+    "leadId": "test-import-spa-ipoh",
+    "leadName": "Test Import Spa",
+    "timestamp": "2026-06-13T17:20:04.479Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "sourceRunId": "import-1781371204479"
+    }
+  },
+  {
+    "id": "PREVIEW_GENERATED-1781374437097",
+    "type": "PREVIEW_GENERATED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-13T18:13:57.096Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "previewUrl": "/previews/zira-beauty-spa-ipoh/zira-beauty-spa-ipoh-preview.html",
+      "slug": "zira-beauty-spa-ipoh"
+    }
+  },
+  {
+    "id": "CTA_APPROVED-1781421901916",
+    "type": "CTA_APPROVED",
+    "leadId": "test-import-spa-ipoh",
+    "leadName": "Test Import Spa",
+    "timestamp": "2026-06-14T07:25:01.916Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "messageLength": 15
+    }
+  },
+  {
+    "id": "WHATSAPP_OPENED-1781421902002",
+    "type": "WHATSAPP_OPENED",
+    "leadId": "test-import-spa-ipoh",
+    "leadName": "Test Import Spa",
+    "timestamp": "2026-06-14T07:25:02.002Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "via": "wa.me"
+    }
+  },
+  {
+    "id": "CTA_APPROVED-1781427995220",
+    "type": "CTA_APPROVED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-14T09:06:35.220Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "messageLength": 719
+    }
+  },
+  {
+    "id": "WHATSAPP_OPENED-1781427995324",
+    "type": "WHATSAPP_OPENED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-14T09:06:35.324Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "via": "wa.me"
+    }
+  },
+  {
+    "id": "CLOSED_WON-1781463973596",
+    "type": "CLOSED_WON",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-14T19:06:13.596Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "LOCKED-1781463973597",
+    "type": "LOCKED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-14T19:06:13.596Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "lockReason": "CLOSED_WON"
+    }
+  },
+  {
+    "id": "CLOSED_LOST-1781467794566",
+    "type": "CLOSED_LOST",
+    "leadId": "test-import-spa-ipoh",
+    "leadName": "Test Import Spa",
+    "timestamp": "2026-06-14T20:09:54.566Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "LOCKED-1781467794567",
+    "type": "LOCKED",
+    "leadId": "test-import-spa-ipoh",
+    "leadName": "Test Import Spa",
+    "timestamp": "2026-06-14T20:09:54.566Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "lockReason": "CLOSED_LOST"
+    }
+  },
+  {
+    "id": "CLOSED_LOST-1781467827725",
+    "type": "CLOSED_LOST",
+    "leadId": "workflow-test-spa",
+    "leadName": "Workflow Test Spa",
+    "timestamp": "2026-06-14T20:10:27.725Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "LOCKED-1781467827726",
+    "type": "LOCKED",
+    "leadId": "workflow-test-spa",
+    "leadName": "Workflow Test Spa",
+    "timestamp": "2026-06-14T20:10:27.725Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "lockReason": "CLOSED_LOST"
+    }
+  },
+  {
+    "id": "CTA_APPROVED-1781489968395",
+    "type": "CTA_APPROVED",
+    "leadId": "test-1781372145150",
+    "leadName": "test",
+    "timestamp": "2026-06-15T02:19:28.395Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "messageLength": 0
+    }
+  },
+  {
+    "id": "WHATSAPP_OPENED-1781489968502",
+    "type": "WHATSAPP_OPENED",
+    "leadId": "test-1781372145150",
+    "leadName": "test",
+    "timestamp": "2026-06-15T02:19:28.502Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "via": "wa.me"
+    }
+  },
+  {
+    "id": "CLOSED_WON-1781489996395",
+    "type": "CLOSED_WON",
+    "leadId": "test-1781372145150",
+    "leadName": "test",
+    "timestamp": "2026-06-15T02:19:56.395Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "LOCKED-1781489996396",
+    "type": "LOCKED",
+    "leadId": "test-1781372145150",
+    "leadName": "test",
+    "timestamp": "2026-06-15T02:19:56.395Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "lockReason": "CLOSED_WON"
+    }
+  },
+  {
+    "id": "PREVIEW_GENERATED-1781672455137",
+    "type": "PREVIEW_GENERATED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-17T05:00:55.134Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "previewUrl": "/previews/zira-beauty-spa-ipoh/zira-beauty-spa-ipoh-preview.html",
+      "slug": "zira-beauty-spa-ipoh"
+    }
+  },
+  {
+    "id": "PAYMENT_RECEIVED-1781677249960",
+    "type": "PAYMENT_RECEIVED",
+    "leadId": "paytest-klinik-1781677233482",
+    "leadName": "PayTest Klinik",
+    "timestamp": "2026-06-17T06:20:49.960Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "paidAmount": 350,
+      "dealValue": 350,
+      "paymentProofNote": "Test payment confirmed",
+      "paidAt": "2026-06-17T06:20:49.960Z"
+    }
+  },
+  {
+    "id": "AUDIT_UPDATED-1781703673310",
+    "type": "AUDIT_UPDATED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-17T13:41:13.309Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "auditScore": 68,
+      "previewReadinessScore": 90,
+      "priority": "MEDIUM"
+    }
+  },
+  {
+    "id": "AUDIT_UPDATED-1781703702804",
+    "type": "AUDIT_UPDATED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-17T13:41:42.804Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "auditScore": 0,
+      "previewReadinessScore": 90,
+      "priority": "LOW"
+    }
+  },
+  {
+    "id": "AUDIT_UPDATED-1781723109453",
+    "type": "AUDIT_UPDATED",
+    "leadId": "verify-test-clinic-1781722894099",
+    "leadName": "VERIFY_TEST_Clinic",
+    "timestamp": "2026-06-17T19:05:09.453Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "auditScore": 0,
+      "previewReadinessScore": 60,
+      "priority": "LOW"
+    }
+  },
+  {
+    "id": "AUDIT_UPDATED-1781723228887",
+    "type": "AUDIT_UPDATED",
+    "leadId": "verify-test-clinic-1781722894099",
+    "leadName": "VERIFY_TEST_Clinic",
+    "timestamp": "2026-06-17T19:07:08.887Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "auditScore": 72,
+      "previewReadinessScore": 60,
+      "priority": "MEDIUM"
+    }
+  },
+  {
+    "id": "AUDIT_UPDATED-1781724102673",
+    "type": "AUDIT_UPDATED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-17T19:21:42.673Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "auditScore": 99,
+      "previewReadinessScore": 90,
+      "priority": "HIGH"
+    }
+  },
+  {
+    "id": "CTA_APPROVED-1781744201575",
+    "type": "CTA_APPROVED",
+    "leadId": "verify-test-clinic-1781722894099",
+    "leadName": "VERIFY_TEST_Clinic",
+    "timestamp": "2026-06-18T00:56:41.575Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "messageLength": 0
+    }
+  },
+  {
+    "id": "WHATSAPP_OPENED-1781744201670",
+    "type": "WHATSAPP_OPENED",
+    "leadId": "verify-test-clinic-1781722894099",
+    "leadName": "VERIFY_TEST_Clinic",
+    "timestamp": "2026-06-18T00:56:41.670Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "via": "wa.me"
+    }
+  },
+  {
+    "id": "BATCH_PROSPECT_IMPORTED-1781746514357-0",
+    "type": "BATCH_PROSPECT_IMPORTED",
+    "leadId": "import-final-test-clinic-ipoh-1781746514356",
+    "leadName": "Import Final Test Clinic",
+    "timestamp": "2026-06-18T01:35:14.356Z",
+    "source": "operator-import",
+    "actor": "Aliff",
+    "metadata": {
+      "batchId": "batch-1781746514356",
+      "source": "batch-import",
+      "importedAt": "2026-06-18T01:35:14.356Z"
+    }
+  },
+  {
+    "id": "TEST_VIEW-1781746663282",
+    "type": "TEST_VIEW",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-18T01:37:43.282Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {}
+  },
+  {
+    "id": "AMENDMENT_ADDED-1781746663459",
+    "type": "AMENDMENT_ADDED",
+    "leadId": "zira-beauty-spa-ipoh",
+    "leadName": "Zira Beauty Spa",
+    "timestamp": "2026-06-18T01:37:43.459Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "amendmentId": "amend-1781746663459",
+      "note": "Test amendment via curl"
+    }
+  },
+  {
+    "id": "AUDIT_UPDATED-1781746743264",
+    "type": "AUDIT_UPDATED",
+    "leadId": "verify-test-clinic-1781722894099",
+    "leadName": "VERIFY_TEST_Clinic",
+    "timestamp": "2026-06-18T01:39:03.264Z",
+    "source": "operator-ui",
+    "actor": "Aliff",
+    "metadata": {
+      "auditScore": 72,
+      "previewReadinessScore": 75,
+      "priority": "MEDIUM"
+    }
+  }
+]

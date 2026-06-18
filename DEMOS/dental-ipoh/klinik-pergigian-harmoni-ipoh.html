@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Klinik Pergigian Harmoni Ipoh — Rawatan gigi profesional, harga berpatutan, persekitaran selesa di Ipoh, Perak."/>
+<title>Klinik Pergigian Harmoni Ipoh</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+img{max-width:100%;display:block}
+a{text-decoration:none}
+
+/* ── TOKENS ── */
+:root{
+  --white:#FFFFFF;
+  --bg:#F0F9FF;
+  --bg2:#E0F2FE;
+  --surface:#FFFFFF;
+  --primary:#0284C7;
+  --primary-dark:#0369A1;
+  --primary-light:#BAE6FD;
+  --teal:#0D9488;
+  --teal-dark:#0F766E;
+  --accent:#F59E0B;
+  --text:#0F172A;
+  --text-muted:#475569;
+  --text-light:#94A3B8;
+  --border:#CBD5E1;
+  --border-light:#E2E8F0;
+  --wa:#25D366;
+  --wa-dark:#1fbc5b;
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow:0 4px 24px rgba(2,132,199,0.10);
+  --shadow-lg:0 16px 48px rgba(2,132,199,0.15);
+}
+
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  line-height:1.7;
+}
+
+/* ── PROGRESS BAR ── */
+#progress-bar{
+  position:fixed;top:0;left:0;z-index:500;
+  height:3px;width:0%;
+  background:linear-gradient(90deg,var(--primary),var(--teal));
+  transition:width 0.1s linear;
+}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.75s cubic-bezier(0.22,1,0.36,1),transform 0.75s cubic-bezier(0.22,1,0.36,1)}
+.reveal.visible{opacity:1;transform:none}
+.d1{transition-delay:0.08s}.d2{transition-delay:0.18s}.d3{transition-delay:0.28s}.d4{transition-delay:0.38s}
+
+/* ── CONTAINER ── */
+.container{max-width:1140px;margin:0 auto;padding:0 24px}
+
+/* ── SECTION LABEL ── */
+.section-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:0.72rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--primary);margin-bottom:14px;
+}
+.section-label::before{content:'';width:24px;height:2px;background:var(--primary);flex-shrink:0}
+.section-label-c{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:0.72rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--primary);margin-bottom:14px;
+}
+.section-label-c::before,.section-label-c::after{content:'';flex:1;max-width:32px;height:2px;background:var(--primary)}
+
+/* ── SECTION HEADING ── */
+.section-title{font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:800;line-height:1.2;color:var(--text);margin-bottom:12px}
+.section-title span{color:var(--primary)}
+.section-sub{font-size:1rem;color:var(--text-muted);max-width:540px;line-height:1.7}
+.section-sub-c{font-size:1rem;color:var(--text-muted);max-width:540px;line-height:1.7;text-align:center;margin:0 auto}
+
+/* ── BUTTONS ── */
+.btn-wa{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--wa);color:#fff;
+  padding:16px 36px;font-family:inherit;font-size:0.9rem;
+  font-weight:700;letter-spacing:0.04em;
+  border:none;border-radius:50px;cursor:pointer;
+  box-shadow:0 8px 28px rgba(37,211,102,0.3);
+  transition:background 0.3s,transform 0.3s cubic-bezier(0.22,1,0.36,1),box-shadow 0.3s;
+}
+.btn-wa:hover{background:var(--wa-dark);transform:translateY(-3px) scale(1.02);box-shadow:0 18px 44px rgba(37,211,102,0.4)}
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--primary);color:#fff;
+  padding:16px 36px;font-family:inherit;font-size:0.9rem;
+  font-weight:700;letter-spacing:0.04em;
+  border:none;border-radius:50px;cursor:pointer;
+  box-shadow:0 8px 28px rgba(2,132,199,0.3);
+  transition:background 0.3s,transform 0.3s cubic-bezier(0.22,1,0.36,1),box-shadow 0.3s;
+}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-3px) scale(1.02);box-shadow:0 18px 44px rgba(2,132,199,0.4)}
+.btn-outline{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  background:transparent;color:var(--primary);
+  padding:15px 32px;font-family:inherit;font-size:0.88rem;
+  font-weight:600;letter-spacing:0.04em;
+  border:2px solid var(--primary);border-radius:50px;cursor:pointer;
+  transition:all 0.3s ease;
+}
+.btn-outline:hover{background:var(--primary);color:#fff;transform:translateY(-2px)}
+
+/* ══════════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════════ */
+#navbar{
+  position:sticky;top:0;z-index:200;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border-light);
+  padding:0;
+  transition:box-shadow 0.3s;
+}
+#navbar.scrolled{box-shadow:0 4px 24px rgba(2,132,199,0.10)}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:70px;
+}
+.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-logo-icon{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+  box-shadow:0 4px 14px rgba(2,132,199,0.3);
+  flex-shrink:0;
+}
+.nav-logo-text{display:flex;flex-direction:column}
+.nav-logo-name{font-size:1rem;font-weight:800;color:var(--text);line-height:1.1}
+.nav-logo-sub{font-size:0.68rem;color:var(--primary);font-weight:600;letter-spacing:0.05em}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{
+  font-size:0.85rem;font-weight:600;color:var(--text-muted);
+  padding:8px 14px;border-radius:8px;
+  transition:color 0.2s,background 0.2s;
+}
+.nav-links a:hover{color:var(--primary);background:var(--bg2)}
+.nav-cta{
+  background:var(--wa);color:#fff;
+  padding:10px 22px;border-radius:50px;
+  font-size:0.83rem;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 4px 14px rgba(37,211,102,0.3);
+  transition:background 0.2s,transform 0.2s;
+}
+.nav-cta:hover{background:var(--wa-dark);transform:translateY(-1px)}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.nav-hamburger span{width:24px;height:2px;background:var(--text);border-radius:2px;transition:all 0.3s}
+#mobile-menu{
+  display:none;position:absolute;top:70px;left:0;right:0;
+  background:#fff;border-bottom:1px solid var(--border-light);
+  padding:16px 24px;flex-direction:column;gap:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+}
+#mobile-menu.open{display:flex}
+#mobile-menu a{
+  font-size:0.9rem;font-weight:600;color:var(--text-muted);
+  padding:12px 16px;border-radius:10px;
+  transition:color 0.2s,background 0.2s;
+}
+#mobile-menu a:hover{color:var(--primary);background:var(--bg2)}
+#mobile-menu .nav-cta{margin-top:8px;justify-content:center}
+
+/* ══════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════ */
+#hero{
+  background:linear-gradient(135deg,#F0F9FF 0%,#E0F2FE 50%,#BAE6FD 100%);
+  padding:100px 0 80px;
+  position:relative;overflow:hidden;
+}
+#hero::before{
+  content:'';position:absolute;
+  top:-120px;right:-100px;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(2,132,199,0.12) 0%,transparent 70%);
+  border-radius:50%;
+}
+#hero::after{
+  content:'';position:absolute;
+  bottom:-80px;left:-60px;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(13,148,136,0.10) 0%,transparent 70%);
+  border-radius:50%;
+}
+.hero-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;
+  align-items:center;position:relative;z-index:1;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(2,132,199,0.10);
+  border:1px solid rgba(2,132,199,0.2);
+  color:var(--primary);
+  padding:6px 16px;border-radius:50px;
+  font-size:0.78rem;font-weight:700;letter-spacing:0.05em;
+  margin-bottom:20px;
+}
+.hero-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--wa);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero-title{
+  font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;
+  color:var(--text);margin-bottom:20px;
+}
+.hero-title .highlight{
+  color:var(--primary);
+  position:relative;
+}
+.hero-title .highlight::after{
+  content:'';position:absolute;
+  bottom:2px;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary),var(--teal));
+  border-radius:2px;
+}
+.hero-sub{font-size:1.05rem;color:var(--text-muted);margin-bottom:32px;max-width:460px;line-height:1.75}
+.hero-sub-en{font-size:0.88rem;color:var(--text-light);font-style:italic;margin-bottom:36px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px}
+.hero-trust{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.hero-trust-item{display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:600;color:var(--text-muted)}
+.hero-trust-icon{font-size:1.1rem}
+.hero-visual{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--teal) 100%);
+  border-radius:28px;
+  padding:48px 36px;
+  box-shadow:0 24px 64px rgba(2,132,199,0.25);
+  position:relative;
+  overflow:hidden;
+}
+.hero-visual::before{
+  content:'';position:absolute;
+  top:-40px;right:-40px;
+  width:200px;height:200px;
+  background:rgba(255,255,255,0.06);
+  border-radius:50%;
+}
+.hero-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.hero-stat{
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:16px;
+  padding:20px 16px;text-align:center;
+  transition:transform 0.3s;
+}
+.hero-stat:hover{transform:translateY(-4px)}
+.hero-stat-num{font-size:1.9rem;font-weight:800;color:#fff;line-height:1}
+.hero-stat-label{font-size:0.73rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:4px}
+.hero-working{
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:12px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
+}
+.hw-dot{width:9px;height:9px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,0.3);flex-shrink:0}
+.hw-text{font-size:0.82rem;color:rgba(255,255,255,0.85);font-weight:500}
+
+/* ══════════════════════════════════════════════
+   SERVIS
+══════════════════════════════════════════════ */
+#servis{padding:96px 0;background:#fff}
+.servis-header{text-align:center;margin-bottom:60px}
+.servis-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+.servis-card{
+  background:var(--bg);
+  border:1px solid var(--border-light);
+  border-radius:var(--radius);
+  padding:32px 28px;
+  transition:transform 0.3s cubic-bezier(0.22,1,0.36,1),box-shadow 0.3s,border-color 0.3s;
+  position:relative;overflow:hidden;
+  cursor:default;
+}
+.servis-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary),var(--teal));
+  opacity:0;transition:opacity 0.3s;
+}
+.servis-card:hover{
+  transform:translateY(-6px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--primary-light);
+}
+.servis-card:hover::before{opacity:1}
+.servis-icon{
+  width:56px;height:56px;border-radius:14px;
+  background:linear-gradient(135deg,var(--bg2),var(--primary-light));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;margin-bottom:20px;
+  transition:transform 0.3s;
+}
+.servis-card:hover .servis-icon{transform:scale(1.1) rotate(-3deg)}
+.servis-name{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:8px}
+.servis-name-en{font-size:0.78rem;color:var(--text-light);font-weight:500;font-style:italic;margin-bottom:12px}
+.servis-desc{font-size:0.88rem;color:var(--text-muted);line-height:1.65}
+.servis-price{
+  display:inline-block;
+  background:rgba(2,132,199,0.08);
+  color:var(--primary);
+  padding:4px 12px;border-radius:50px;
+  font-size:0.76rem;font-weight:700;
+  margin-top:14px;
+}
+
+/* ══════════════════════════════════════════════
+   KENAPA PILIH KAMI
+══════════════════════════════════════════════ */
+#kenapa{
+  padding:96px 0;
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 40%,var(--teal) 100%);
+  position:relative;overflow:hidden;
+}
+#kenapa::before{
+  content:'';position:absolute;
+  top:-100px;right:-100px;
+  width:500px;height:500px;
+  background:rgba(255,255,255,0.05);
+  border-radius:50%;
+}
+.kenapa-header{text-align:center;margin-bottom:56px;position:relative;z-index:1}
+.kenapa-header .section-label-c{color:rgba(255,255,255,0.7)}
+.kenapa-header .section-label-c::before,.kenapa-header .section-label-c::after{background:rgba(255,255,255,0.4)}
+.kenapa-header .section-title{color:#fff}
+.kenapa-header .section-sub-c{color:rgba(255,255,255,0.75)}
+.kenapa-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:24px;
+  position:relative;z-index:1;
+}
+.kenapa-card{
+  background:rgba(255,255,255,0.10);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:var(--radius);
+  padding:32px 28px;
+  display:flex;gap:20px;
+  transition:background 0.3s,transform 0.3s;
+}
+.kenapa-card:hover{background:rgba(255,255,255,0.16);transform:translateY(-4px)}
+.kenapa-num{
+  width:48px;height:48px;border-radius:12px;
+  background:rgba(255,255,255,0.15);
+  border:1px solid rgba(255,255,255,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;
+}
+.kenapa-body{}
+.kenapa-title{font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:6px}
+.kenapa-desc{font-size:0.87rem;color:rgba(255,255,255,0.73);line-height:1.65}
+
+/* ══════════════════════════════════════════════
+   TESTIMONIAL
+══════════════════════════════════════════════ */
+#testimonial{padding:96px 0;background:var(--bg)}
+.testimonial-header{text-align:center;margin-bottom:60px}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.testi-card{
+  background:#fff;
+  border:1px solid var(--border-light);
+  border-radius:var(--radius);
+  padding:32px 28px;
+  position:relative;
+  transition:transform 0.3s,box-shadow 0.3s;
+}
+.testi-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.testi-quote{
+  font-size:3rem;line-height:1;
+  color:var(--primary-light);
+  font-weight:800;
+  margin-bottom:8px;
+}
+.testi-text{font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:24px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:14px}
+.testi-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:700;color:#fff;flex-shrink:0;
+}
+.testi-name{font-size:0.9rem;font-weight:700;color:var(--text)}
+.testi-meta{font-size:0.76rem;color:var(--text-light);margin-top:2px}
+.testi-stars{
+  display:flex;gap:3px;margin-bottom:16px;
+  font-size:1rem;color:var(--accent);
+}
+
+/* ══════════════════════════════════════════════
+   GOOGLE MAP
+══════════════════════════════════════════════ */
+#lokasi{padding:96px 0;background:#fff}
+.lokasi-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.lokasi-info{}
+.lokasi-details{margin-top:32px;display:flex;flex-direction:column;gap:18px}
+.lokasi-item{display:flex;align-items:flex-start;gap:14px}
+.lokasi-icon{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.lokasi-label{font-size:0.75rem;font-weight:700;color:var(--primary);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:2px}
+.lokasi-value{font-size:0.92rem;color:var(--text-muted);line-height:1.5}
+.map-wrap{
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-lg);
+  border:1px solid var(--border-light);
+}
+.map-wrap iframe{display:block;width:100%;height:380px;border:none}
+
+/* ══════════════════════════════════════════════
+   FAQ
+══════════════════════════════════════════════ */
+#faq{padding:96px 0;background:var(--bg)}
+.faq-header{text-align:center;margin-bottom:56px}
+.faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{
+  background:#fff;
+  border:1px solid var(--border-light);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  transition:box-shadow 0.2s,border-color 0.2s;
+}
+.faq-item.open{border-color:var(--primary-light);box-shadow:0 4px 16px rgba(2,132,199,0.10)}
+.faq-q{
+  width:100%;background:none;border:none;
+  padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  text-align:left;cursor:pointer;
+  font-family:inherit;font-size:0.97rem;font-weight:600;color:var(--text);
+  transition:color 0.2s;
+}
+.faq-item.open .faq-q{color:var(--primary)}
+.faq-icon{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:var(--primary);
+  transition:transform 0.3s,background 0.2s;
+}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--primary);color:#fff}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.4s cubic-bezier(0.22,1,0.36,1),padding 0.3s;
+  font-size:0.9rem;color:var(--text-muted);line-height:1.75;
+  padding:0 24px;
+}
+.faq-item.open .faq-a{max-height:300px;padding:0 24px 20px}
+.faq-lang{font-size:0.78rem;color:var(--text-light);font-style:italic;margin-top:6px}
+
+/* ══════════════════════════════════════════════
+   FINAL CTA
+══════════════════════════════════════════════ */
+#cta-final{
+  padding:96px 0;
+  background:linear-gradient(135deg,var(--primary) 0%,var(--teal) 100%);
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+#cta-final::before{
+  content:'';position:absolute;
+  top:-80px;left:50%;transform:translateX(-50%);
+  width:700px;height:400px;
+  background:rgba(255,255,255,0.05);
+  border-radius:50%;
+}
+.cta-final-inner{position:relative;z-index:1}
+.cta-final-inner .section-label-c{color:rgba(255,255,255,0.7)}
+.cta-final-inner .section-label-c::before,.cta-final-inner .section-label-c::after{background:rgba(255,255,255,0.4)}
+.cta-final-inner h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;margin-bottom:14px}
+.cta-final-inner p{font-size:1.05rem;color:rgba(255,255,255,0.78);max-width:480px;margin:0 auto 36px;line-height:1.7}
+.cta-final-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-wa-lg{
+  display:inline-flex;align-items:center;gap:12px;
+  background:var(--wa);color:#fff;
+  padding:18px 42px;font-family:inherit;font-size:1rem;
+  font-weight:700;border-radius:50px;
+  box-shadow:0 8px 32px rgba(37,211,102,0.4);
+  transition:background 0.3s,transform 0.3s,box-shadow 0.3s;
+}
+.btn-wa-lg:hover{background:var(--wa-dark);transform:translateY(-3px);box-shadow:0 18px 48px rgba(37,211,102,0.5)}
+.btn-outline-white{
+  display:inline-flex;align-items:center;gap:9px;
+  background:transparent;color:#fff;
+  padding:17px 36px;font-family:inherit;font-size:0.9rem;
+  font-weight:700;border-radius:50px;
+  border:2px solid rgba(255,255,255,0.5);
+  transition:all 0.3s;
+}
+.btn-outline-white:hover{background:rgba(255,255,255,0.12);border-color:#fff}
+
+/* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
+footer{
+  background:#0F172A;
+  color:rgba(255,255,255,0.65);
+  padding:48px 0 32px;
+}
+.footer-grid{
+  display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px;
+}
+.footer-brand{}
+.footer-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.footer-logo-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;
+}
+.footer-logo-name{font-size:1rem;font-weight:700;color:#fff}
+.footer-desc{font-size:0.85rem;line-height:1.7;max-width:280px;margin-bottom:20px}
+.footer-contact-item{display:flex;align-items:center;gap:10px;font-size:0.83rem;margin-bottom:8px}
+.footer-contact-item span{color:var(--primary)}
+.footer-col-title{font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:18px}
+.footer-links{display:flex;flex-direction:column;gap:10px}
+.footer-links a{font-size:0.85rem;color:rgba(255,255,255,0.6);transition:color 0.2s}
+.footer-links a:hover{color:#fff}
+.footer-bottom{
+  border-top:1px solid rgba(255,255,255,0.08);
+  padding-top:24px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.footer-copy{font-size:0.78rem;color:rgba(255,255,255,0.35)}
+.footer-badge{
+  font-size:0.72rem;color:rgba(255,255,255,0.35);
+  display:flex;align-items:center;gap:6px;
+}
+
+/* ══════════════════════════════════════════════
+   FLOATING WA BUTTON
+══════════════════════════════════════════════ */
+#float-wa{
+  position:fixed;bottom:88px;right:24px;z-index:300;
+  width:58px;height:58px;border-radius:50%;
+  background:var(--wa);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 28px rgba(37,211,102,0.45);
+  font-size:1.6rem;
+  transition:transform 0.3s,box-shadow 0.3s;
+  cursor:pointer;
+}
+#float-wa:hover{transform:scale(1.12);box-shadow:0 16px 40px rgba(37,211,102,0.55)}
+.float-wa-pulse{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(37,211,102,0.3);
+  animation:wapulse 2.5s ease-out infinite;
+}
+@keyframes wapulse{0%{transform:scale(1);opacity:0.8}100%{transform:scale(1.7);opacity:0}}
+#float-wa-tooltip{
+  position:fixed;bottom:107px;right:90px;z-index:299;
+  background:#0F172A;color:#fff;
+  font-size:0.78rem;font-weight:600;
+  padding:8px 14px;border-radius:8px;
+  white-space:nowrap;
+  opacity:0;transform:translateX(8px);
+  transition:opacity 0.3s,transform 0.3s;
+  pointer-events:none;
+}
+#float-wa:hover + #float-wa-tooltip,#float-wa-tooltip.show{opacity:1;transform:translateX(0)}
+
+/* ══════════════════════════════════════════════
+   STICKY BOTTOM CTA
+══════════════════════════════════════════════ */
+#sticky-cta{
+  position:fixed;bottom:0;left:0;right:0;z-index:250;
+  background:rgba(15,23,42,0.96);backdrop-filter:blur(12px);
+  padding:12px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  transform:translateY(100%);
+  transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 -4px 24px rgba(0,0,0,0.3);
+}
+#sticky-cta.show{transform:translateY(0)}
+.sct-text{flex:1}
+.sct-text strong{font-size:0.95rem;font-weight:700;color:#fff;display:block}
+.sct-text span{font-size:0.78rem;color:rgba(255,255,255,0.55)}
+.sct-btn{
+  flex-shrink:0;
+  background:var(--wa);color:#fff;
+  padding:11px 24px;border-radius:50px;
+  font-size:0.82rem;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+  white-space:nowrap;
+  box-shadow:0 4px 14px rgba(37,211,102,0.35);
+  transition:background 0.2s,transform 0.2s;
+}
+.sct-btn:hover{background:var(--wa-dark);transform:translateY(-1px)}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media(max-width:1024px){
+  .hero-grid{gap:40px}
+  .servis-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .footer-brand{grid-column:1/-1}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-hamburger{display:flex}
+  #navbar{position:sticky}
+
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .hero-visual{order:-1}
+  .hero-stats-grid{grid-template-columns:repeat(4,1fr)}
+  .hero-title{font-size:2rem}
+  .hero-btns{flex-direction:column}
+  .hero-btns .btn-wa,.hero-btns .btn-outline{width:100%;max-width:360px}
+
+  .servis-grid{grid-template-columns:1fr}
+  .kenapa-grid{grid-template-columns:1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .lokasi-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-brand{grid-column:auto}
+  .footer-bottom{flex-direction:column;text-align:center}
+
+  .cta-final-btns{flex-direction:column;align-items:center}
+  .btn-wa-lg,.btn-outline-white{width:100%;max-width:360px;justify-content:center}
+
+  .sct-text span{display:none}
+  #sticky-cta{padding:10px 16px}
+
+  #float-wa{bottom:76px;right:16px;width:52px;height:52px}
+}
+@media(max-width:480px){
+  .hero-stats-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-trust{flex-direction:column;align-items:flex-start;gap:10px}
+  .hero-badge{font-size:0.72rem}
+  .kenapa-card{flex-direction:column;gap:14px}
+  .kenapa-num{width:42px;height:42px}
+}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-icon">🦷</div>
+        <div class="nav-logo-text">
+          <div class="nav-logo-name">Harmoni Dental</div>
+          <div class="nav-logo-sub">Klinik Pergigian Ipoh</div>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="#servis">Servis</a>
+        <a href="#kenapa">Tentang Kami</a>
+        <a href="#testimonial">Ulasan</a>
+        <a href="#lokasi">Lokasi</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <a href="https://wa.me/601XXXXXXXX?text=Saya%20ingin%20buat%20temujanji" class="nav-cta" target="_blank" rel="noopener">
+        💬 Temujanji
+      </a>
+      <div class="nav-hamburger" id="hamburger" role="button" aria-label="Menu" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+  <div id="mobile-menu">
+    <a href="#servis">Servis</a>
+    <a href="#kenapa">Tentang Kami</a>
+    <a href="#testimonial">Ulasan</a>
+    <a href="#lokasi">Lokasi</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://wa.me/601XXXXXXXX" class="nav-cta" target="_blank" rel="noopener">💬 Buat Temujanji</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Menerima Pesakit Baru Sekarang
+        </div>
+        <h1 class="hero-title reveal">
+          Senyum Lebih Cerah,<br>
+          <span class="highlight">Rawatan Lebih Selesa</span>
+        </h1>
+        <p class="hero-sub reveal d1">
+          Klinik Pergigian Harmoni Ipoh — tempat di mana kesihatan gigi anda diutamakan dengan sentuhan profesional dan persekitaran yang mesra.
+        </p>
+        <p class="hero-sub-en reveal d2">
+          <em>Professional dental care in Ipoh, Perak — gentle, modern & affordable.</em>
+        </p>
+        <div class="hero-btns reveal d2">
+          <a href="https://wa.me/601XXXXXXXX?text=Saya%20ingin%20buat%20temujanji%20di%20Klinik%20Pergigian%20Harmoni" class="btn-wa" target="_blank" rel="noopener">
+            💬 Buat Temujanji via WhatsApp
+          </a>
+          <a href="#servis" class="btn-outline">
+            Lihat Servis Kami
+          </a>
+        </div>
+        <div class="hero-trust reveal d3">
+          <div class="hero-trust-item">
+            <span class="hero-trust-icon">✅</span>
+            Doktor Bertauliah
+          </div>
+          <div class="hero-trust-item">
+            <span class="hero-trust-icon">🏥</span>
+            Peralatan Moden
+          </div>
+          <div class="hero-trust-item">
+            <span class="hero-trust-icon">💳</span>
+            Harga Berpatutan
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal d1">
+        <div class="hero-stats-grid">
+          <div class="hero-stat">
+            <div class="hero-stat-num">12+</div>
+            <div class="hero-stat-label">Tahun<br>Pengalaman</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">5K+</div>
+            <div class="hero-stat-label">Pesakit<br>Berpuas Hati</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">5</div>
+            <div class="hero-stat-label">Jenis<br>Rawatan</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">⭐ 4.9</div>
+            <div class="hero-stat-label">Rating<br>Google</div>
+          </div>
+        </div>
+        <div class="hero-working">
+          <div class="hw-dot"></div>
+          <div class="hw-text">
+            <strong style="color:#fff;display:block;font-size:0.87rem;">Waktu Operasi:</strong>
+            Isnin–Sabtu: 9am – 7pm &nbsp;|&nbsp; Ahad: 9am – 2pm
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ SERVIS ══ -->
+<section id="servis">
+  <div class="container">
+    <div class="servis-header reveal">
+      <div class="section-label-c">Perkhidmatan Kami</div>
+      <h2 class="section-title" style="text-align:center">Rawatan Lengkap <span>Untuk Sekeluarga</span></h2>
+      <p class="section-sub-c" style="margin-top:10px">Kami menyediakan pelbagai rawatan pergigian — dari pembersihan rutin hingga rawatan estetik. <em>Complete dental treatments for the whole family.</em></p>
+    </div>
+    <div class="servis-grid">
+
+      <div class="servis-card reveal">
+        <div class="servis-icon">🪥</div>
+        <div class="servis-name">Pembersihan & Scaling</div>
+        <div class="servis-name-en">Teeth Cleaning & Scaling</div>
+        <div class="servis-desc">Buang karang gigi, bau mulut, dan plak dengan ultrasonic scaler moden. Disyorkan setiap 6 bulan sekali untuk kesihatan gusi yang optimum.</div>
+        <span class="servis-price">Mulai RM 80</span>
+      </div>
+
+      <div class="servis-card reveal d1">
+        <div class="servis-icon">🦷</div>
+        <div class="servis-name">Cabut Gigi</div>
+        <div class="servis-name-en">Tooth Extraction</div>
+        <div class="servis-desc">Prosedur pencabutan gigi dengan teknik minimally invasive — lebih cepat, lebih selesa, dan pemulihan lebih pantas tanpa rasa sakit berlebihan.</div>
+        <span class="servis-price">Mulai RM 50</span>
+      </div>
+
+      <div class="servis-card reveal d2">
+        <div class="servis-icon">🔬</div>
+        <div class="servis-name">Tampalan Gigi</div>
+        <div class="servis-name-en">Dental Filling</div>
+        <div class="servis-desc">Tampalan komposit warna gigi — tampak semula jadi, kuat dan tahan lama. Sesuai untuk gigi berlubang pada tahap awal hingga sederhana.</div>
+        <span class="servis-price">Mulai RM 100</span>
+      </div>
+
+      <div class="servis-card reveal">
+        <div class="servis-icon">✨</div>
+        <div class="servis-name">Pemutihan Gigi</div>
+        <div class="servis-name-en">Teeth Whitening</div>
+        <div class="servis-desc">Rawatan pemutihan gigi profesional dengan teknologi terkini — hasil lebih putih sehingga 8 tos dalam masa 1 sesi. Selamat dan berkesan.</div>
+        <span class="servis-price">Mulai RM 350</span>
+      </div>
+
+      <div class="servis-card reveal d1" style="grid-column:span 2">
+        <div class="servis-icon">😁</div>
+        <div class="servis-name">Orthodontik (Pendakap Gigi)</div>
+        <div class="servis-name-en">Orthodontic / Braces</div>
+        <div class="servis-desc">Pendakap gigi konvensional dan clear aligner — betulkan susunan gigi dan gigitan untuk senyuman yang lebih kemas dan yakin. Pelan bayaran tersedia untuk memudahkan rawatan jangka panjang anda bersama kami.</div>
+        <span class="servis-price">Mulai RM 3,500</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ KENAPA PILIH KAMI ══ -->
+<section id="kenapa">
+  <div class="container">
+    <div class="kenapa-header reveal">
+      <div class="section-label-c">Kelebihan Kami</div>
+      <h2 class="section-title">Kenapa Pilih <span style="color:rgba(255,255,255,0.9)">Harmoni Dental?</span></h2>
+      <p class="section-sub-c">Kami bukan sekadar klinik — kami adalah rakan kesihatan gigi anda yang boleh dipercayai.</p>
+    </div>
+    <div class="kenapa-grid">
+
+      <div class="kenapa-card reveal">
+        <div class="kenapa-num">👨‍⚕️</div>
+        <div class="kenapa-body">
+          <div class="kenapa-title">Doktor Berpengalaman & Bertauliah</div>
+          <div class="kenapa-desc">Pasukan doktor kami berkelayakan dengan pengalaman lebih 10 tahun dalam pelbagai bidang pergigian — dari rawatan umum hingga estetik. <em>Experienced & certified dental professionals.</em></div>
+        </div>
+      </div>
+
+      <div class="kenapa-card reveal d1">
+        <div class="kenapa-num">🔬</div>
+        <div class="kenapa-body">
+          <div class="kenapa-title">Peralatan & Teknologi Moden</div>
+          <div class="kenapa-desc">Kami menggunakan peralatan terkini termasuk digital X-ray, ultrasonic scaler, dan LED whitening system untuk rawatan yang lebih tepat dan selamat. <em>Modern equipment for precise & safe treatment.</em></div>
+        </div>
+      </div>
+
+      <div class="kenapa-card reveal d2">
+        <div class="kenapa-num">💰</div>
+        <div class="kenapa-body">
+          <div class="kenapa-title">Harga Berpatutan & Telus</div>
+          <div class="kenapa-desc">Tiada caj tersembunyi. Kami percaya rawatan berkualiti patut mampu dimiliki semua orang. Pelan bayaran ansuran tersedia untuk rawatan besar. <em>Transparent pricing, no hidden fees.</em></div>
+        </div>
+      </div>
+
+      <div class="kenapa-card reveal d3">
+        <div class="kenapa-num">🏥</div>
+        <div class="kenapa-body">
+          <div class="kenapa-title">Persekitaran Selesa & Mesra</div>
+          <div class="kenapa-desc">Klinik kami direka untuk menjadikan anda selesa dari saat masuk — bilik tunggu yang nyaman, staf yang mesra, dan suasana yang menenangkan. <em>A warm, comfortable & welcoming environment.</em></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIAL ══ -->
+<section id="testimonial">
+  <div class="container">
+    <div class="testimonial-header reveal">
+      <div class="section-label-c">Ulasan Pesakit</div>
+      <h2 class="section-title" style="text-align:center">Apa Kata <span>Pesakit Kami</span></h2>
+      <p class="section-sub-c" style="margin-top:10px">Kepuasan pesakit adalah keutamaan kami. <em>Our patients' satisfaction is our priority.</em></p>
+    </div>
+    <div class="testi-grid">
+
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <div class="testi-text">Saya sangat berpuas hati dengan rawatan scaling di sini. Doktor sangat sabar menerangkan setiap prosedur. Persekitaran klinik pun bersih dan selesa. Memang akan datang balik!</div>
+        <div class="testi-author">
+          <div class="testi-avatar">NK</div>
+          <div>
+            <div class="testi-name">Nor Kamala bt. Rashid</div>
+            <div class="testi-meta">Rawatan Scaling · Ipoh Timur</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card reveal d1">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <div class="testi-text">I was really nervous about getting braces but the dentist here made me feel so at ease. The process was explained clearly in both BM and English. 6 months in and I can already see amazing results!</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#0D9488,#0284C7)">AK</div>
+          <div>
+            <div class="testi-name">Ahmad Khairul bin Suhaimi</div>
+            <div class="testi-meta">Orthodontic Treatment · Menglembu</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card reveal d2">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <div class="testi-text">Bawa anak-anak saya untuk cabut gigi susu, mereka takut pada mulanya. Tapi doktor dan staf sangat pandai pujuk budak-budak. Sekarang anak saya dah tak takut pergi klinik gigi dah!</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#7C3AED,#0D9488)">LH</div>
+          <div>
+            <div class="testi-name">Lim Hui Ying</div>
+            <div class="testi-meta">Pencabutan Gigi Kanak-kanak · Buntong</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ LOKASI / MAP ══ -->
+<section id="lokasi">
+  <div class="container">
+    <div class="lokasi-grid">
+
+      <div class="lokasi-info reveal">
+        <div class="section-label">Lokasi Kami</div>
+        <h2 class="section-title">Mudah Dicapai di<br><span>Ipoh, Perak</span></h2>
+        <p class="section-sub" style="margin-top:10px">Terletak di lokasi strategik di Ipoh — mudah diakses dengan kenderaan awam dan mempunyai tempat letak kereta yang selesa.</p>
+        <div class="lokasi-details">
+          <div class="lokasi-item">
+            <div class="lokasi-icon">📍</div>
+            <div>
+              <div class="lokasi-label">Alamat</div>
+              <div class="lokasi-value">Klinik Pergigian Harmoni,<br>No. XX, Jalan [Nama Jalan],<br>30XXX Ipoh, Perak</div>
+            </div>
+          </div>
+          <div class="lokasi-item">
+            <div class="lokasi-icon">📞</div>
+            <div>
+              <div class="lokasi-label">Telefon / WhatsApp</div>
+              <div class="lokasi-value">601X-XXXXXXX</div>
+            </div>
+          </div>
+          <div class="lokasi-item">
+            <div class="lokasi-icon">🕐</div>
+            <div>
+              <div class="lokasi-label">Waktu Operasi</div>
+              <div class="lokasi-value">Isnin – Sabtu: 9:00am – 7:00pm<br>Ahad: 9:00am – 2:00pm<br>Cuti Umum: Ditutup</div>
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <a href="https://wa.me/601XXXXXXXX" class="btn-wa" target="_blank" rel="noopener">
+              💬 Hubungi Kami
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-wrap reveal d1">
+        <iframe
+          src="https://maps.google.com/maps?q=Ipoh+Perak+Malaysia&output=embed&z=14"
+          allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Lokasi Klinik Pergigian Harmoni Ipoh">
+        </iframe>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section id="faq">
+  <div class="container">
+    <div class="faq-header reveal">
+      <div class="section-label-c">Soalan Lazim</div>
+      <h2 class="section-title" style="text-align:center">Ada <span>Soalan?</span></h2>
+      <p class="section-sub-c" style="margin-top:10px">Jawapan kepada soalan yang sering ditanya tentang rawatan kami. <em>Answers to your frequently asked dental questions.</em></p>
+    </div>
+    <div class="faq-list">
+
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          Berapa kerap saya perlu buat scaling gigi?
+          <div class="faq-icon">+</div>
+        </button>
+        <div class="faq-a">
+          Adalah disyorkan untuk membuat scaling setiap <strong>6 bulan sekali</strong> untuk mengekalkan kesihatan gusi dan gigi. Walau bagaimanapun, bagi mereka yang mempunyai masalah gusi tertentu, doktor mungkin mengesyorkan lebih kerap.
+          <div class="faq-lang"><em>How often should I get scaling? Every 6 months is recommended for optimal gum health.</em></div>
+        </div>
+      </div>
+
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          Adakah rawatan pemutihan gigi selamat?
+          <div class="faq-icon">+</div>
+        </button>
+        <div class="faq-a">
+          Ya, rawatan teeth whitening yang dilakukan di klinik adalah <strong>selamat sepenuhnya</strong> apabila dilakukan oleh doktor bertauliah. Kami menggunakan bahan yang diluluskan dan dipantau sepanjang prosedur. Mungkin ada sedikit sensitiviti sementara selepas rawatan — ini adalah normal.
+          <div class="faq-lang"><em>Is teeth whitening safe? Yes, when done by a qualified dentist with approved materials.</em></div>
+        </div>
+      </div>
+
+      <div class="faq-item reveal d2">
+        <button class="faq-q">
+          Adakah saya boleh buat temujanji melalui WhatsApp?
+          <div class="faq-icon">+</div>
+        </button>
+        <div class="faq-a">
+          Ya! Kami menggalakkan temujanji melalui <strong>WhatsApp</strong> untuk kemudahan anda. Hanya hantar mesej dengan nama, nombor telefon, dan jenis rawatan yang dikehendaki. Staf kami akan balas dalam masa 1 jam waktu operasi.
+          <div class="faq-lang"><em>Can I book via WhatsApp? Yes! Send us your name, number, and required treatment.</em></div>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          Berapa lama rawatan pendakap gigi (braces)?
+          <div class="faq-icon">+</div>
+        </button>
+        <div class="faq-a">
+          Tempoh rawatan orthodontik bergantung pada tahap keterukan kes. Secara purata, rawatan memakan masa antara <strong>18 hingga 24 bulan</strong>. Konsultasi percuma tersedia untuk penilaian awal sebelum anda membuat keputusan.
+          <div class="faq-lang"><em>How long does braces treatment take? Usually 18–24 months, depending on severity.</em></div>
+        </div>
+      </div>
+
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          Adakah klinik menerima kad MyKad / Insurans?
+          <div class="faq-icon">+</div>
+        </button>
+        <div class="faq-a">
+          Kami menerima <strong>bayaran tunai, kad kredit/debit, dan DuitNow</strong>. Untuk insurans, sila hubungi kami terlebih dahulu untuk semak sama ada insurans anda layak. Kami juga menawarkan pelan bayaran ansuran tanpa faedah untuk rawatan tertentu.
+          <div class="faq-lang"><em>Payment: cash, card, DuitNow accepted. Insurance coverage — please contact us to verify.</em></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ FINAL CTA ══ -->
+<section id="cta-final">
+  <div class="container">
+    <div class="cta-final-inner reveal">
+      <div class="section-label-c">Jangan Tangguh Lagi</div>
+      <h2>Gigi Sihat, Senyum Lebih Yakin 😁</h2>
+      <p>Hubungi kami hari ini untuk temujanji atau sebarang pertanyaan. Kami sedia membantu! <em>Book your appointment today — we're here for you.</em></p>
+      <div class="cta-final-btns">
+        <a href="https://wa.me/601XXXXXXXX?text=Saya%20ingin%20buat%20temujanji%20di%20Klinik%20Pergigian%20Harmoni%20Ipoh" class="btn-wa-lg" target="_blank" rel="noopener">
+          💬 WhatsApp Sekarang
+        </a>
+        <a href="tel:601XXXXXXXX" class="btn-outline-white">
+          📞 Hubungi Terus
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon">🦷</div>
+          <div class="footer-logo-name">Klinik Pergigian Harmoni Ipoh</div>
+        </div>
+        <div class="footer-desc">Rawatan pergigian profesional, persekitaran selesa, harga berpatutan. Kepercayaan anda adalah tanggungjawab kami sejak 2012.</div>
+        <div class="footer-contact-item"><span>📍</span> No. XX, Jalan [Nama Jalan], 30XXX Ipoh, Perak</div>
+        <div class="footer-contact-item"><span>📞</span> 601X-XXXXXXX</div>
+        <div class="footer-contact-item"><span>✉️</span> harmoni.dental@gmail.com</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Servis</div>
+        <div class="footer-links">
+          <a href="#servis">Scaling & Pembersihan</a>
+          <a href="#servis">Cabut Gigi</a>
+          <a href="#servis">Tampalan</a>
+          <a href="#servis">Pemutihan Gigi</a>
+          <a href="#servis">Orthodontik</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Info</div>
+        <div class="footer-links">
+          <a href="#kenapa">Tentang Kami</a>
+          <a href="#testimonial">Ulasan Pesakit</a>
+          <a href="#lokasi">Cara ke Sini</a>
+          <a href="#faq">Soalan Lazim</a>
+          <a href="https://wa.me/601XXXXXXXX">Hubungi Kami</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Klinik Pergigian Harmoni Ipoh. Hak cipta terpelihara.</div>
+      <div class="footer-badge">🦷 Profesional · Amanah · Berpatutan</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ FLOATING WA ══ -->
+<a href="https://wa.me/601XXXXXXXX?text=Saya%20ingin%20bertanya%20tentang%20rawatan%20di%20Klinik%20Pergigian%20Harmoni" id="float-wa" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <div class="float-wa-pulse"></div>
+  💬
+</a>
+<div id="float-wa-tooltip">WhatsApp Kami!</div>
+
+<!-- ══ STICKY CTA ══ -->
+<div id="sticky-cta">
+  <div class="sct-text">
+    <strong>Klinik Pergigian Harmoni Ipoh</strong>
+    <span>Isnin–Sabtu: 9am–7pm · Ahad: 9am–2pm</span>
+  </div>
+  <a href="https://wa.me/601XXXXXXXX?text=Saya%20ingin%20buat%20temujanji" class="sct-btn" target="_blank" rel="noopener">
+    💬 Buat Temujanji
+  </a>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+// Progress bar
+const progressBar = document.getElementById('progress-bar');
+function updateProgress() {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  progressBar.style.width = pct + '%';
+}
+
+// Reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => revealObs.observe(el));
+
+// Navbar scroll state
+const navbar = document.getElementById('navbar');
+function updateNav() {
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+}
+
+// Sticky CTA
+const stickyCta = document.getElementById('sticky-cta');
+function updateStickyCtA() {
+  stickyCta.classList.toggle('show', window.scrollY > 500);
+}
+
+// Scroll handler
+window.addEventListener('scroll', () => {
+  updateProgress();
+  updateNav();
+  updateStickyCtA();
+}, { passive: true });
+
+// Mobile menu
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  mobileMenu.classList.toggle('open');
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => mobileMenu.classList.remove('open'));
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+// Smooth nav links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      const offset = 76;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  });
+});
+
+// Floating WA tooltip
+const floatWa = document.getElementById('float-wa');
+const tooltip = document.getElementById('float-wa-tooltip');
+floatWa.addEventListener('mouseenter', () => tooltip.classList.add('show'));
+floatWa.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+</script>
+</body>
+</html>

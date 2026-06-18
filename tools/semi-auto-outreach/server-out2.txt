@@ -1,0 +1,5 @@
+
+✅ DealSense Approval Sender Lite
+📋 Dashboard: http://localhost:3777
+⚠  Human approval required before any message is sent.
+

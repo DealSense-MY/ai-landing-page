@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aurelia Glow — Luxury Skincare for Malaysian Women</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F9F7F4; --primary: #EADFD8; --accent: #C6A769; --accent-dark: #B8964F;
+  --text: #2B2B2B; --text-muted: #7A7167; --white: #FFFFFF; --dark: #1E1C1A;
+  --border: rgba(198,167,105,0.22); --border-light: rgba(198,167,105,0.14);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.7; }
+h1,h2,h3,h4 { font-family: 'Playfair Display', serif; line-height: 1.2; letter-spacing: -0.01em; }
+img { max-width: 100%; display: block; }
+a { text-decoration: none; }
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.85s cubic-bezier(0.22,1,0.36,1), transform 0.85s cubic-bezier(0.22,1,0.36,1); }
+.reveal.visible { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; }
+.d3 { transition-delay: 0.32s; } .d4 { transition-delay: 0.44s; }
+
+/* BUTTONS — PRIMARY = WhatsApp green, SECONDARY = gold */
+.btn-wa {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: #25D366; color: var(--white);
+  padding: 17px 40px; font-family: 'Lato', sans-serif; font-size: 0.82rem;
+  font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 28px rgba(37,211,102,0.26);
+  transition: background 0.3s, transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s;
+}
+.btn-wa:hover { background: #1fbc5b; transform: translateY(-3px) scale(1.015); box-shadow: 0 18px 44px rgba(37,211,102,0.38); }
+.btn-gold {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  background: var(--accent); color: var(--white);
+  padding: 17px 36px; font-family: 'Lato', sans-serif; font-size: 0.82rem;
+  font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 28px rgba(198,167,105,0.26);
+  transition: background 0.3s, transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s;
+}
+.btn-gold:hover { background: var(--accent-dark); transform: translateY(-3px) scale(1.015); box-shadow: 0 18px 44px rgba(198,167,105,0.38); }
+.btn-outline {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--text);
+  padding: 16px 32px; font-family: 'Lato', sans-serif; font-size: 0.82rem;
+  font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+  border: 1px solid rgba(43,43,43,0.25); cursor: pointer;
+  transition: border-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(198,167,105,0.1); }
+@media (max-width: 768px) {
+  .btn-wa, .btn-gold { padding: 17px 24px; font-size: 0.83rem; width: 100%; max-width: 400px; }
+  .btn-outline { padding: 16px 24px; font-size: 0.81rem; width: 100%; max-width: 400px; }
+}
+
+/* EYEBROWS */
+.eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase;
+  font-weight: 700; color: var(--accent); margin-bottom: 14px;
+}
+.eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--accent); flex-shrink: 0; }
+.eyebrow-c {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase;
+  font-weight: 700; color: var(--accent); margin-bottom: 14px;
+}
+.eyebrow-c::before,.eyebrow-c::after { content: ''; flex: 1; max-width: 34px; height: 1px; background: var(--accent); }
+
+/* PROGRESS BAR */
+#progress-bar {
+  position: fixed; top: 0; left: 0; z-index: 300;
+  height: 2px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  transition: width 0.1s linear;
+}
+
+/* STICKY BOTTOM CTA */
+#sticky-cta {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+  background: var(--dark); padding: 12px 32px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 -4px 28px rgba(0,0,0,0.22);
+}
+#sticky-cta.show { transform: translateY(0); }
+.sct-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); }
+.sct-text strong { color: var(--white); font-family: 'Playfair Display', serif; font-size: 0.95rem; display: block; }
+.sct-btn {
+  flex-shrink: 0; background: #25D366; color: var(--white);
+  padding: 11px 26px; font-family: 'Lato', sans-serif;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap; transition: background 0.2s, transform 0.2s;
+}
+.sct-btn:hover { background: #1fbc5b; transform: scale(1.02); }
+@media (max-width: 560px) {
+  .sct-text { display: none; }
+  #sticky-cta { justify-content: center; }
+  .sct-btn { width: 100%; text-align: center; padding: 15px; font-size: 0.82rem; }
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 64px;
+  background: rgba(249,247,244,0.95); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-light);
+  transition: padding 0.35s, box-shadow 0.35s;
+}
+nav.scrolled { padding: 14px 64px; box-shadow: 0 4px 36px rgba(43,43,43,0.07); }
+.nav-logo { font-family: 'Playfair Display', serif; font-size: 1.38rem; font-weight: 700; letter-spacing: 0.05em; color: var(--text); }
+.nav-logo span { color: var(--accent); }
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a { font-size: 0.77rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); font-weight: 400; transition: color 0.2s; }
+.nav-links a:hover { color: var(--accent); }
+.nav-cta {
+  font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase;
+  background: transparent; color: var(--accent);
+  padding: 9px 22px; font-family: 'Lato', sans-serif; font-weight: 700;
+  border: 1.5px solid var(--accent);
+  transition: background 0.3s, color 0.3s, transform 0.3s;
+}
+.nav-cta:hover { background: var(--accent); color: var(--white); transform: translateY(-1px); }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.hamburger span { width: 22px; height: 1.5px; background: var(--text); display: block; transition: all 0.3s; }
+
+/* ── HERO ── */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+#hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 80px;
+  background: var(--bg);
+}
+.hero-left {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 96px 64px 96px 88px;
+  position: relative;
+}
+.hero-left::before {
+  content: '';
+  position: absolute; top: 96px; left: 88px;
+  width: 56px; height: 1px; background: var(--accent); opacity: 0.4;
+}
+.hero-eyebrow-wrap {
+  display: flex; align-items: center; gap: 11px;
+  margin-bottom: 32px;
+  animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+  opacity: 1;
+}
+.hero-eyebrow-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+.hero-eyebrow-text {
+  font-size: 0.66rem; letter-spacing: 0.28em; text-transform: uppercase;
+  font-weight: 700; color: var(--accent);
+}
+.hero-eyebrow-line {
+  flex: 1; max-width: 44px; height: 1px; background: var(--accent); opacity: 0.5;
+}
+.hero-h1 {
+  font-size: clamp(2.6rem, 4.2vw, 4rem);
+  font-weight: 500; color: var(--text);
+  line-height: 1.15; letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+.hero-h1 em { color: var(--accent); font-style: italic; }
+.hero-sub {
+  font-size: 0.97rem; color: var(--text-muted);
+  max-width: 390px; margin-bottom: 14px;
+  font-weight: 300; line-height: 1.95;
+}
+.hero-micro-trust {
+  font-size: 0.78rem; color: var(--text-muted);
+  font-weight: 400; margin-bottom: 44px;
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-micro-trust::before {
+  content: '';
+  width: 28px; height: 1px; background: var(--accent); flex-shrink: 0; opacity: 0.6;
+}
+.hero-micro-trust strong { color: var(--text); font-weight: 600; }
+.hero-btns {
+  display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+}
+
+/* TRUST LINE */
+.trust { font-size: 0.74rem; color: var(--text-muted); font-weight: 300; letter-spacing: 0.04em; margin-top: 7px; }
+
+/* RIGHT — image panel */
+.hero-right {
+  position: relative; overflow: hidden;
+  background: #E8DFD6;
+}
+.hero-right img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 20%;
+  transition: transform 10s ease;
+  animation: heroFadeIn 1.2s ease 0.1s both;
+}
+.hero-right:hover img { transform: scale(1.04); }
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.22)),
+    linear-gradient(120deg, rgba(0,0,0,0.08) 0%, transparent 50%);
+}
+
+/* ===== HERO TEXT (CINEMATIC PREMIUM) ===== */
+.hero-badge {
+  position: absolute;
+  bottom: 80px;
+  left: 80px;
+  max-width: 520px;
+  transform: translateY(10px);
+}
+
+/* LABEL */
+.hero-badge-eyebrow {
+  display: inline-block;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 8px 18px;
+  margin-bottom: 18px;
+}
+
+/* MAIN HEADLINE */
+.hero-badge strong {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 3.2vw, 3.2rem);
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  display: block;
+  margin-bottom: 14px;
+  text-shadow:
+    0 10px 40px rgba(0,0,0,0.45),
+    0 3px 12px rgba(0,0,0,0.35);
+}
+
+/* SUBTEXT */
+.hero-badge p {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.95);
+  line-height: 1.7;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.35);
+}
+
+/* floating accent tag top-right */
+.hero-tag {
+  position: absolute; top: 52px; right: 36px;
+  background: var(--accent); color: var(--white);
+  padding: 8px 18px; font-size: 0.62rem; letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 700;
+  animation: heroFadeIn 1s ease 1s both;
+}
+
+/* HERO RESPONSIVE */
+@media (max-width: 900px) {
+  #hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-left { padding: 64px 24px 56px; order: 2; }
+  .hero-left::before { display: none; }
+  .hero-right { height: 65vw; max-height: 480px; order: 1; }
+  .hero-badge { bottom: 24px; left: 20px; }
+  .hero-badge strong { font-size: 1.6rem; }
+  .hero-tag { top: 18px; right: 18px; }
+}
+@media (max-width: 540px) {
+  .hero-btns { flex-direction: column; align-items: stretch; }
+  .hero-h1 { font-size: clamp(2.2rem, 8vw, 2.8rem); }
+}
+
+/* ── TRUST STATS ── */
+#trust-stats {
+  padding: 0; background: var(--white);
+  border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);
+}
+.trust-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.trust-stat-item {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 44px 28px; border-right: 1px solid var(--border-light);
+  transition: background 0.3s;
+}
+.trust-stat-item:last-child { border-right: none; }
+.trust-stat-item:hover { background: var(--bg); }
+.trust-stat-icon {
+  width: 50px; height: 50px; background: var(--primary); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--accent);
+}
+.trust-stat-number { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+.trust-stat-label { font-size: 0.77rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text); margin-bottom: 6px; }
+.trust-stat-sub { font-size: 0.73rem; color: var(--text-muted); font-weight: 300; }
+
+/* ── AS FEATURED IN ── */
+#featured-in {
+  padding: 48px 80px 40px; background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
+}
+.featured-label {
+  text-align: center; font-size: 0.63rem; letter-spacing: 0.32em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 26px; font-weight: 400;
+}
+.featured-logos {
+  display: flex; align-items: center; justify-content: center; gap: 56px; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.featured-logo-item {
+  font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700;
+  letter-spacing: 0.26em; text-transform: uppercase; color: rgba(43,43,43,0.2);
+  transition: color 0.3s; cursor: default; user-select: none;
+}
+.featured-logo-item:hover { color: rgba(43,43,43,0.4); }
+.featured-disclaimer {
+  text-align: center; font-size: 0.67rem; letter-spacing: 0.08em;
+  color: rgba(122,113,103,0.55); font-style: italic; font-weight: 300;
+}
+
+/* ── SECTION HELPERS ── */
+.sw { padding: 112px 80px; }
+.sw.bg-p { background: var(--primary); }
+.sw.bg-d { background: var(--dark); }
+.tc { text-align: center; }
+.sh2 { font-size: clamp(1.9rem, 3vw, 2.7rem); font-weight: 500; color: var(--text); margin-bottom: 16px; }
+.sh2.light { color: var(--white); }
+.slead { font-size: 0.96rem; color: var(--text-muted); max-width: 520px; margin: 0 auto; font-weight: 300; line-height: 1.9; }
+.slead.light { color: rgba(255,255,255,0.48); }
+.divider { width: 44px; height: 2px; background: var(--accent); margin: 18px auto 52px; }
+
+/* CTA STRIP */
+.cta-strip {
+  background: var(--primary); padding: 40px 80px;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.cta-strip-t { font-family: 'Playfair Display', serif; font-size: 1.22rem; font-weight: 500; color: var(--text); }
+.cta-strip-t span { color: var(--accent); font-style: italic; }
+
+/* ── STORY ── */
+.story-inner { max-width: 740px; margin: 0 auto; text-align: center; }
+.story-quote { font-family: 'Playfair Display', serif; font-size: clamp(1.42rem, 2.6vw, 2rem); font-style: italic; font-weight: 400; color: var(--text); line-height: 1.65; margin-bottom: 28px; }
+.story-body { font-size: 0.95rem; color: var(--text-muted); font-weight: 300; line-height: 1.95; margin-bottom: 24px; }
+.story-brand-line {
+  display: inline-block;
+  font-size: 0.82rem; color: var(--accent); font-style: italic;
+  letter-spacing: 0.04em; margin-bottom: 28px;
+  padding: 10px 20px; border: 1px solid var(--border);
+}
+.story-sig { font-family: 'Playfair Display', serif; font-size: 1.02rem; font-style: italic; color: var(--accent); }
+
+/* ── PROBLEM / SOLUTION ── */
+#problem { display: grid; grid-template-columns: 1fr 1fr; }
+.prob-col { padding: 104px 80px; }
+.prob-col.dark { background: #2B2B2B; }
+.prob-col.light { background: var(--bg); }
+.prob-h2 { font-size: clamp(1.65rem, 2.3vw, 2.2rem); font-weight: 500; margin-bottom: 30px; }
+.prob-col.dark .prob-h2 { color: var(--white); }
+.prob-col.light .prob-h2 { color: var(--text); }
+.prob-list { list-style: none; display: flex; flex-direction: column; gap: 18px; }
+.prob-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 0.93rem; line-height: 1.7; }
+.prob-col.dark .prob-list li { color: rgba(255,255,255,0.65); }
+.prob-col.light .prob-list li { color: var(--text-muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 8px; }
+.prob-col.dark .dot { background: rgba(198,167,105,0.6); }
+.prob-col.light .dot { background: var(--accent); }
+
+/* ── PRODUCT ── */
+#product { display: grid; grid-template-columns: 1fr 1fr; gap: 88px; align-items: center; padding: 112px 80px; }
+.pimg {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 520px;
+}
+.pimg img { width: 100%; height: auto; display: block; position: relative; z-index: 1; }
+/* SHINE EFFECT */
+.shine {
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%);
+  transform: skewX(-20deg);
+  animation: shine 4s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+@keyframes shine {
+  0%   { left: -60%; }
+  50%  { left: 130%; }
+  100% { left: 130%; }
+}
+.ptag { position: absolute; top: 22px; right: 0; background: var(--accent); color: var(--white); padding: 7px 16px; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; z-index: 3; }
+.pname { font-size: clamp(1.9rem, 2.8vw, 2.7rem); font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.ptagline { font-family: 'Playfair Display', serif; font-size: 1.02rem; font-style: italic; color: var(--accent); margin-bottom: 10px; }
+.psocial-proof { font-size: 0.81rem; color: var(--text-muted); font-weight: 400; margin-bottom: 8px; }
+.psocial-proof strong { color: var(--accent); }
+.pclimate { display: inline-flex; align-items: center; gap: 6px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); background: var(--primary); padding: 5px 13px; margin-bottom: 22px; }
+.pdesc { font-size: 0.93rem; color: var(--text-muted); line-height: 1.95; font-weight: 300; margin-bottom: 28px; }
+.poutcome { background: var(--primary); padding: 20px 24px; border-left: 3px solid var(--accent); margin-bottom: 32px; font-size: 0.89rem; color: var(--text); line-height: 1.7; }
+.poutcome strong { font-family: 'Playfair Display', serif; font-size: 0.98rem; display: block; margin-bottom: 6px; }
+.pprice { font-family: 'Playfair Display', serif; font-size: 1.85rem; font-weight: 600; color: var(--text); margin-bottom: 24px; }
+.pprice span { font-size: 0.88rem; color: var(--text-muted); font-family: 'Lato', sans-serif; font-weight: 300; }
+.trust-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+.badge { display: flex; align-items: center; gap: 7px; font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--border); padding: 7px 13px; transition: border-color 0.3s, color 0.3s; }
+.badge:hover { border-color: var(--accent); color: var(--accent); }
+.badge svg { color: var(--accent); flex-shrink: 0; }
+
+/* TRANSFORMATION STRIP */
+.transform-strip { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: var(--dark); padding: 68px 80px; text-align: center; }
+.trf-col { padding: 0 36px; }
+.trf-label { font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.36); margin-bottom: 14px; font-weight: 700; }
+.trf-text { font-family: 'Playfair Display', serif; font-size: clamp(1.05rem, 1.8vw, 1.42rem); font-weight: 500; line-height: 1.45; }
+.trf-col.before .trf-text { color: rgba(255,255,255,0.38); }
+.trf-col.after .trf-text { color: var(--white); }
+.trf-arrow { font-size: 1.4rem; color: var(--accent); padding: 0 24px; opacity: 0.6; }
+
+/* BENEFITS */
+.benefits-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 22px; margin-top: 56px; }
+.bcard { background: var(--bg); padding: 40px 26px; text-align: center; border-bottom: 3px solid transparent; transition: border-color 0.3s, transform 0.38s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s; }
+.bcard:hover { border-bottom-color: var(--accent); transform: translateY(-8px); box-shadow: 0 24px 56px rgba(43,43,43,0.08); }
+.bicon { width: 52px; height: 52px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+.bicon svg { color: var(--accent); }
+.btitle { font-family: 'Playfair Display', serif; font-size: 1.08rem; font-weight: 600; margin-bottom: 10px; }
+.bdesc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.78; font-weight: 300; }
+
+/* INGREDIENTS */
+.ing-grid { display: grid; grid-template-columns: repeat(3,1fr); margin-top: 56px; border: 1px solid var(--border); }
+.ing { padding: 48px 36px; text-align: center; border: 1px solid var(--border); transition: background 0.3s, transform 0.3s; }
+.ing:hover { background: var(--primary); transform: translateY(-3px); }
+.ing-sym { font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; color: var(--accent); margin-bottom: 14px; display: block; }
+.ing-name { font-family: 'Playfair Display', serif; font-size: 1.08rem; font-weight: 600; margin-bottom: 10px; }
+.ing-desc { font-size: 0.84rem; color: var(--text-muted); line-height: 1.78; font-weight: 300; }
+
+/* TESTIMONIALS */
+.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 26px; margin-top: 56px; }
+.tcard { background: var(--bg); padding: 40px 32px; position: relative; transition: transform 0.38s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s; }
+.tcard:hover { transform: translateY(-7px); box-shadow: 0 24px 56px rgba(43,43,43,0.09); }
+.tqmark { font-family: 'Playfair Display', serif; font-size: 4.5rem; line-height: 0.6; color: var(--primary); font-weight: 700; position: absolute; top: 26px; right: 26px; }
+.stars { display: flex; gap: 3px; margin-bottom: 16px; }
+.star { color: var(--accent); font-size: 0.93rem; }
+.ttext { font-size: 0.9rem; color: var(--text); line-height: 1.88; margin-bottom: 24px; font-weight: 300; font-style: italic; }
+.tauthor { display: flex; align-items: center; gap: 13px; }
+.tavatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border); }
+.tavatar img { width: 100%; height: 100%; object-fit: cover; }
+.tname { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+.tloc { font-size: 0.73rem; color: var(--text-muted); }
+.tverified {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.63rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #2E7D32; font-weight: 700;
+  background: rgba(46,125,50,0.07); padding: 3px 9px; margin-top: 5px;
+}
+.tverified svg { color: #2E7D32; }
+
+/* FAQ */
+.faq-list { max-width: 760px; margin: 0 auto; }
+.faq-item { border-bottom: 1px solid var(--border); cursor: pointer; }
+.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; gap: 20px; font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 500; color: var(--text); }
+.faq-icon { width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 1.2rem; line-height: 1; transition: transform 0.3s, background 0.3s, border-color 0.3s; }
+.faq-item.open .faq-icon { transform: rotate(45deg); background: var(--accent); color: var(--white); border-color: var(--accent); }
+.faq-a { max-height: 0; overflow: hidden; font-size: 0.91rem; color: var(--text-muted); line-height: 1.88; font-weight: 300; transition: max-height 0.42s ease, padding 0.3s; }
+.faq-item.open .faq-a { max-height: 280px; padding-bottom: 22px; }
+
+/* FINAL CTA */
+#final-cta { background: var(--dark); text-align: center; padding: 124px 80px; position: relative; overflow: hidden; }
+#final-cta::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 700px; height: 700px; background: radial-gradient(circle, rgba(198,167,105,0.09) 0%, transparent 68%); pointer-events: none; }
+.cta-urgency { display: inline-block; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(198,167,105,0.32); padding: 8px 22px; margin-bottom: 30px; }
+.cta-h2 { font-size: clamp(2rem, 3.8vw, 3.2rem); font-weight: 500; color: var(--white); margin-bottom: 18px; }
+.cta-h2 em { color: var(--accent); font-style: italic; }
+.cta-sub { font-size: 0.96rem; color: rgba(255,255,255,0.48); max-width: 480px; margin: 0 auto 42px; font-weight: 300; line-height: 1.9; }
+.cta-note { font-size: 0.72rem; color: rgba(255,255,255,0.25); letter-spacing: 0.09em; margin-top: 20px; }
+.cta-community { font-size: 0.78rem; color: rgba(255,255,255,0.32); letter-spacing: 0.05em; margin-top: 10px; font-style: italic; font-weight: 300; }
+
+/* FOOTER */
+footer { background: #181614; padding: 0; }
+.footer-main {
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 64px;
+  padding: 68px 80px 56px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.flogo { font-family: 'Playfair Display', serif; font-size: 1.32rem; font-weight: 700; color: var(--white); letter-spacing: 0.05em; display: inline-block; margin-bottom: 12px; }
+.flogo span { color: var(--accent); }
+.footer-tagline { font-size: 0.83rem; color: rgba(255,255,255,0.38); font-weight: 300; line-height: 1.7; max-width: 220px; font-style: italic; }
+.footer-col-title { font-size: 0.66rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.25); font-weight: 700; margin-bottom: 20px; }
+.flinks { display: flex; flex-direction: column; gap: 12px; }
+.flinks a { font-size: 0.8rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.38); transition: color 0.2s; }
+.flinks a:hover { color: var(--accent); }
+.fcontact { display: flex; flex-direction: column; gap: 12px; }
+.fcontact a { font-size: 0.8rem; color: rgba(255,255,255,0.38); transition: color 0.2s; display: flex; align-items: center; gap: 9px; }
+.fcontact a:hover { color: var(--accent); }
+.fcontact svg { flex-shrink: 0; opacity: 0.5; }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+  padding: 22px 80px;
+}
+.fcopy { font-size: 0.73rem; color: rgba(255,255,255,0.2); }
+.fpolicy { display: flex; gap: 20px; }
+.fpolicy a { font-size: 0.72rem; color: rgba(255,255,255,0.18); letter-spacing: 0.06em; transition: color 0.2s; }
+.fpolicy a:hover { color: rgba(255,255,255,0.4); }
+
+/* FLOATING WA */
+.float-wa { position: fixed; bottom: 76px; right: 28px; z-index: 190; width: 56px; height: 56px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 28px rgba(37,211,102,0.36); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s; animation: wap 3s infinite; }
+.float-wa:hover { transform: scale(1.13); box-shadow: 0 18px 48px rgba(37,211,102,0.52); animation: none; }
+.float-wa svg { color: var(--white); }
+@keyframes wap { 0%,100% { box-shadow: 0 8px 28px rgba(37,211,102,0.36); } 50% { box-shadow: 0 8px 56px rgba(37,211,102,0.66); } }
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .benefits-grid { grid-template-columns: repeat(2,1fr); }
+  .ing-grid { grid-template-columns: repeat(2,1fr); }
+  .testi-grid { grid-template-columns: 1fr 1fr; }
+  .testi-grid .tcard:last-child { grid-column: 1/-1; max-width: 460px; margin: 0 auto; width: 100%; }
+  .transform-strip { padding: 56px 40px; }
+  .trust-stats-grid { grid-template-columns: repeat(2,1fr); }
+  .trust-stat-item:nth-child(2) { border-right: none; }
+  .trust-stat-item:nth-child(3) { border-top: 1px solid var(--border-light); }
+  .trust-stat-item:nth-child(4) { border-top: 1px solid var(--border-light); border-right: none; }
+  .footer-main { grid-template-columns: 1fr 1fr; gap: 44px; }
+}
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  nav.scrolled { padding: 12px 24px; }
+  .nav-links { display: none; }
+  .nav-links.open { display: flex; flex-direction: column; gap: 10px; position: absolute; top: 100%; left: 0; right: 0; background: rgba(249,247,244,0.98); padding: 22px 24px; border-bottom: 1px solid var(--border-light); }
+  .hamburger { display: flex; }
+  #hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-left { padding: 60px 24px 52px; order: 2; }
+  .hero-right { height: 62vw; max-height: 460px; order: 1; }
+  .hero-badge { display: none; }
+  .hero-proof { gap: 22px; flex-wrap: wrap; }
+  .sw { padding: 80px 24px; }
+  #trust-stats { padding: 0; }
+  #featured-in { padding: 38px 24px 32px; }
+  .featured-logos { gap: 28px; }
+  #problem { grid-template-columns: 1fr; }
+  .prob-col { padding: 64px 24px; }
+  #product { grid-template-columns: 1fr; padding: 80px 24px; gap: 44px; }
+  .pimg { max-width: 480px; margin: 0 auto; min-height: 420px; }
+  .transform-strip { grid-template-columns: 1fr; padding: 52px 24px; gap: 26px; }
+  .trf-arrow { transform: rotate(90deg); font-size: 1.8rem; }
+  .benefits-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ing-grid { grid-template-columns: 1fr 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .testi-grid .tcard:last-child { grid-column: auto; max-width: none; }
+  .cta-strip { flex-direction: column; padding: 34px 24px; text-align: center; }
+  #final-cta { padding: 88px 24px; }
+  .footer-main { grid-template-columns: 1fr; gap: 36px; padding: 52px 24px 44px; }
+  .footer-bottom { padding: 18px 24px; flex-direction: column; text-align: center; }
+  .float-wa { bottom: 70px; right: 16px; width: 50px; height: 50px; }
+}
+@media (max-width: 540px) {
+  .benefits-grid { grid-template-columns: 1fr; }
+  .ing-grid { grid-template-columns: 1fr; }
+  .hero-btns { flex-direction: column; align-items: stretch; }
+  .trust-stats-grid { grid-template-columns: repeat(2,1fr); }
+  .featured-logos { gap: 20px; }
+  .featured-logo-item { font-size: 0.86rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Aurelia<span>.</span>Glow</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#story">Our Story</a></li>
+    <li><a href="#product">The Serum</a></li>
+    <li><a href="#ingredients">Ingredients</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="nav-cta" target="_blank">Start Your Glow Today</a>
+  <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════
+  HERO — Luxury Campaign Layout
+════════════════════════════ -->
+<section id="hero">
+
+  <!-- LEFT — Copy -->
+  <div class="hero-left">
+
+    <!-- Eyebrow -->
+    <div class="hero-eyebrow-wrap">
+      <span class="hero-eyebrow-dot"></span>
+      <span class="hero-eyebrow-text">Luxury Skincare · Designed for Malaysian Climate</span>
+      <span class="hero-eyebrow-line"></span>
+    </div>
+
+    <!-- Headline -->
+    <h1 class="hero-h1">
+      Tired of Dull, Oily Skin<br>
+      by Midday in Malaysia's Heat?
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="hero-sub">
+      A lightweight glow serum made for humid weather — so your skin stays fresh, clear, and radiant all day without heaviness.
+    </p>
+
+    <!-- Micro trust line -->
+    <p class="hero-micro-trust">
+      <strong>2,800+ Malaysian women already fixed their skin routine with Aurelia Glow</strong>
+    </p>
+
+    <!-- CTA -->
+    <div class="hero-btns">
+      <a href="https://wa.me/60165366631" class="btn-wa" target="_blank">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Start Your Glow Today
+      </a>
+    </div>
+
+    <p class="trust">No pressure · Instant WhatsApp response</p>
+    <p class="trust">Limited monthly batch — once sold out, next restock takes time</p>
+
+  </div>
+
+  <!-- RIGHT — Image -->
+  <div class="hero-right">
+    <img
+      id="hero-img"
+      src="nGkayVUjkGGmD3XSGLjR--0--THuQn.jpg"
+      alt="Aurelia Glow — Kulit Bercahaya, Berhijab Cantik"
+      loading="eager"
+    />
+    <div class="hero-overlay"></div>
+
+    <!-- Floating label top right -->
+    <div class="hero-tag">Limited Batch</div>
+
+    <!-- Floating product badge bottom left -->
+    <div class="hero-badge">
+      <span class="hero-badge-eyebrow">Best Seller</span>
+      <strong>Aurelia Glow Serum</strong>
+      <p>Visible glow in 7 days - made for Malaysian skin</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- TRUST STATS -->
+<section id="trust-stats">
+  <div class="trust-stats-grid">
+    <div class="trust-stat-item reveal">
+      <div class="trust-stat-icon">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="trust-stat-number">2,800+</div>
+      <div class="trust-stat-label">Happy Customers</div>
+      <div class="trust-stat-sub">Trusted by Malaysian women daily</div>
+    </div>
+    <div class="trust-stat-item reveal d1">
+      <div class="trust-stat-icon">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="trust-stat-number">98%</div>
+      <div class="trust-stat-label">See Visible Results</div>
+      <div class="trust-stat-sub">Glow within 7 days of use</div>
+    </div>
+    <div class="trust-stat-item reveal d2">
+      <div class="trust-stat-icon">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="trust-stat-number">✓</div>
+      <div class="trust-stat-label">Dermatologically Tested</div>
+      <div class="trust-stat-sub">Clinically verified formula</div>
+    </div>
+    <div class="trust-stat-item reveal d3">
+      <div class="trust-stat-icon">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="trust-stat-number">✓</div>
+      <div class="trust-stat-label">Safe for Sensitive Skin</div>
+      <div class="trust-stat-sub">Gentle, clean, non-irritating</div>
+    </div>
+  </div>
+</section>
+
+<!-- AS FEATURED IN -->
+<section id="featured-in">
+  <p class="featured-label reveal">As Featured In</p>
+  <div class="featured-logos reveal d1">
+    <span class="featured-logo-item">Vogue</span>
+    <span class="featured-logo-item">Elle</span>
+    <span class="featured-logo-item">Beauty Insider</span>
+    <span class="featured-logo-item">Female</span>
+  </div>
+  <p class="featured-disclaimer reveal d2">Design inspired by global beauty standards</p>
+</section>
+
+<!-- BRAND STORY -->
+<section id="story" class="sw bg-p">
+  <div class="story-inner">
+    <div class="eyebrow-c reveal">Our Story</div>
+    <blockquote class="story-quote reveal d1">"Every Malaysian woman deserves skincare that truly understands her skin."</blockquote>
+    <div class="divider reveal d2"></div>
+    <p class="story-body reveal d2">Aurelia Glow was born from a simple frustration — finding skincare that actually works in our heat and humidity. We spent three years developing a formula that's gentle enough for sensitive skin, yet powerful enough to deliver real transformation. No empty promises. No aggressive chemicals. Just pure, honest skincare designed for you.</p>
+    <div class="story-brand-line reveal d3">Designed specifically for Malaysian skin — not Western formulas.</div>
+    <p class="story-sig reveal d3">— Founder, Aurelia Glow</p>
+  </div>
+</section>
+
+<!-- INLINE CTA #1 -->
+<div class="cta-strip reveal">
+  <p class="cta-strip-t">Ready to begin? <span>Your glow is one step away.</span></p>
+  <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="btn-wa" target="_blank">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Start Your Glow Today
+  </a>
+</div>
+
+<!-- PROBLEM / SOLUTION -->
+<section id="problem">
+  <div class="prob-col dark">
+    <div class="eyebrow reveal" style="color:rgba(198,167,105,0.8)"><span style="width:26px;height:1px;background:rgba(198,167,105,0.8);display:inline-block;flex-shrink:0"></span>The Problem</div>
+    <h2 class="prob-h2 reveal d1">Does this sound like you?</h2>
+    <ul class="prob-list reveal d2">
+      <li><span class="dot"></span>Skin looks dull and tired no matter what you try</li>
+      <li><span class="dot"></span>Dark spots and uneven tone that just won't fade</li>
+      <li><span class="dot"></span>Heavy products that clog pores in Malaysia's heat</li>
+      <li><span class="dot"></span>Spent money on products with zero visible results</li>
+      <li><span class="dot"></span>Lost confidence in your own skin</li>
+    </ul>
+  </div>
+  <div class="prob-col light">
+    <div class="eyebrow reveal">The Solution</div>
+    <h2 class="prob-h2 reveal d1">Aurelia Glow is different.</h2>
+    <ul class="prob-list reveal d2">
+      <li><span class="dot"></span>Visible glow within 7 days — not months</li>
+      <li><span class="dot"></span>Niacinamide + Vitamin C fades dark spots naturally</li>
+      <li><span class="dot"></span>Feather-light formula — absorbs in seconds, no grease</li>
+      <li><span class="dot"></span>Safe, clean ingredients your skin actually trusts</li>
+      <li><span class="dot"></span>Wake up every morning feeling genuinely confident</li>
+    </ul>
+  </div>
+</section>
+
+<!-- PRODUCT SHOWCASE -->
+<section id="product">
+  <div class="pimg reveal">
+    <div class="shine"></div>
+    <img src="aurelia-product.png" alt="Aurelia Glow Luminous Renewal Serum" loading="lazy" />
+    <div class="ptag">Limited Batch — Only 85 Bottles This Month</div>
+  </div>
+  <div>
+    <div class="eyebrow reveal">Hero Product</div>
+    <h2 class="pname reveal d1">Aurelia Glow Luminous<br>Renewal Serum</h2>
+    <p class="ptagline reveal d1">Your 28-Day Skin Transformation</p>
+    <p class="psocial-proof reveal d1"><strong>Used by 2,800+ Malaysian women</strong> and counting.</p>
+    <div class="pclimate reveal d1">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+      Formulated for tropical climate
+    </div>
+    <p class="pdesc reveal d2">A feather-light, fast-absorbing serum with 10% Niacinamide, Vitamin C derivative, and our proprietary Glow-Complex™. Designed for Malaysian women — deeply hydrating without any greasy feel.</p>
+    <div class="poutcome reveal d2">
+      <strong>What you'll experience:</strong>
+      Brighter, more even skin tone · Reduced dark spots · Firmer texture · Lasting hydration all day.
+    </div>
+    <div class="pprice reveal d3">RM 189 <span>/ 30ml · 2-month supply</span></div>
+    <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="btn-wa reveal d3" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Start Your Glow Today
+    </a>
+    <div class="trust-badges reveal d4">
+      <div class="badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Dermatologically Tested</div>
+      <div class="badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Safe Ingredients</div>
+      <div class="badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Free Shipping (WM)</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSFORMATION -->
+<div class="transform-strip">
+  <div class="trf-col before reveal">
+    <div class="trf-label">Before</div>
+    <div class="trf-text">Dull. Uneven.<br>Lacking confidence.</div>
+  </div>
+  <div class="trf-arrow reveal d1">→</div>
+  <div class="trf-col after reveal d2">
+    <div class="trf-label">After 28 Days</div>
+    <div class="trf-text">Radiant. Even-toned.<br>Confidently glowing.</div>
+  </div>
+</div>
+
+<!-- BENEFITS -->
+<section class="sw bg-p" id="benefits">
+  <div class="tc">
+    <div class="eyebrow-c reveal">Why It Works</div>
+    <h2 class="sh2 reveal d1">Four Ways It Changes Your Skin</h2>
+    <div class="divider reveal d2"></div>
+  </div>
+  <div class="benefits-grid">
+    <div class="bcard reveal">
+      <div class="bicon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></div>
+      <h3 class="btitle">Instant Glow</h3>
+      <p class="bdesc">Visible luminosity from the very first use. Your skin will look alive and healthy within minutes of applying.</p>
+    </div>
+    <div class="bcard reveal d1">
+      <div class="bicon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+      <h3 class="btitle">Deep Hydration</h3>
+      <p class="bdesc">72-hour moisture lock — keeps skin soft and supple all day, even in Malaysia's heat and humidity.</p>
+    </div>
+    <div class="bcard reveal d2">
+      <div class="bicon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      <h3 class="btitle">Fades Dark Spots</h3>
+      <p class="bdesc">Dual-action brightening visibly reduces hyperpigmentation and uneven skin tone with consistent use.</p>
+    </div>
+    <div class="bcard reveal d3">
+      <div class="bicon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h3 class="btitle">Clean Formula</h3>
+      <p class="bdesc">Paraben-free, sulphate-free, non-comedogenic. Gentle on sensitive and acne-prone skin.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INLINE CTA #2 -->
+<div class="cta-strip reveal">
+  <p class="cta-strip-t">Only <span>85 bottles</span> left in this limited batch.</p>
+  <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="btn-wa" target="_blank" style="padding:13px 28px;font-size:0.77rem;box-shadow:none">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Start Your Glow Today
+  </a>
+</div>
+
+<!-- INGREDIENTS -->
+<section id="ingredients" class="sw">
+  <div class="tc">
+    <div class="eyebrow-c reveal">The Science</div>
+    <h2 class="sh2 reveal d1">Ingredients That Actually Work</h2>
+    <p class="slead reveal d2">Every ingredient chosen with purpose — backed by science, trusted by dermatologists.</p>
+  </div>
+  <div class="ing-grid">
+    <div class="ing reveal"><span class="ing-sym">Ni</span><h3 class="ing-name">10% Niacinamide</h3><p class="ing-desc">Gold standard for brightening. Reduces dark spots, tightens pores, and strengthens the skin barrier.</p></div>
+    <div class="ing reveal d1"><span class="ing-sym">Vc</span><h3 class="ing-name">Vitamin C Complex</h3><p class="ing-desc">Stable derivative that fights oxidative stress, evens tone, and delivers lasting luminosity.</p></div>
+    <div class="ing reveal d2"><span class="ing-sym">Ha</span><h3 class="ing-name">Hyaluronic Acid</h3><p class="ing-desc">Deep-layer hydration without heaviness. Keeps skin plump and soft all day in any weather.</p></div>
+    <div class="ing reveal"><span class="ing-sym">Bk</span><h3 class="ing-name">Bakuchiol</h3><p class="ing-desc">Plant-based retinol alternative. Firms, smooths, and renews — without irritation or redness.</p></div>
+    <div class="ing reveal d1"><span class="ing-sym">Gc</span><h3 class="ing-name">Glow-Complex™</h3><p class="ing-desc">Our proprietary blend of rare Malaysian rainforest botanicals. Exclusive to Aurelia Glow.</p></div>
+    <div class="ing reveal d2"><span class="ing-sym">Cr</span><h3 class="ing-name">Ceramides</h3><p class="ing-desc">Rebuilds skin's protective barrier — locks in moisture and shields against daily environmental stress.</p></div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="sw bg-p">
+  <div class="tc">
+    <div class="eyebrow-c reveal">Real Stories</div>
+    <h2 class="sh2 reveal d1">Women Who Found Their Glow</h2>
+    <p class="slead reveal d2">No filters. No edits. Real results from real Malaysian women — just like you.</p>
+  </div>
+  <div class="testi-grid">
+    <div class="tcard reveal">
+      <div class="tqmark">"</div>
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <p class="ttext">After 3 weeks my husband asked if I'd done something different. My skin is glowing and my dark spots are fading. I cried happy tears. This serum is everything.</p>
+      <div class="tauthor">
+        <div class="tavatar"><img src="https://images.pexels.com/photos/322920/pexels-photo-322920.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop&crop=faces" alt="Nurul" loading="lazy" /></div>
+        <div>
+          <div class="tname">Nurul Ain, 32</div>
+          <div class="tloc">Kuala Lumpur</div>
+          <div class="tverified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verified Customer</div>
+        </div>
+      </div>
+    </div>
+    <div class="tcard reveal d1">
+      <div class="tqmark">"</div>
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <p class="ttext">I have oily skin and nothing ever worked. Aurelia Glow absorbs so fast, no greasy feeling by noon. Finally found my holy grail serum after years of trying.</p>
+      <div class="tauthor">
+        <div class="tavatar"><img src="https://images.pexels.com/photos/4728655/pexels-photo-4728655.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop&crop=faces" alt="Sarah" loading="lazy" /></div>
+        <div>
+          <div class="tname">Sarah Khairul, 27</div>
+          <div class="tloc">Johor Bahru</div>
+          <div class="tverified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verified Customer</div>
+        </div>
+      </div>
+    </div>
+    <div class="tcard reveal d2">
+      <div class="tqmark">"</div>
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <p class="ttext">By Day 7 my colleagues were asking what skincare I was using. The results are real and my confidence has never been higher. 100% recommend to every Malaysian woman.</p>
+      <div class="tauthor">
+        <div class="tavatar"><img src="https://images.pexels.com/photos/7451464/pexels-photo-7451464.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop&crop=faces" alt="Amira" loading="lazy" /></div>
+        <div>
+          <div class="tname">Amira Zulaikha, 38</div>
+          <div class="tloc">Penang</div>
+          <div class="tverified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verified Customer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sw" id="faq">
+  <div class="tc" style="margin-bottom:52px">
+    <div class="eyebrow-c reveal">FAQ</div>
+    <h2 class="sh2 reveal d1">Questions? We've Got Answers.</h2>
+    <p class="slead reveal d2">Transparency is at the heart of everything we do.</p>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item reveal" onclick="toggleFAQ(this)">
+      <div class="faq-q">When will I see results? <span class="faq-icon">+</span></div>
+      <div class="faq-a">Most customers see visible improvement in brightness and texture within 7–10 days. For significant reduction in dark spots and improved firmness, use consistently for 28 days. Our formula is designed to work for all skin types.</div>
+    </div>
+    <div class="faq-item reveal" onclick="toggleFAQ(this)">
+      <div class="faq-q">Is this suitable for sensitive skin? <span class="faq-icon">+</span></div>
+      <div class="faq-a">Yes. Our formula is dermatologically tested and formulated to be gentle on all skin types including sensitive and acne-prone skin. We recommend a patch test first if you have a known skin condition.</div>
+    </div>
+    <div class="faq-item reveal" onclick="toggleFAQ(this)">
+      <div class="faq-q">How do I use the serum? <span class="faq-icon">+</span></div>
+      <div class="faq-a">Apply 2–3 drops to clean, dry skin morning and evening. Gently press into your skin with upward motions, then follow with moisturiser and SPF in the morning. Consistent daily use gives the best results.</div>
+    </div>
+    <div class="faq-item reveal" onclick="toggleFAQ(this)">
+      <div class="faq-q">Is there free shipping? <span class="faq-icon">+</span></div>
+      <div class="faq-a">Free shipping for all orders within Peninsular Malaysia. Flat RM6 for Sabah and Sarawak. Orders processed within 1–2 business days and delivered within 3–5 working days.</div>
+    </div>
+    <div class="faq-item reveal" onclick="toggleFAQ(this)">
+      <div class="faq-q">What if I'm not satisfied? <span class="faq-icon">+</span></div>
+      <div class="faq-a">We offer a full 30-day money-back guarantee. If you're not happy with your results, contact us via WhatsApp and we'll sort it out immediately — no questions asked.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="final-cta">
+  <div class="cta-urgency reveal">✦ Limited Batch — Only 85 Bottles Remaining</div>
+  <h2 class="cta-h2 reveal d1">Your Best Skin<br>Starts <em>Today</em></h2>
+  <p class="cta-sub reveal d2">Join 2,800+ Malaysian women who woke up to glowing, confident skin. One simple step — reach out via WhatsApp right now.</p>
+  <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="btn-wa reveal d3" target="_blank">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Start Your Glow Today
+  </a>
+  <p class="cta-note reveal d4">Free shipping · 30-day money-back guarantee · Reply within minutes</p>
+  <p class="cta-community reveal d4">Join thousands of Malaysian women already transforming their skin.</p>
+  <p style="font-size:0.7rem;color:rgba(198,167,105,0.45);letter-spacing:0.1em;margin-top:14px;font-style:italic;">Limited stock resets monthly — don't wait.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-main">
+    <div>
+      <a href="#" class="flogo">Aurelia<span>.</span>Glow</a>
+      <p class="footer-tagline">Luxury skincare crafted for Malaysian women.</p>
+    </div>
+    <div>
+      <p class="footer-col-title">Navigate</p>
+      <div class="flinks">
+        <a href="#story">Our Story</a>
+        <a href="#product">The Serum</a>
+        <a href="#ingredients">Ingredients</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+    <div>
+      <p class="footer-col-title">Get in Touch</p>
+      <div class="fcontact">
+        <a href="mailto:hello@aureliaglow.com">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          hello@aureliaglow.com
+        </a>
+        <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp Us
+        </a>
+        <a href="https://instagram.com/aureliaglow" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          @aureliaglow
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="fcopy">© 2024 Aurelia Glow. All rights reserved.</p>
+    <div class="fpolicy">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms</a>
+      <a href="#">Returns</a>
+    </div>
+  </div>
+  <div style="text-align:center; padding: 14px 80px 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+    <p style="font-family:'Playfair Display',serif; font-size:0.82rem; color:rgba(255,255,255,0.18); font-style:italic; letter-spacing:0.04em;">Confidence begins with your skin.</p>
+  </div>
+</footer>
+
+<!-- FLOATING WA -->
+<a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="float-wa" target="_blank" aria-label="WhatsApp">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- STICKY BOTTOM CTA -->
+<div id="sticky-cta">
+  <div class="sct-text"><strong>Luminous Renewal Serum</strong>RM189 · Free Shipping · Limited Stock</div>
+  <a href="https://wa.me/60165366631?text=Hi%20Aurelia%20Glow%2C%20saya%20nak%20start%20glow%20journey%20saya%20hari%20ini%20%F0%9F%98%8A" class="sct-btn" target="_blank">Start Your Glow Today</a>
+</div>
+
+<script>
+const navbar = document.getElementById('navbar');
+const progressBar = document.getElementById('progress-bar');
+const stickyCta = document.getElementById('sticky-cta');
+const hero = document.getElementById('hero');
+
+window.addEventListener('scroll', () => {
+  const sy = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  progressBar.style.width = (sy / total * 100) + '%';
+  navbar.classList.toggle('scrolled', sy > 40);
+  const heroEnd = hero.offsetTop + hero.offsetHeight;
+  const nearEnd = sy + window.innerHeight > document.body.scrollHeight - 200;
+  stickyCta.classList.toggle('show', sy > heroEnd - 80 && !nearEnd);
+}, { passive: true });
+
+function toggleMenu() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+function toggleFAQ(item) {
+  const open = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!open) item.classList.add('open');
+}
+</script>
+</body>
+</html>

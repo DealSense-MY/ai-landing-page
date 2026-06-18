@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aircond Fresh Services — Tanjung Tualang, Perak</title>
+  <meta name="description" content="Pakar Servis, Baiki & Pasang Aircond di Tanjung Tualang, Perak. Lesen KT0545349-H. Hubungi kami sekarang!" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:    #0a2e1a;
+      --green-main:    #0f4a28;
+      --green-mid:     #1a6b3a;
+      --green-light:   #2d9b5a;
+      --green-pale:    #e8f5ee;
+      --yellow-badge:  #f5c518;
+      --yellow-light:  #ffe066;
+      --white:         #ffffff;
+      --grey-light:    #f4f7f4;
+      --grey-mid:      #d1ddd5;
+      --text-dark:     #0d1f14;
+      --text-body:     #2c4035;
+      --wa-green:      #25D366;
+      --wa-hover:      #1da851;
+      --radius:        14px;
+      --shadow:        0 8px 32px rgba(10,46,26,.18);
+      --shadow-card:   0 4px 20px rgba(10,46,26,.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--white);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── TOPBAR ────────────────────────────────────────── */
+    .topbar {
+      background: var(--green-dark);
+      color: rgba(255,255,255,.75);
+      font-size: .78rem;
+      text-align: center;
+      padding: .4rem 1rem;
+      letter-spacing: .03em;
+    }
+    .topbar span { margin: 0 .6rem; }
+    .topbar a { color: var(--yellow-badge); }
+
+    /* ─── NAV ───────────────────────────────────────────── */
+    nav {
+      background: var(--green-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .8rem 5%;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    .nav-logo-wrap {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    .nav-brand-text {
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .nav-brand-text strong {
+      display: block;
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+    .nav-brand-text span {
+      font-size: .68rem;
+      color: rgba(255,255,255,.65);
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,.85);
+      font-size: .85rem;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--yellow-badge); }
+    .nav-cta {
+      background: var(--wa-green);
+      color: var(--white) !important;
+      padding: .45rem 1.1rem;
+      border-radius: 30px;
+      font-weight: 600 !important;
+      font-size: .82rem !important;
+      transition: background .2s, transform .15s !important;
+    }
+    .nav-cta:hover { background: var(--wa-hover) !important; transform: scale(1.04); }
+
+    /* ─── HERO ──────────────────────────────────────────── */
+    .hero {
+      background:
+        linear-gradient(135deg, rgba(10,46,26,.92) 0%, rgba(15,74,40,.82) 60%, rgba(29,107,58,.7) 100%),
+        radial-gradient(ellipse at 70% 50%, rgba(45,155,90,.25) 0%, transparent 60%);
+      background-color: var(--green-dark);
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 5% 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative house / aircon silhouette */
+    .hero::before {
+      content: '';
+      position: absolute;
+      right: -60px;
+      bottom: -40px;
+      width: 480px;
+      height: 480px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='rgba(255,255,255,0.04)'%3E%3Crect x='30' y='100' width='140' height='80' rx='4'/%3E%3Cpolygon points='10,100 100,30 190,100'/%3E%3Crect x='80' y='130' width='40' height='50'/%3E%3Crect x='45' y='108' width='35' height='28' rx='2'/%3E%3Crect x='118' y='108' width='35' height='28' rx='2'/%3E%3Crect x='20' y='60' width='60' height='22' rx='4'/%3E%3Ccircle cx='50' cy='71' r='6'/%3E%3Ccircle cx='72' cy='71' r='4'/%3E%3C/g%3E%3C/svg%3E") no-repeat center/contain;
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+    }
+
+    /* SVG Badge Logo */
+    .hero-logo {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 1.8rem;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.5));
+    }
+
+    .hero-badge-label {
+      display: inline-block;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: var(--yellow-badge);
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: .3rem .9rem;
+      border-radius: 20px;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 12px rgba(0,0,0,.4);
+    }
+    .hero h1 span { color: var(--yellow-badge); }
+
+    .hero-sub {
+      font-size: clamp(.95rem, 2vw, 1.2rem);
+      color: rgba(255,255,255,.82);
+      max-width: 540px;
+      margin: 0 auto 1rem;
+    }
+
+    .hero-services-chips {
+      display: flex;
+      gap: .6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1.4rem 0 2.2rem;
+    }
+    .chip {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.22);
+      color: var(--white);
+      font-size: .8rem;
+      font-weight: 500;
+      padding: .35rem .9rem;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-wa {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--wa-green);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: .9rem 2rem;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(37,211,102,.4);
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-wa:hover {
+      background: var(--wa-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(37,211,102,.5);
+    }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: transparent;
+      color: var(--white);
+      font-weight: 600;
+      font-size: .95rem;
+      padding: .85rem 1.8rem;
+      border-radius: 50px;
+      border: 2px solid rgba(255,255,255,.4);
+      transition: border-color .2s, background .2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--white);
+      background: rgba(255,255,255,.08);
+    }
+
+    .hero-license {
+      margin-top: 1.8rem;
+      font-size: .72rem;
+      color: rgba(255,255,255,.45);
+      letter-spacing: .04em;
+    }
+
+    /* ─── STATS STRIP ───────────────────────────────────── */
+    .stats-strip {
+      background: var(--yellow-badge);
+      padding: 1.2rem 5%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+      color: var(--green-dark);
+    }
+    .stat-item strong {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .stat-item span {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      opacity: .75;
+    }
+    .stat-divider {
+      width: 1px;
+      height: 36px;
+      background: rgba(10,46,26,.2);
+    }
+
+    /* ─── SECTIONS ──────────────────────────────────────── */
+    section { padding: 5rem 5%; }
+
+    .section-label {
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: .5rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800;
+      color: var(--text-dark);
+      line-height: 1.2;
+      margin-bottom: .8rem;
+    }
+    .section-sub {
+      color: var(--text-body);
+      max-width: 540px;
+      font-size: .95rem;
+    }
+    .section-header { margin-bottom: 3rem; }
+
+    /* ─── SERVICES ──────────────────────────────────────── */
+    .services { background: var(--grey-light); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .service-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 2rem 1.6rem;
+      box-shadow: var(--shadow-card);
+      border-top: 4px solid var(--green-light);
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 80px; height: 80px;
+      background: var(--green-pale);
+      border-radius: 50% 0 0 0;
+      opacity: .5;
+    }
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 36px rgba(10,46,26,.18);
+    }
+    .service-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--green-pale);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.6rem;
+    }
+    .service-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: .5rem;
+    }
+    .service-card p {
+      font-size: .85rem;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+    .service-card .price-tag {
+      display: inline-block;
+      margin-top: .9rem;
+      background: var(--green-pale);
+      color: var(--green-mid);
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .25rem .7rem;
+      border-radius: 20px;
+    }
+
+    /* ─── WHY US ────────────────────────────────────────── */
+    .why-us {
+      background: var(--white);
+    }
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      max-width: 680px;
+    }
+    .why-item {
+      display: flex;
+      gap: .9rem;
+      align-items: flex-start;
+      padding: 1.2rem;
+      background: var(--grey-light);
+      border-radius: var(--radius);
+    }
+    .why-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--green-main);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+      color: var(--white);
+    }
+    .why-text strong {
+      display: block;
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .why-text span {
+      font-size: .78rem;
+      color: var(--text-body);
+    }
+
+    /* ─── GALLERY / SERVICES VISUAL ─────────────────────── */
+    .gallery { background: var(--green-dark); padding: 5rem 5%; }
+    .gallery .section-title { color: var(--white); }
+    .gallery .section-label { color: var(--yellow-badge); }
+    .gallery .section-sub { color: rgba(255,255,255,.65); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .gallery-card {
+      background: var(--green-main);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.08);
+      transition: transform .2s;
+    }
+    .gallery-card:hover { transform: scale(1.02); }
+    .gallery-img-placeholder {
+      height: 160px;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: rgba(255,255,255,.4);
+    }
+    .gallery-card-body {
+      padding: .9rem 1rem;
+    }
+    .gallery-card-body strong {
+      display: block;
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .gallery-card-body span {
+      font-size: .76rem;
+      color: rgba(255,255,255,.55);
+    }
+
+    /* ─── TESTIMONIALS ──────────────────────────────────── */
+    .testimonials { background: var(--grey-light); }
+
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.4rem;
+    }
+    .testi-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+    }
+    .stars { color: var(--yellow-badge); font-size: .95rem; margin-bottom: .7rem; }
+    .testi-text {
+      font-size: .88rem;
+      color: var(--text-body);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      font-style: italic;
+    }
+    .testi-author {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    }
+    .testi-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--green-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: 700;
+      font-size: .85rem;
+    }
+    .testi-name strong {
+      display: block;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+    .testi-name span {
+      font-size: .72rem;
+      color: var(--text-body);
+    }
+
+    /* ─── CONTACT / MAP ─────────────────────────────────── */
+    .contact {
+      background: var(--green-main);
+      color: var(--white);
+    }
+    .contact .section-title { color: var(--white); }
+    .contact .section-label { color: var(--yellow-badge); }
+    .contact .section-sub { color: rgba(255,255,255,.72); }
+
+    .contact-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    .contact-info-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .contact-info-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .ci-icon {
+      width: 42px;
+      height: 42px;
+      background: rgba(255,255,255,.12);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .ci-text strong { display: block; font-size: .9rem; font-weight: 700; color: var(--white); }
+    .ci-text span { font-size: .82rem; color: rgba(255,255,255,.65); }
+
+    .map-embed {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,.15);
+      box-shadow: var(--shadow);
+    }
+    .map-embed iframe {
+      width: 100%;
+      height: 280px;
+      border: 0;
+      display: block;
+    }
+
+    .wa-block {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.15);
+    }
+    .wa-block p { font-size: .88rem; color: rgba(255,255,255,.75); margin-bottom: 1rem; }
+
+    /* ─── FLOATING WA BUTTON ─────────────────────────────── */
+    .wa-float {
+      position: fixed;
+      bottom: 1.6rem;
+      right: 1.6rem;
+      z-index: 999;
+      width: 58px;
+      height: 58px;
+      background: var(--wa-green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(37,211,102,.5);
+      transition: transform .2s, box-shadow .2s;
+      cursor: pointer;
+    }
+    .wa-float:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 28px rgba(37,211,102,.6);
+    }
+    .wa-float svg { width: 28px; height: 28px; fill: var(--white); }
+
+    /* ─── FOOTER ────────────────────────────────────────── */
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,.55);
+      text-align: center;
+      padding: 2rem 5%;
+      font-size: .78rem;
+      line-height: 2;
+    }
+    footer strong { color: rgba(255,255,255,.85); }
+
+    /* ─── RESPONSIVE ────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .contact-wrap { grid-template-columns: 1fr; }
+      .why-grid { grid-template-columns: 1fr; }
+      .stats-strip { gap: 1.5rem; }
+      .stat-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span>📍 Tanjung Tualang, Perak</span>
+    <span>|</span>
+    <span>Lesen: KT0545349-H</span>
+    <span>|</span>
+    <span><a href="https://wa.me/601XXXXXXXX">📞 WhatsApp Kami Sekarang</a></span>
+  </div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo-wrap">
+        <!-- SVG Logo recreation of the yellow badge -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#f5c518"/>
+          <circle cx="50" cy="50" r="43" fill="none" stroke="#0a2e1a" stroke-width="2"/>
+          <circle cx="50" cy="50" r="38" fill="#0f4a28"/>
+          <!-- House silhouette -->
+          <polygon points="50,18 20,38 80,38" fill="#f5c518"/>
+          <rect x="25" y="38" width="50" height="28" fill="#f5c518"/>
+          <rect x="40" y="47" width="20" height="19" fill="#0f4a28"/>
+          <!-- AC unit on house -->
+          <rect x="28" y="41" width="16" height="10" rx="2" fill="#0a2e1a"/>
+          <rect x="56" y="41" width="16" height="10" rx="2" fill="#0a2e1a"/>
+          <!-- Outer ring text placeholder -->
+          <path id="curve" d="M 50,50 m -36,0 a 36,36 0 1,1 72,0 a 36,36 0 1,1 -72,0" fill="none"/>
+          <text font-family="Poppins, sans-serif" font-size="7" font-weight="800" fill="#0a2e1a" letter-spacing="1.5">
+            <textPath href="#curve" startOffset="5%">AIRCOND FRESH SERVICE</textPath>
+          </text>
+        </svg>
+      </div>
+      <div class="nav-brand-text">
+        <strong>Aircond Fresh Services</strong>
+        <span>Tanjung Tualang, Perak • KT0545349-H</span>
+      </div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#services">Servis</a></li>
+      <li><a href="#why">Kenapa Kami</a></li>
+      <li><a href="#testimonials">Ulasan</a></li>
+      <li><a href="#contact">Hubungi</a></li>
+      <li><a href="https://wa.me/601XXXXXXXX" class="nav-cta">💬 WhatsApp</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="hero-inner">
+
+      <!-- Large Badge Logo -->
+      <svg class="hero-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer ring -->
+        <circle cx="100" cy="100" r="96" fill="#f5c518"/>
+        <circle cx="100" cy="100" r="88" fill="none" stroke="#0a2e1a" stroke-width="3"/>
+        <circle cx="100" cy="100" r="82" fill="#0f4a28"/>
+        <!-- House -->
+        <polygon points="100,32 44,72 156,72" fill="#f5c518"/>
+        <rect x="48" y="72" width="104" height="62" rx="3" fill="#f5c518"/>
+        <!-- Door -->
+        <rect x="82" y="95" width="36" height="39" rx="2" fill="#0f4a28"/>
+        <!-- Windows -->
+        <rect x="54" y="78" width="26" height="20" rx="3" fill="#0a2e1a"/>
+        <rect x="118" y="78" width="26" height="20" rx="3" fill="#0a2e1a"/>
+        <!-- AC unit lines on windows -->
+        <line x1="57" y1="84" x2="77" y2="84" stroke="#f5c518" stroke-width="1.5"/>
+        <line x1="57" y1="88" x2="77" y2="88" stroke="#f5c518" stroke-width="1.5"/>
+        <line x1="57" y1="92" x2="77" y2="92" stroke="#f5c518" stroke-width="1.5"/>
+        <line x1="121" y1="84" x2="141" y2="84" stroke="#f5c518" stroke-width="1.5"/>
+        <line x1="121" y1="88" x2="141" y2="88" stroke="#f5c518" stroke-width="1.5"/>
+        <line x1="121" y1="92" x2="141" y2="92" stroke="#f5c518" stroke-width="1.5"/>
+        <!-- Curved top text -->
+        <path id="topArc" d="M 100,100 m -70,0 a 70,70 0 1,1 140,0" fill="none"/>
+        <text font-family="Poppins,sans-serif" font-size="11.5" font-weight="900" fill="#0a2e1a" letter-spacing="3">
+          <textPath href="#topArc" startOffset="6%">AIRCOND FRESH SERVICE</textPath>
+        </text>
+        <!-- Bottom text: year -->
+        <path id="botArc" d="M 100,100 m -52,0 a 52,52 0 0,0 104,0" fill="none"/>
+        <text font-family="Poppins,sans-serif" font-size="13" font-weight="900" fill="#f5c518" letter-spacing="4">
+          <textPath href="#botArc" startOffset="22%">2023</textPath>
+        </text>
+      </svg>
+
+      <div class="hero-badge-label">✅ Bertauliah &amp; Berpengalaman</div>
+
+      <h1>Pakar <span>Aircond</span> Anda<br/>di Tanjung Tualang</h1>
+
+      <p class="hero-sub">
+        Servis profesional, baiki cepat, pasang baru — semua dalam satu panggilan.
+        Dipercayai ratusan pelanggan di Perak.
+      </p>
+
+      <div class="hero-services-chips">
+        <div class="chip">❄️ Servis Aircond</div>
+        <div class="chip">🔧 Baiki Aircond</div>
+        <div class="chip">🏠 Pasang Baru</div>
+        <div class="chip">⚡ Kerja Elektrik</div>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="https://wa.me/601XXXXXXXX?text=Salam%2C%20saya%20nak%20buat%20servis%20aircond.%20Boleh%20bagi%20maklumat%3F" class="btn-wa">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.864L.054 23.782a.5.5 0 0 0 .609.631l6.053-1.59A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.892 0-3.67-.518-5.188-1.42l-.362-.214-3.742.981.998-3.645-.235-.374A9.96 9.96 0 0 1 2 12c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10z"/></svg>
+          Hubungi Sekarang
+        </a>
+        <a href="#services" class="btn-outline">
+          Lihat Servis Kami ↓
+        </a>
+      </div>
+
+      <p class="hero-license">Lesen No. KT0545349-H · Tanjung Tualang, Perak</p>
+    </div>
+  </section>
+
+  <!-- Stats Strip -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <strong>500+</strong>
+      <span>Pelanggan Berpuas Hati</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <strong>5+</strong>
+      <span>Tahun Pengalaman</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <strong>4</strong>
+      <span>Jenis Perkhidmatan</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <strong>Perak</strong>
+      <span>Kawasan Servis</span>
+    </div>
+  </div>
+
+  <!-- Services -->
+  <section class="services" id="services">
+    <div class="section-header">
+      <div class="section-label">Perkhidmatan Kami</div>
+      <h2 class="section-title">Apa Yang Kami Tawarkan</h2>
+      <p class="section-sub">Dari servis rutin hingga pemasangan baru — kami sedia bantu setiap keperluan aircond anda.</p>
+    </div>
+    <div class="services-grid">
+
+      <div class="service-card">
+        <div class="service-icon">❄️</div>
+        <h3>Servis Aircond</h3>
+        <p>Pencucian menyeluruh unit indoor &amp; outdoor. Basuh evaporator, condenser coil, dan semak tahap gas refrigeran.</p>
+        <span class="price-tag">✅ Jadual Berkala</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">🔧</div>
+        <h3>Baiki Aircond</h3>
+        <p>Diagnosis pantas dan pembaikan efisien — aircond tak sejuk, bocor air, berdengung, atau tiba-tiba mati. Kami selesaikan.</p>
+        <span class="price-tag">⚡ Servis Cepat</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">🏠</div>
+        <h3>Pasang Aircond Baru</h3>
+        <p>Pemasangan profesional untuk semua jenama aircond. Termasuk pendawaian, bracket, dan paip salir yang kemas dan selamat.</p>
+        <span class="price-tag">🔩 Semua Jenama</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">⚡</div>
+        <h3>Kerja Elektrik</h3>
+        <p>Pendawaian tambahan, tukar plug 16A, pasang circuit breaker, dan semua kerja elektrik berkaitan pemasangan aircond.</p>
+        <span class="price-tag">🛡️ Selamat &amp; Patuh</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Why Us -->
+  <section class="why-us" id="why">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center;">
+      <div>
+        <div class="section-label">Kenapa Pilih Kami?</div>
+        <h2 class="section-title">Dipercayai Kerana Kami Deliver</h2>
+        <p class="section-sub" style="margin-bottom:2rem;">
+          Kami bukan sekadar tukang aircond. Kami pakar yang ambil berat tentang keselesaan rumah dan pejabat anda.
+        </p>
+        <div class="why-grid">
+          <div class="why-item">
+            <div class="why-icon">🎯</div>
+            <div class="why-text">
+              <strong>Bertauliah Rasmi</strong>
+              <span>Lesen KT0545349-H — kerja sah dan selamat</span>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">⏰</div>
+            <div class="why-text">
+              <strong>On-Time Selalu</strong>
+              <span>Tiba tepat waktu yang dijanjikan</span>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">💰</div>
+            <div class="why-text">
+              <strong>Harga Telus</strong>
+              <span>Tiada caj tersembunyi. Sebut harga dulu</span>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">🛡️</div>
+            <div class="why-text">
+              <strong>Waranti Kerja</strong>
+              <span>Guarantee kepuasan setiap servis</span>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">📍</div>
+            <div class="why-text">
+              <strong>Tempatan Perak</strong>
+              <span>Tanjung Tualang &amp; kawasan sekitar</span>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">📱</div>
+            <div class="why-text">
+              <strong>Mudah Hubungi</strong>
+              <span>WhatsApp terus, respon pantas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <!-- Large decorative badge -->
+        <svg viewBox="0 0 300 300" style="width:280px;height:280px;filter:drop-shadow(0 16px 48px rgba(10,46,26,.25))">
+          <circle cx="150" cy="150" r="144" fill="#f5c518"/>
+          <circle cx="150" cy="150" r="133" fill="none" stroke="#0a2e1a" stroke-width="4"/>
+          <circle cx="150" cy="150" r="124" fill="#0f4a28"/>
+          <!-- House -->
+          <polygon points="150,48 66,108 234,108" fill="#f5c518"/>
+          <rect x="72" y="108" width="156" height="94" rx="4" fill="#f5c518"/>
+          <rect x="123" y="144" width="54" height="58" rx="3" fill="#0f4a28"/>
+          <!-- Windows as AC units -->
+          <rect x="80" y="114" width="42" height="30" rx="4" fill="#0a2e1a"/>
+          <rect x="178" y="114" width="42" height="30" rx="4" fill="#0a2e1a"/>
+          <line x1="85" y1="122" x2="117" y2="122" stroke="#f5c518" stroke-width="2"/>
+          <line x1="85" y1="128" x2="117" y2="128" stroke="#f5c518" stroke-width="2"/>
+          <line x1="85" y1="134" x2="117" y2="134" stroke="#f5c518" stroke-width="2"/>
+          <line x1="183" y1="122" x2="215" y2="122" stroke="#f5c518" stroke-width="2"/>
+          <line x1="183" y1="128" x2="215" y2="128" stroke="#f5c518" stroke-width="2"/>
+          <line x1="183" y1="134" x2="215" y2="134" stroke="#f5c518" stroke-width="2"/>
+          <!-- Text arcs -->
+          <path id="bigTop" d="M 150,150 m -105,0 a 105,105 0 1,1 210,0" fill="none"/>
+          <text font-family="Poppins,sans-serif" font-size="16" font-weight="900" fill="#0a2e1a" letter-spacing="4">
+            <textPath href="#bigTop" startOffset="6%">AIRCOND FRESH SERVICE</textPath>
+          </text>
+          <path id="bigBot" d="M 150,150 m -78,0 a 78,78 0 0,0 156,0" fill="none"/>
+          <text font-family="Poppins,sans-serif" font-size="20" font-weight="900" fill="#f5c518" letter-spacing="8">
+            <textPath href="#bigBot" startOffset="22%">2023</textPath>
+          </text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery / Service Images -->
+  <section class="gallery" id="gallery">
+    <div class="section-header">
+      <div class="section-label">Kerja Kami</div>
+      <h2 class="section-title">Contoh Servis &amp; Pemasangan</h2>
+      <p class="section-sub">Setiap kerja kami laksanakan dengan teliti, kemas, dan profesional.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-card">
+        <div class="gallery-img-placeholder">❄️</div>
+        <div class="gallery-card-body">
+          <strong>Servis &amp; Basuh Aircond</strong>
+          <span>Pencucian menyeluruh unit split</span>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img-placeholder">🔧</div>
+        <div class="gallery-card-body">
+          <strong>Baiki Kompressor</strong>
+          <span>Diagnosis dan penggantian bahagian</span>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img-placeholder">🏠</div>
+        <div class="gallery-card-body">
+          <strong>Pasang Aircond Rumah</strong>
+          <span>Pemasangan bersih dan selamat</span>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img-placeholder">⚡</div>
+        <div class="gallery-card-body">
+          <strong>Pendawaian Elektrik</strong>
+          <span>Wiring baru untuk unit aircond</span>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img-placeholder">🏢</div>
+        <div class="gallery-card-body">
+          <strong>Aircond Pejabat</strong>
+          <span>Pasang &amp; servis untuk premis komersial</span>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img-placeholder">💧</div>
+        <div class="gallery-card-body">
+          <strong>Gas Top Up</strong>
+          <span>Tambah gas R32 / R410A / R22</span>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center; color:rgba(255,255,255,.45); font-size:.78rem; margin-top:1.5rem;">
+      * Gambar projek sebenar boleh dilihat di Facebook: <a href="https://web.facebook.com/aircondfreshservices" target="_blank" style="color:var(--yellow-badge)">fb.com/aircondfreshservices</a>
+    </p>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials" id="testimonials">
+    <div class="section-header">
+      <div class="section-label">Apa Kata Pelanggan</div>
+      <h2 class="section-title">Ulasan Pelanggan Kami</h2>
+      <p class="section-sub">Kepuasan pelanggan adalah keutamaan kami.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Servis cepat dan kemas. Technician datang tepat waktu, aircond terus sejuk lepas basuh. Harga pun berpatutan. Akan panggil lagi!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar">A</div>
+          <div class="testi-name">
+            <strong>Ahmad R.</strong>
+            <span>Tanjung Tualang</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Pasang aircond baru kat rumah baru. Kerja kemas, pendawaian elok, tiada masalah. Recommend sangat untuk orang Perak!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar">S</div>
+          <div class="testi-name">
+            <strong>Siti N.</strong>
+            <span>Batu Gajah</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Aircond bocor air, call pagi dah datang petang. Repair siap hari tu juga. Profesional dan amanah. Terima kasih!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar">R</div>
+          <div class="testi-name">
+            <strong>Razif M.</strong>
+            <span>Ipoh</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact" id="contact">
+    <div class="section-header">
+      <div class="section-label">Hubungi Kami</div>
+      <h2 class="section-title">Buat Tempahan Sekarang</h2>
+      <p class="section-sub">Whatsapp kami untuk sebut harga percuma. Kami sedia membantu!</p>
+    </div>
+    <div class="contact-wrap">
+      <div>
+        <ul class="contact-info-list">
+          <li class="contact-info-item">
+            <div class="ci-icon">📍</div>
+            <div class="ci-text">
+              <strong>Alamat</strong>
+              <span>Tanjung Tualang, Perak, Malaysia</span>
+            </div>
+          </li>
+          <li class="contact-info-item">
+            <div class="ci-icon">💬</div>
+            <div class="ci-text">
+              <strong>WhatsApp</strong>
+              <span>Hantar mesej untuk tempahan &amp; pertanyaan</span>
+            </div>
+          </li>
+          <li class="contact-info-item">
+            <div class="ci-icon">📘</div>
+            <div class="ci-text">
+              <strong>Facebook</strong>
+              <span><a href="https://web.facebook.com/aircondfreshservices" target="_blank" style="color:var(--yellow-badge)">fb.com/aircondfreshservices</a></span>
+            </div>
+          </li>
+          <li class="contact-info-item">
+            <div class="ci-icon">🪪</div>
+            <div class="ci-text">
+              <strong>No. Lesen</strong>
+              <span>KT0545349-H (Bertauliah Rasmi)</span>
+            </div>
+          </li>
+          <li class="contact-info-item">
+            <div class="ci-icon">⏰</div>
+            <div class="ci-text">
+              <strong>Waktu Operasi</strong>
+              <span>Isnin – Sabtu: 8am – 6pm</span>
+            </div>
+          </li>
+        </ul>
+        <div class="wa-block">
+          <p>Tekan butang di bawah — mesej WhatsApp automatik akan dibuka untuk tempahan mudah.</p>
+          <a href="https://wa.me/601XXXXXXXX?text=Salam%20Aircond%20Fresh%20Services%2C%20saya%20berminat%20dengan%20perkhidmatan%20anda.%20Boleh%20bagi%20sebut%20harga%3F" class="btn-wa">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.864L.054 23.782a.5.5 0 0 0 .609.631l6.053-1.59A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.892 0-3.67-.518-5.188-1.42l-.362-.214-3.742.981.998-3.645-.235-.374A9.96 9.96 0 0 1 2 12c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10z"/></svg>
+            WhatsApp Sekarang
+          </a>
+        </div>
+      </div>
+
+      <!-- Google Maps embed: Tanjung Tualang, Perak -->
+      <div class="map-embed">
+        <iframe
+          src="https://maps.google.com/maps?q=Tanjung+Tualang,+Perak,+Malaysia&z=13&output=embed"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Lokasi Aircond Fresh Services — Tanjung Tualang, Perak"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      <strong>Aircond Fresh Services</strong> · Tanjung Tualang, Perak, Malaysia
+    </p>
+    <p>Lesen No. KT0545349-H · Servis · Baiki · Pasang · Elektrik</p>
+    <p style="margin-top:.5rem; font-size:.7rem; opacity:.5;">
+      © 2023–2026 Aircond Fresh Services. Hak Cipta Terpelihara.
+    </p>
+  </footer>
+
+  <!-- Floating WhatsApp Button -->
+  <a class="wa-float" href="https://wa.me/601XXXXXXXX?text=Salam%20Aircond%20Fresh%20Services%2C%20boleh%20bantu%20saya%3F" target="_blank" title="WhatsApp Kami">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.864L.054 23.782a.5.5 0 0 0 .609.631l6.053-1.59A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.892 0-3.67-.518-5.188-1.42l-.362-.214-3.742.981.998-3.645-.235-.374A9.96 9.96 0 0 1 2 12c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10z"/>
+    </svg>
+  </a>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "dealsense-approval-sender-lite",
+  "version": "1.0.0",
+  "description": "DealSense Semi-Auto Outreach Approval Dashboard — local tool only",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

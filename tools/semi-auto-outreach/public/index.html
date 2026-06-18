@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexProspect by AUKIY</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="safety-banner">
+  ⚠ HUMAN APPROVAL REQUIRED — This tool only prepares and opens messages. It does NOT silently send anything.
+</div>
+
+<header class="app-header">
+  <div class="brand-wrap">
+    <div class="brand-mark">
+      <img src="assets/apexprospect-icon.png" alt="ApexProspect" class="brand-icon-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon-fallback">AP</div>
+    </div>
+    <div class="brand-text">
+      <h1 class="brand-title">ApexProspect</h1>
+      <span class="brand-subtitle">BY AUKIY</span>
+    </div>
+  </div>
+  <span class="badge">AUKIY LOCAL MODE</span>
+  <div class="header-actions">
+    <button type="button" class="btn-header btn-op-toggle" id="op-toggle" onclick="toggleOperation()">⚡ Operation: ON</button>
+    <button class="btn-header btn-agent-schedule" id="btn-agent-schedule" onclick="toggleAgentSchedule()">🗓 Agent Run: OFF</button>
+    <button type="button" class="btn-header" onclick="toggleAddForm()">+ Add Lead</button>
+    <a class="btn-header btn-export" href="/api/export/csv" download>↓ CSV</a>
+    <a class="btn-header btn-export" href="/api/export/json" download>↓ JSON</a>
+    <button type="button" class="btn-header btn-export" onclick="exportLogs()">↓ Logs</button>
+  </div>
+</header>
+
+<!-- FIX 6: Unified Add Lead panel with Import tab -->
+<div id="add-lead-form" class="add-lead-form-hidden">
+  <div class="add-form-inner">
+    <div class="add-lead-tabs">
+      <button class="add-lead-tab active" data-tab="add" onclick="switchAddLeadTab('add')">+ Add Lead</button>
+      <button class="add-lead-tab" data-tab="import" onclick="switchAddLeadTab('import')">↑ Import JSON</button>
+    </div>
+
+    <!-- Tab 1: Add Lead form -->
+    <div id="add-lead-content">
+      <h2>Add New Lead</h2>
+      <form onsubmit="submitAddLead(event)">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Business Name *</label>
+            <input type="text" name="businessName" placeholder="Zira Beauty Spa" required />
+          </div>
+          <div class="form-field">
+            <label>Location</label>
+            <input type="text" name="location" placeholder="Ipoh" />
+          </div>
+          <div class="form-field">
+            <label>Niche</label>
+            <input type="text" name="niche" placeholder="Beauty Spa / Facial" />
+          </div>
+          <div class="form-field">
+            <label>WhatsApp Number</label>
+            <input type="text" name="whatsappNumber" placeholder="60165531496" />
+          </div>
+          <div class="form-field">
+            <label>Profile URL</label>
+            <input type="text" name="profileUrl" placeholder="https://facebook.com/..." />
+          </div>
+          <div class="form-field">
+            <label>Offer Angle</label>
+            <input type="text" name="offerAngle" placeholder="Mini Website Booking RM350" />
+          </div>
+          <div class="form-field form-field-full">
+            <label>Weakness (pain point)</label>
+            <input type="text" name="weakness" placeholder="No clear booking page" />
+          </div>
+          <div class="form-field form-field-full">
+            <label>DM Draft</label>
+            <textarea name="defaultDm" rows="5" placeholder="Hi..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-form-submit">Add Lead</button>
+          <button type="button" class="btn-form-cancel" onclick="toggleAddForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tab 2: Import JSON -->
+    <div id="import-content" style="display:none;">
+      <h2>Import Prospects from ChatGPT Agent</h2>
+      <p class="import-hint">Paste a JSON array (Format A: operatorLiteLeadData nested, or Format B: flat array), or drag &amp; drop a JSON file.</p>
+      <input type="file" id="import-file-input" accept=".json,application/json" style="display:none;">
+      <!-- FIX 7: Unified single import area -->
+      <div class="import-unified-area">
+        <div class="import-dropzone" id="import-dropzone">
+          <span class="import-dropzone-icon">📁</span>
+          Drag &amp; drop JSON file here
+          <div class="import-dropzone-hint">or paste below</div>
+        </div>
+        <div class="import-or-divider">─────────── or paste below ───────────</div>
+        <textarea id="import-textarea" class="import-textarea" placeholder="Paste JSON array here, or drag &amp; drop file above..."></textarea>
+        <div id="import-file-feedback" style="font-size:12px; min-height:16px; margin-top:4px;"></div>
+      </div>
+      <div class="form-actions import-form-actions">
+        <button type="button" class="btn-form-submit" onclick="submitImport()">Import Prospects</button>
+        <button type="button" class="btn-browse" onclick="document.getElementById('import-file-input').click()">📂 Browse File</button>
+        <button type="button" class="btn-sample-json" onclick="showImportSample()">{ } Sample JSON</button>
+        <button type="button" class="btn-form-cancel" onclick="toggleAddForm()">Cancel</button>
+      </div>
+      <div id="import-result" class="import-result" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sample JSON Modal -->
+<div id="sample-json-overlay" class="sample-json-overlay" style="display:none;" onclick="if(event.target===this)closeSampleJson()">
+  <div class="sample-json-modal">
+    <div class="sample-json-header">
+      <span>Sample Import JSON</span>
+      <button class="sample-json-close" onclick="closeSampleJson()">✕</button>
+    </div>
+    <p class="sample-json-desc">Record 1: complete. Record 2: missing whatsapp but has facebook. Record 3: invalid (no businessName) — will be rejected.</p>
+    <pre id="sample-json-pre" class="sample-json-pre"></pre>
+    <div class="sample-json-actions">
+      <button class="btn-form-submit" onclick="copySampleJson()">Use This Sample</button>
+      <button class="btn-form-cancel" onclick="closeSampleJson()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Start Here Panel -->
+<div class="start-here-panel" id="start-here-panel">
+  <div class="start-here-inner">
+    <div class="start-here-title">Start Here</div>
+    <div class="start-here-subtitle">Move one prospect from review to manual WhatsApp outreach.</div>
+    <div class="start-here-actions">
+      <button type="button" class="btn-start-action" onclick="toggleAddForm(); switchAddLeadTab('add')">+ Add Prospect</button>
+      <button type="button" class="btn-start-action" onclick="toggleAddForm(); switchAddLeadTab('import')">↑ Import Prospects</button>
+      <button type="button" class="btn-start-action" onclick="reviewNextProspect()">▶ Review Next Prospect</button>
+      <button type="button" class="btn-start-action btn-start-workflow" onclick="toggleWorkflowPanel()">📋 Open Manual Workflow</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manual Workflow Panel -->
+<div class="workflow-panel" id="workflow-panel" style="display:none;">
+  <div class="workflow-inner">
+    <div class="workflow-header">
+      <span class="workflow-title">Manual Outreach Workflow</span>
+      <button type="button" class="workflow-close" onclick="toggleWorkflowPanel()">✕ Close</button>
+    </div>
+    <ol class="workflow-steps">
+      <li>Add or import prospect</li>
+      <li>Review business details</li>
+      <li>Generate or attach landing page preview</li>
+      <li>Write or paste DM Draft</li>
+      <li>Click <strong>Approve &amp; Open WhatsApp</strong></li>
+      <li>Press <strong>Send</strong> manually in WhatsApp</li>
+      <li>Return and click <strong>Confirm Sent</strong></li>
+      <li>Mark Replied when prospect responds</li>
+      <li>Follow up or close Won / Lost</li>
+      <li>Record payment / delivery / amendment</li>
+    </ol>
+    <div class="workflow-safety">⚠ This system prepares and opens messages only. It never sends messages automatically.</div>
+    <div class="workflow-legend">
+      <div class="workflow-legend-title">Pipeline Legend</div>
+      <div class="workflow-legend-grid">
+        <span class="wl-key">NEW</span><span class="wl-val">Not reviewed yet</span>
+        <span class="wl-key">NEEDS REVIEW</span><span class="wl-val">Requires operator check</span>
+        <span class="wl-key">APPROVED</span><span class="wl-val">DM approved but not sent</span>
+        <span class="wl-key">CONTACTED</span><span class="wl-val">Manually sent and confirmed</span>
+        <span class="wl-key">REPLIED</span><span class="wl-val">Prospect replied</span>
+        <span class="wl-key">FOLLOW-UP</span><span class="wl-val">Follow-up needed</span>
+        <span class="wl-key">CLOSED WON</span><span class="wl-val">Deal won and locked</span>
+        <span class="wl-key">CLOSED LOST</span><span class="wl-val">Deal lost and locked</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FIX 4: Agent Schedule Panel with Repeat row -->
+<div id="agent-schedule-panel" class="agent-schedule-panel" style="display:none;">
+  <div class="agent-schedule-inner">
+    <h3>🤖 Schedule Agent Prospect Run</h3>
+    <p>Set time for agent (ChatGPT/Alt) to find new prospects automatically.</p>
+    <div class="agent-schedule-row">
+      <label>Date &amp; Time:</label>
+      <input type="datetime-local" id="agent-run-datetime">
+    </div>
+    <!-- FIX 4: Repeat every 7 days -->
+    <div class="agent-schedule-row">
+      <label>Repeat:</label>
+      <label class="toggle-label">
+        <input type="checkbox" id="agent-run-repeat">
+        <span>Every 7 days automatically</span>
+      </label>
+    </div>
+    <div class="agent-schedule-row">
+      <label>Niche Target:</label>
+      <input type="text" id="agent-run-niche" placeholder="Beauty Spa, Clinic, Dental..." value="Beauty Spa / Facial">
+    </div>
+    <div class="agent-schedule-row">
+      <label>Location:</label>
+      <input type="text" id="agent-run-location" placeholder="Ipoh, Perak" value="Ipoh">
+    </div>
+    <div class="agent-schedule-row">
+      <label>Number of Prospects:</label>
+      <input type="number" id="agent-run-count" value="30" min="5" max="50">
+    </div>
+    <!-- FIX 5: Prompt output row (hidden until Find Now clicked) -->
+    <div id="agent-prompt-row" style="display:none;" class="agent-schedule-row agent-prompt-row">
+      <label>Prompt:</label>
+      <textarea id="agent-prompt-output" readonly rows="4"></textarea>
+    </div>
+    <!-- FIX 5: Button order: Find Now, Save Schedule, Clear, Close -->
+    <div class="agent-schedule-actions">
+      <button type="button" class="btn-find-now" onclick="handleFindNow()">🔍 Find Prospects Now</button>
+      <button type="button" class="btn-save-schedule" onclick="saveAgentSchedule()">💾 Save Schedule</button>
+      <button type="button" onclick="clearAgentSchedule()">🗑 Clear</button>
+      <button type="button" onclick="toggleAgentSchedule()">Close</button>
+    </div>
+    <div id="agent-schedule-status"></div>
+  </div>
+</div>
+
+<div class="pipeline-tabs" id="pipeline-tabs">
+  <!-- Rendered by app.js -->
+</div>
+
+<!-- Phase 7: Smart Action Panel -->
+<div class="smart-panel" id="smart-panel">
+  <div class="smart-panel-header">
+    <span class="smart-panel-title">⚡ Next Actions</span>
+    <button type="button" class="smart-panel-toggle" id="smart-panel-toggle" onclick="toggleSmartPanel()">▾ Hide</button>
+  </div>
+  <div class="smart-panel-body" id="smart-panel-body">
+    <!-- Rendered by app.js renderSmartPanel() -->
+    <div class="smart-panel-empty">Loading...</div>
+  </div>
+</div>
+
+<!-- Phase 7: Daily Target Tracker -->
+<div class="daily-tracker" id="daily-tracker">
+  <!-- Rendered by app.js renderDailyTracker() -->
+</div>
+
+<div class="prospect-table-wrapper">
+  <table class="prospect-table" id="prospect-table">
+    <thead>
+      <tr>
+        <th>Business</th>
+        <th>Location</th>
+        <th>Prospect Status</th>
+        <th>Reply</th>
+        <th>Deal</th>
+        <th>Last Action</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="prospect-tbody">
+      <tr class="table-empty-row"><td colspan="7">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Hidden cards grid — used by modal only -->
+<div style="display:none;">
+  <div class="leads-grid" id="leads-grid"></div>
+</div>
+
+<!-- Phase 6B: Card Modal -->
+<div id="card-modal-overlay" class="card-modal-overlay" onclick="handleModalOverlayClick(event)" style="display:none;">
+  <div class="card-modal-box" id="card-modal-box">
+    <button type="button" class="card-modal-close" onclick="closeCardModal()">✕</button>
+    <div id="card-modal-content"></div>
+  </div>
+</div>
+
+<!-- Phase 6: Operation paused banner -->
+<div id="op-paused-banner" class="op-paused-banner hidden">
+  ⏸ Operation paused. No messages can be approved.
+</div>
+
+<!-- Phase 6: Working hours warning modal -->
+<div id="wh-modal-overlay" class="modal-overlay hidden" onclick="whModalCancel()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-icon">⚠</div>
+    <div class="modal-title">Outside Operating Hours</div>
+    <div class="modal-body">Current time is outside 9AM–9PM. Send now anyway?</div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-confirm" id="wh-confirm-btn">Send Now</button>
+      <button type="button" class="btn-modal-cancel" onclick="whModalCancel()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
