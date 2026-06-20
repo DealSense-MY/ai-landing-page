@@ -24,8 +24,9 @@ function generateToken() {
 }
 
 function isLocalHost(req) {
-  const host = req.hostname || req.headers.host || '';
-  return host === 'localhost' || host === '127.0.0.1' || host.startsWith('localhost:') || host.startsWith('127.0.0.1:');
+  // Use TCP peer address — Host header is operator-controlled and spoofable
+  const ip = req.socket && req.socket.remoteAddress;
+  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
 }
 
 function getSessionToken(req) {
@@ -1200,8 +1201,12 @@ app.get('/api/export/csv', requireAuth, (req, res) => {
 });
 
 ensureDataFiles();
-app.listen(PORT, () => {
+// Bind to loopback-only when unprotected so the OS blocks remote connections
+// before any middleware runs. When PROTECTED, bind 0.0.0.0 so ngrok/tunnels work.
+const BIND_HOST = PROTECTED ? '0.0.0.0' : '127.0.0.1';
+app.listen(PORT, BIND_HOST, () => {
   console.log(`\n✅ DealSense Approval Sender Lite`);
   console.log(`📋 Dashboard: http://localhost:${PORT}`);
+  if (!PROTECTED) console.log(`🔒 Bound to 127.0.0.1 — set APEX_OPERATOR_PASSWORD to allow remote access.`);
   console.log(`⚠  Human approval required before any message is sent.\n`);
 });
