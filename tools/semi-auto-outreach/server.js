@@ -1,10 +1,61 @@
+require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const previewBuilder = require('./modules/previewBuilder');
 
 const app = express();
 const PORT = 3777;
+
+// ── Security bootstrap ────────────────────────────────────────────────────────
+const OPERATOR_PASSWORD = process.env.APEX_OPERATOR_PASSWORD || '';
+const PROTECTED = !!OPERATOR_PASSWORD;
+
+if (!PROTECTED) {
+  console.warn('WARNING: APEX_OPERATOR_PASSWORD not set. Dashboard is unprotected.');
+}
+
+// In-memory session tokens (single-operator, no persistence needed)
+const activeSessions = new Set();
+
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function isLocalHost(req) {
+  const host = req.hostname || req.headers.host || '';
+  return host === 'localhost' || host === '127.0.0.1' || host.startsWith('localhost:') || host.startsWith('127.0.0.1:');
+}
+
+function getSessionToken(req) {
+  // Read from httpOnly cookie
+  const raw = req.headers.cookie || '';
+  const match = raw.match(/(?:^|;\s*)apex_session=([^;]+)/);
+  return match ? match[1] : null;
+}
+
+function isAuthenticated(req) {
+  if (!PROTECTED) return true;
+  const token = getSessionToken(req);
+  return token && activeSessions.has(token);
+}
+
+// Middleware: require operator auth for write/mutation routes
+function requireAuth(req, res, next) {
+  if (isAuthenticated(req)) return next();
+  return res.status(401).json({ success: false, error: 'Unauthorized' });
+}
+
+// Middleware: block non-localhost access when no password is set
+function remoteGuard(req, res, next) {
+  if (PROTECTED) return next();
+  if (!isLocalHost(req)) {
+    return res.status(403).send('Operator password required before remote access.');
+  }
+  return next();
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const LEADS_FILE   = path.join(__dirname, 'data', 'leads.json');
 const LOG_FILE     = path.join(__dirname, 'data', 'outreach-log.json');
@@ -12,8 +63,63 @@ const RUN_LOG_FILE = path.join(__dirname, 'data', 'run-log.json');
 const DEMOS_BASE   = path.join(__dirname, '../../DEMOS');
 
 app.use(express.json());
+app.use(remoteGuard);
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/previews', express.static(DEMOS_BASE));
+app.use('/previews', requireAuth, express.static(DEMOS_BASE));
+
+// ── Backup helper (Patch E) ───────────────────────────────────────────────────
+const BACKUP_DIR = path.join(__dirname, 'data', 'backups');
+
+function ensureBackupDir() {
+  if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+}
+
+function backupFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  ensureBackupDir();
+  const ts  = new Date().toISOString().replace(/[-:T]/g, match => match === 'T' ? '-' : match === ':' ? '' : match).slice(0, 15);
+  const base = path.basename(filePath);
+  const dest = path.join(BACKUP_DIR, `${ts}-${base}`);
+  fs.copyFileSync(filePath, dest);
+}
+
+function backupBeforeWrite() {
+  backupFile(LEADS_FILE);
+  backupFile(LOG_FILE);
+  backupFile(RUN_LOG_FILE);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Auth API ─────────────────────────────────────────────────────────────────
+app.get('/api/auth/status', (req, res) => {
+  res.json({
+    protected: PROTECTED,
+    authenticated: isAuthenticated(req),
+    localhost: isLocalHost(req)
+  });
+});
+
+app.post('/api/operator-login', (req, res) => {
+  if (!PROTECTED) {
+    return res.json({ ok: true, message: 'No password set — open access on localhost' });
+  }
+  const { password } = req.body || {};
+  if (!password || password !== OPERATOR_PASSWORD) {
+    return res.status(401).json({ success: false, error: 'Wrong password' });
+  }
+  const token = generateToken();
+  activeSessions.add(token);
+  res.setHeader('Set-Cookie', `apex_session=${token}; HttpOnly; Path=/; SameSite=Strict`);
+  res.json({ ok: true });
+});
+
+app.post('/api/operator-logout', (req, res) => {
+  const token = getSessionToken(req);
+  if (token) activeSessions.delete(token);
+  res.setHeader('Set-Cookie', 'apex_session=; HttpOnly; Path=/; Max-Age=0');
+  res.json({ ok: true });
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Serialize all file writes to prevent race conditions
 let writeQueue = Promise.resolve();
@@ -235,18 +341,119 @@ function ensureDataFiles() {
   migrateLeadsFile();
 }
 
-// GET all leads
-app.get('/api/leads', (req, res) => {
+// GET all leads — excludes archived by default; ?archived=true returns only archived
+app.get('/api/leads', requireAuth, (req, res) => {
   try {
-    res.json(safeReadJSON(LEADS_FILE));
+    const all = safeReadJSON(LEADS_FILE);
+    if (req.query.archived === 'true') {
+      return res.json(all.filter(l => l.archived === true));
+    }
+    res.json(all.filter(l => !l.archived));
   } catch (e) {
     res.status(500).json({ error: 'Cannot read leads.json' });
   }
 });
 
-// POST new lead
-app.post('/api/leads', (req, res) => {
+// POST archive a lead (soft hide — keeps data intact)
+app.post('/api/leads/:id/archive', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
+    const leads = safeReadJSON(LEADS_FILE);
+    const idx = leads.findIndex(l => l.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+
+    const now = new Date().toISOString();
+    leads[idx].archived   = true;
+    leads[idx].archivedAt = now;
+    leads[idx].lastActionAt = now;
+
+    if (!Array.isArray(leads[idx].events)) leads[idx].events = [];
+    leads[idx].events.push({
+      id:        `ARCHIVED-${Date.now()}`,
+      type:      'ARCHIVED',
+      leadId:    req.params.id,
+      leadName:  leads[idx].businessName || '',
+      timestamp: now,
+      source:    'operator-ui',
+      actor:     'Aliff',
+      metadata:  {}
+    });
+
+    safeWriteJSON(LEADS_FILE, leads);
+    res.json({ ok: true, lead: leads[idx] });
+  });
+});
+
+// POST restore an archived lead
+app.post('/api/leads/:id/restore', requireAuth, (req, res) => {
+  queueWrite(() => {
+    backupBeforeWrite();
+    const leads = safeReadJSON(LEADS_FILE);
+    const idx = leads.findIndex(l => l.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+
+    const now = new Date().toISOString();
+    leads[idx].archived   = false;
+    leads[idx].archivedAt = '';
+    leads[idx].lastActionAt = now;
+
+    if (!Array.isArray(leads[idx].events)) leads[idx].events = [];
+    leads[idx].events.push({
+      id:        `RESTORED-${Date.now()}`,
+      type:      'RESTORED',
+      leadId:    req.params.id,
+      leadName:  leads[idx].businessName || '',
+      timestamp: now,
+      source:    'operator-ui',
+      actor:     'Aliff',
+      metadata:  {}
+    });
+
+    safeWriteJSON(LEADS_FILE, leads);
+    res.json({ ok: true, lead: leads[idx] });
+  });
+});
+
+// DELETE lead — soft-delete (marks deleted:true, never removes from file)
+app.delete('/api/leads/:id', requireAuth, (req, res) => {
+  queueWrite(() => {
+    backupBeforeWrite();
+    const leads = safeReadJSON(LEADS_FILE);
+    const idx = leads.findIndex(l => l.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+
+    if (leads[idx].locked) {
+      return res.status(403).json({ error: 'Lead is locked — cannot delete' });
+    }
+
+    const now = new Date().toISOString();
+    leads[idx].deleted    = true;
+    leads[idx].deletedAt  = now;
+    leads[idx].archived   = true;
+    leads[idx].archivedAt = now;
+    leads[idx].lastActionAt = now;
+
+    if (!Array.isArray(leads[idx].events)) leads[idx].events = [];
+    leads[idx].events.push({
+      id:        `SOFT_DELETED-${Date.now()}`,
+      type:      'SOFT_DELETED',
+      leadId:    req.params.id,
+      leadName:  leads[idx].businessName || '',
+      timestamp: now,
+      source:    'operator-ui',
+      actor:     'Aliff',
+      metadata:  {}
+    });
+
+    safeWriteJSON(LEADS_FILE, leads);
+    res.json({ ok: true, deleted: true, lead: leads[idx] });
+  });
+});
+
+// POST new lead
+app.post('/api/leads', requireAuth, (req, res) => {
+  queueWrite(() => {
+    backupBeforeWrite();
     const leads = safeReadJSON(LEADS_FILE);
     const { businessName, location, niche, whatsappNumber, profileUrl,
             platform, contactMethod, weakness, offerAngle, defaultDm } = req.body;
@@ -314,8 +521,9 @@ app.post('/api/leads', (req, res) => {
 });
 
 // PATCH lead status / reply / follow-up
-app.patch('/api/leads/:id', (req, res) => {
+app.patch('/api/leads/:id', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const leads = safeReadJSON(LEADS_FILE);
     const log   = safeReadJSON(LOG_FILE);
     const idx = leads.findIndex(l => l.id === req.params.id);
@@ -363,8 +571,9 @@ app.patch('/api/leads/:id', (req, res) => {
 });
 
 // POST import prospects from ChatGPT agent JSON — Patch 5 upgrade
-app.post('/api/leads/import', (req, res) => {
+app.post('/api/leads/import', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const { leads: incoming } = req.body;
     if (!Array.isArray(incoming) || !incoming.length) {
       return res.status(400).json({ error: 'leads array required' });
@@ -595,8 +804,9 @@ app.post('/api/leads/import', (req, res) => {
 });
 
 // POST generate preview for a lead
-app.post('/api/leads/:id/generate-preview', (req, res) => {
+app.post('/api/leads/:id/generate-preview', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const leads = safeReadJSON(LEADS_FILE);
     const idx   = leads.findIndex(l => l.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
@@ -653,8 +863,9 @@ app.post('/api/leads/:id/generate-preview', (req, res) => {
 });
 
 // POST event to a lead's events[] and run-log.json
-app.post('/api/leads/:id/events', (req, res) => {
+app.post('/api/leads/:id/events', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const { type, metadata } = req.body;
     if (!type) return res.status(400).json({ error: 'event type required' });
 
@@ -701,8 +912,9 @@ app.post('/api/leads/:id/events', (req, res) => {
 });
 
 // POST lock a lead (Closed Won / Closed Lost)
-app.post('/api/leads/:id/lock', (req, res) => {
+app.post('/api/leads/:id/lock', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const { reason, dealStatus, prospectStatus } = req.body;
     if (!reason) return res.status(400).json({ error: 'lock reason required' });
 
@@ -769,8 +981,9 @@ app.post('/api/leads/:id/lock', (req, res) => {
 });
 
 // POST add amendment to a lead
-app.post('/api/leads/:id/amendments', (req, res) => {
+app.post('/api/leads/:id/amendments', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const { note, reason } = req.body;
     if (!note || !note.trim()) return res.status(400).json({ error: 'amendment note required' });
 
@@ -820,9 +1033,10 @@ app.post('/api/leads/:id/amendments', (req, res) => {
 });
 
 // PATCH audit sub-object — Patch 5A
-app.patch('/api/leads/:id/audit', (req, res) => {
+app.patch('/api/leads/:id/audit', requireAuth, (req, res) => {
   queueWrite(() => {
     try {
+      backupBeforeWrite();
       const leads = safeReadJSON(LEADS_FILE);
       const idx = leads.findIndex(l => l.id === req.params.id);
       if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
@@ -890,7 +1104,7 @@ app.patch('/api/leads/:id/audit', (req, res) => {
 });
 
 // GET run-log.json as JSON array
-app.get('/api/logs', (req, res) => {
+app.get('/api/logs', requireAuth, (req, res) => {
   try {
     let log = [];
     if (fs.existsSync(RUN_LOG_FILE)) {
@@ -904,8 +1118,9 @@ app.get('/api/logs', (req, res) => {
 });
 
 // POST mark lead as paid
-app.post('/api/leads/:id/mark-paid', (req, res) => {
+app.post('/api/leads/:id/mark-paid', requireAuth, (req, res) => {
   queueWrite(() => {
+    backupBeforeWrite();
     const leads = safeReadJSON(LEADS_FILE);
     const idx = leads.findIndex(l => l.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
@@ -956,7 +1171,7 @@ app.post('/api/leads/:id/mark-paid', (req, res) => {
 });
 
 // GET export — full leads as JSON download
-app.get('/api/export/json', (req, res) => {
+app.get('/api/export/json', requireAuth, (req, res) => {
   try {
     const leads = safeReadJSON(LEADS_FILE);
     res.setHeader('Content-Disposition', 'attachment; filename="leads-export.json"');
@@ -968,7 +1183,7 @@ app.get('/api/export/json', (req, res) => {
 });
 
 // GET export — CSV download
-app.get('/api/export/csv', (req, res) => {
+app.get('/api/export/csv', requireAuth, (req, res) => {
   try {
     const leads = safeReadJSON(LEADS_FILE);
     const cols = ['id','businessName','location','niche','platform','contactMethod',

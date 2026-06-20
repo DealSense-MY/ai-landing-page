@@ -1,5 +1,5 @@
 # APEX_LOCKED_BASELINE.md
-Generated: 2026-06-18 | Status: PARTIAL — updated after Phase 7
+Generated: 2026-06-18 | Last verified: 2026-06-20 | Status: FULL — all 35 items PASS
 
 ---
 
@@ -124,3 +124,11 @@ Generated: 2026-06-18 | Status: PARTIAL — updated after Phase 7
 - **File**: index.html
 - **Why locked**: 10-step workflow with safety note
 - **Do not change**: Collapsible, English-only, no automation implied
+
+---
+
+### 19. Preview click tracker text (English)
+
+- **File**: app.js:492-493
+- **Why locked**: Fixed 2026-06-20 — "Preview dah dibuka Nx" and "Preview belum dikonfirm dibuka" replaced with English
+- **Do not change**: Must remain "Preview opened Nx" and "Preview not yet confirmed opened"

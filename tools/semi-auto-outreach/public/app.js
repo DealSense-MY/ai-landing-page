@@ -16,6 +16,7 @@ const STATUSES = [
 ];
 
 // Pipeline tab definitions — label, filter key, match values
+// ARCHIVED is a special tab — fetches from server with ?archived=true
 const PIPELINE_TABS = [
   { key: 'ALL',          label: 'All',           match: null },
   { key: 'NEW',          label: 'New',           match: ['NEW'] },
@@ -26,11 +27,14 @@ const PIPELINE_TABS = [
   { key: 'FOLLOWUP',     label: 'Follow-Up',     match: ['FOLLOW_UP_NEEDED'] },
   { key: 'CLOSED_WON',   label: 'Closed Won',    match: ['CLOSED_WON'] },
   { key: 'CLOSED_LOST',  label: 'Closed Lost',   match: ['CLOSED_LOST'] },
+  { key: 'ARCHIVED',     label: 'Archived',      match: null, archived: true },
 ];
 
-let _activeTab    = 'ALL';
-let _allLeads     = [];
-let _selectedId   = null;
+let _activeTab      = 'ALL';
+let _allLeads       = [];
+let _archivedLeads  = [];
+let _selectedId     = null;
+let _searchQuery    = '';
 
 function getStatus(l) {
   return l.prospectStatus || l.status || 'NEW';
@@ -105,30 +109,55 @@ function readableStatus(status) {
 }
 
 function matchesTab(l, tab) {
+  if (tab.archived) return false; // ARCHIVED tab is handled separately
   if (!tab.match) return true;
   const s = getStatus(l);
   return tab.match.includes(s);
 }
 
+function applySearch(leads) {
+  if (!_searchQuery) return leads;
+  const q = _searchQuery.toLowerCase();
+  return leads.filter(l =>
+    (l.businessName || '').toLowerCase().includes(q) ||
+    (l.location || l.lokasi || '').toLowerCase().includes(q) ||
+    (l.niche || '').toLowerCase().includes(q) ||
+    (l.whatsappNumber || l.whatsapp || '').includes(q)
+  );
+}
+
 function renderTabs(leads) {
   const container = document.getElementById('pipeline-tabs');
   container.innerHTML = PIPELINE_TABS.map(tab => {
-    const count = tab.match ? leads.filter(l => matchesTab(l, tab)).length : leads.length;
+    let count;
+    if (tab.archived) {
+      count = _archivedLeads.length;
+    } else if (tab.match) {
+      count = leads.filter(l => matchesTab(l, tab)).length;
+    } else {
+      count = leads.length;
+    }
     const active = _activeTab === tab.key ? 'tab-active' : '';
     const needsReviewClass = tab.key === 'NEEDS_REVIEW' && count > 0 ? ' tab-needs-review' : '';
-    return `<button class="tab-btn ${active}${needsReviewClass}" data-key="${safeClass(tab.key)}" onclick="switchTab('${safeClass(tab.key)}')">${esc(tab.label)}<span class="tab-count">${count}</span></button>`;
+    const archivedClass = tab.key === 'ARCHIVED' ? ' tab-archived' : '';
+    return `<button class="tab-btn ${active}${needsReviewClass}${archivedClass}" data-key="${safeClass(tab.key)}" onclick="switchTab('${safeClass(tab.key)}')">${esc(tab.label)}<span class="tab-count">${count}</span></button>`;
   }).join('');
 }
 
 function switchTab(key) {
   _activeTab = key;
-  renderTabs(_allLeads);
   const tab = PIPELINE_TABS.find(t => t.key === key);
-  const filtered = _allLeads.filter(l => matchesTab(l, tab));
-  // Deselect if selected lead is not in new tab
-  if (_selectedId && !filtered.find(l => l.id === _selectedId)) {
-    _selectedId = null;
+  if (tab && tab.archived) {
+    renderTabs(_allLeads);
+    const filtered = applySearch(_archivedLeads);
+    if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
+    renderTable(filtered);
+    renderCards(filtered);
+    return;
   }
+  renderTabs(_allLeads);
+  const filtered = applySearch(_allLeads.filter(l => matchesTab(l, tab)));
+  if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
   renderTable(filtered);
   renderCards(filtered);
 }
@@ -227,9 +256,14 @@ function renderCards(leads) {
 
 async function loadLeads() {
   try {
-    const res = await fetch('/api/leads');
-    const leads = await res.json();
-    _allLeads = leads;
+    const [res, resArchived] = await Promise.all([
+      fetch('/api/leads'),
+      fetch('/api/leads?archived=true')
+    ]);
+    const leads   = await res.json();
+    const archived = await resArchived.json();
+    _allLeads      = leads;
+    _archivedLeads = archived;
     renderLeads(leads);
   } catch (e) {
     document.getElementById('leads-grid').innerHTML = `
@@ -245,7 +279,13 @@ function renderLeads(leads) {
   renderSmartPanel(leads);
   renderDailyTracker(leads);
   const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
-  const filtered = leads.filter(l => matchesTab(l, tab));
+  if (tab && tab.archived) {
+    const filtered = applySearch(_archivedLeads);
+    renderTable(filtered);
+    renderCards(filtered);
+    return;
+  }
+  const filtered = applySearch(leads.filter(l => matchesTab(l, tab)));
   renderTable(filtered);
   renderCards(filtered);
 }
@@ -354,6 +394,10 @@ function buildLeadCard(l) {
       <p class="dm-followup-helper">Use Follow-Up Draft after you have contacted the prospect but have not received a reply.</p>
       <button class="btn btn-won" onclick="handleClose('${id}','CLOSED_WON')">CLOSED WON ✓</button>
       <button class="btn btn-lost" onclick="handleClose('${id}','CLOSED_LOST')">CLOSED LOST</button>
+      <div class="archive-row" id="archive-row-${id}">
+        <button class="btn btn-archive" id="btn-archive-${id}" onclick="handleArchive('${id}')">⬇ ARCHIVE</button>
+        <button class="btn btn-restore" id="btn-restore-${id}" onclick="handleRestore('${id}')" style="display:none">↑ RESTORE</button>
+      </div>
     </div>
 
     <div class="feedback-box" id="fb-${id}"></div>
@@ -489,8 +533,8 @@ function renderPreviewSignal(l) {
   if (l.previewStatus !== 'READY' || l.locked) { el.innerHTML = ''; return; }
   const count = l.previewClickCount || 0;
   const clickedText = l.previewClicked
-    ? `<span>👁 Preview dah dibuka ${count}x</span>`
-    : `<span style="color:var(--text-soft)">Preview belum dikonfirm dibuka</span>`;
+    ? `<span>👁 Preview opened ${count}x</span>`
+    : `<span style="color:var(--text-soft)">Preview not yet confirmed opened</span>`;
   const safeId = safeClass(l.id);
   el.innerHTML = `<div class="preview-click-signal">
     ${clickedText}
@@ -629,6 +673,19 @@ function populateLeadCard(l) {
 
   // Amendments list (always render if any exist)
   renderAmendmentsList(l);
+
+  // Archive / Restore button visibility
+  const archiveBtn  = document.getElementById('btn-archive-' + l.id);
+  const restoreBtn  = document.getElementById('btn-restore-' + l.id);
+  if (archiveBtn && restoreBtn) {
+    if (l.archived) {
+      archiveBtn.style.display = 'none';
+      restoreBtn.style.display = '';
+    } else {
+      archiveBtn.style.display = '';
+      restoreBtn.style.display = 'none';
+    }
+  }
 }
 
 function applyLockedUI(l) {
@@ -984,6 +1041,36 @@ async function handleAddAmendment(id) {
   renderTable(_allLeads.filter(l => matchesTab(l, tab)));
   openCardModal(id);
   showFeedback(id, 'success', 'Amendment saved.');
+}
+
+async function handleArchive(id) {
+  const res  = await fetch('/api/leads/' + id + '/archive', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  const data = await res.json();
+  if (!res.ok) { showFeedback(id, 'error', data.error || 'Archive failed'); return; }
+  const idx = _allLeads.findIndex(l => l.id === id);
+  if (idx !== -1) _allLeads.splice(idx, 1);
+  if (!_archivedLeads.find(l => l.id === id)) _archivedLeads.push(data.lead);
+  renderTabs(_allLeads);
+  closeCardModal();
+  const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
+  const filtered = applySearch(tab && tab.archived ? _archivedLeads : _allLeads.filter(l => matchesTab(l, tab)));
+  renderTable(filtered);
+  renderCards(filtered);
+}
+
+async function handleRestore(id) {
+  const res  = await fetch('/api/leads/' + id + '/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  const data = await res.json();
+  if (!res.ok) { showFeedback(id, 'error', data.error || 'Restore failed'); return; }
+  const aIdx = _archivedLeads.findIndex(l => l.id === id);
+  if (aIdx !== -1) _archivedLeads.splice(aIdx, 1);
+  if (!_allLeads.find(l => l.id === id)) _allLeads.push(data.lead);
+  renderTabs(_allLeads);
+  closeCardModal();
+  const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
+  const filtered = applySearch(tab && tab.archived ? _archivedLeads : _allLeads.filter(l => matchesTab(l, tab)));
+  renderTable(filtered);
+  renderCards(filtered);
 }
 
 // ── Phase 6: Operation Toggle ─────────────────────────────────
@@ -1941,6 +2028,125 @@ function toggleWorkflowPanel() {
   panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 }
 
-applyOperationState();
-restoreAgentSchedule();
-loadLeads();
+function initSearchBar() {
+  const input = document.getElementById('prospect-search');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    _searchQuery = input.value.trim();
+    const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
+    const pool = (tab && tab.archived) ? _archivedLeads : _allLeads.filter(l => matchesTab(l, tab));
+    const filtered = applySearch(pool);
+    renderTable(filtered);
+    renderCards(filtered);
+  });
+}
+
+// ── Security gate (Patch F) ──────────────────────────────────────────────────
+async function initSecurityGate() {
+  let status;
+  try {
+    const r = await fetch('/api/auth/status');
+    status = await r.json();
+  } catch (e) {
+    status = { protected: false, authenticated: true, localhost: true };
+  }
+
+  const banner = document.getElementById('security-banner');
+  if (banner) {
+    if (status.protected && status.authenticated) {
+      banner.textContent = '🔒 Operator Protected';
+      banner.className = 'security-banner security-banner--ok';
+      banner.style.display = '';
+    } else if (!status.protected) {
+      banner.textContent = '⚠ Local Mode: No Operator Password Set';
+      banner.className = 'security-banner security-banner--warn';
+      banner.style.display = '';
+    }
+  }
+
+  if (status.protected && !status.authenticated) {
+    showLoginGate();
+    return false;
+  }
+  return true;
+}
+
+function showLoginGate() {
+  document.body.replaceChildren();
+
+  const gate = document.createElement('div');
+  gate.className = 'login-gate';
+
+  const box = document.createElement('div');
+  box.className = 'login-box';
+
+  const logo = document.createElement('div');
+  logo.className = 'login-logo';
+  logo.textContent = '🔒';
+
+  const title = document.createElement('h2');
+  title.textContent = 'ApexProspect';
+
+  const sub = document.createElement('p');
+  sub.className = 'login-sub';
+  sub.textContent = 'Operator access required';
+
+  const form = document.createElement('form');
+  form.id = 'login-form';
+  form.addEventListener('submit', submitLogin);
+
+  const pw = document.createElement('input');
+  pw.id = 'login-pw';
+  pw.type = 'password';
+  pw.placeholder = 'Operator password';
+  pw.setAttribute('autofocus', '');
+  pw.autocomplete = 'current-password';
+
+  const btn = document.createElement('button');
+  btn.type = 'submit';
+  btn.textContent = 'Unlock Dashboard';
+
+  const errDiv = document.createElement('div');
+  errDiv.id = 'login-error';
+  errDiv.className = 'login-error';
+  errDiv.style.display = 'none';
+  errDiv.textContent = 'Wrong password';
+
+  form.append(pw, btn, errDiv);
+  box.append(logo, title, sub, form);
+  gate.appendChild(box);
+  document.body.appendChild(gate);
+
+  pw.focus();
+}
+
+async function submitLogin(e) {
+  e.preventDefault();
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-error');
+  try {
+    const r = await fetch('/api/operator-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (r.ok) {
+      location.reload();
+    } else {
+      err.style.display = 'block';
+      document.getElementById('login-pw').value = '';
+      document.getElementById('login-pw').focus();
+    }
+  } catch (e) {
+    err.textContent = 'Connection error';
+    err.style.display = 'block';
+  }
+}
+
+initSecurityGate().then(ok => {
+  if (!ok) return;
+  applyOperationState();
+  restoreAgentSchedule();
+  loadLeads();
+});
+initSearchBar();

@@ -1,5 +1,5 @@
 # APEX_FINAL_REGRESSION_CHECKLIST.md
-Generated: 2026-06-18 | Status: ALL PASS
+Generated: 2026-06-18 | Last live run: 2026-06-20 | Status: ALL PASS (35/35 + 7 bonus)
 
 This checklist must be run before any future patch to verify nothing regressed.
 
