@@ -7,7 +7,8 @@ const SHELL_FILES = [
   '/style.css',
   '/app.js',
   '/manifest.json',
-  '/assets/apexprospect-icon.png'
+  '/assets/apexprospect-logo-192.png',
+  '/assets/apexprospect-logo-512.png'
 ];
 
 self.addEventListener('install', event => {
