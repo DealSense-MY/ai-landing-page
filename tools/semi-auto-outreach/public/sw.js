@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apexprospect-shell-v1';
+const CACHE_NAME = 'apexprospect-shell-v2';
 
 // App shell files only — never cache /api/* responses
 const SHELL_FILES = [
