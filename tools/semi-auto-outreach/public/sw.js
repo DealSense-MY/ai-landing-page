@@ -1,11 +1,12 @@
-const CACHE_NAME = 'apexprospect-shell-v2';
+const CACHE_NAME = 'apexprospect-shell-v3';
 
 // App shell files only — never cache /api/* responses
+// Use versioned URL for app.js to match what index.html requests
 const SHELL_FILES = [
   '/',
   '/index.html',
   '/style.css',
-  '/app.js',
+  '/app.js?v=3',
   '/manifest.json',
   '/assets/apexprospect-logo-192.png',
   '/assets/apexprospect-logo-512.png'
