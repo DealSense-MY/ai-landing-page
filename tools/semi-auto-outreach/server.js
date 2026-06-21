@@ -65,7 +65,7 @@ const DEMOS_BASE   = path.join(__dirname, '../../DEMOS');
 
 app.use(express.json());
 app.use(remoteGuard);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { etag: false, lastModified: false, setHeaders: (res, path) => { if (/\.(html|js|css)$/.test(path)) res.setHeader('Cache-Control', 'no-store'); } }));
 app.use('/previews', requireAuth, express.static(DEMOS_BASE));
 
 // ── Backup helper (Patch E) ───────────────────────────────────────────────────

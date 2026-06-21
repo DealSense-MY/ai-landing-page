@@ -212,8 +212,8 @@ function openCardModal(id) {
 
   // Step 3: defer all DOM queries to next tick so browser parses innerHTML
   setTimeout(() => {
-    populateLeadCard(lead);
-    if (isLocked(lead.id)) applyLockedUI(lead);
+    populateLeadCard(lead, content);
+    if (isLocked(lead.id)) applyLockedUI(lead, content);
     attachEvents(lead);
     // Sync char count after textarea is populated
     const ta = document.getElementById('dm-' + lead.id);
@@ -544,8 +544,10 @@ function renderPreviewSignal(l) {
   </div>`;
 }
 
-function populateLeadCard(l) {
-  const card = document.getElementById('card-' + l.id);
+function populateLeadCard(l, root) {
+  const card = root
+    ? root.querySelector('#card-' + l.id)
+    : document.getElementById('card-' + l.id);
   if (!card) return;
   card.querySelector('[data-field="businessName"]').textContent = l.businessName || '';
 
@@ -556,13 +558,14 @@ function populateLeadCard(l) {
 
   card.querySelector('[data-field="screenshotPath"]').textContent = l.screenshotPath || 'None';
 
-  // Pipeline header
-  const titleEl      = document.getElementById('pipeline-title-' + l.id);
-  const statusBadge  = document.getElementById('pipeline-status-badge-' + l.id);
-  const dealBadge    = document.getElementById('pipeline-deal-badge-' + l.id);
-  const lockBadge    = document.getElementById('pipeline-lock-badge-' + l.id);
-  const nextActionEl = document.getElementById('pipeline-next-action-' + l.id);
-  const lockNoteEl   = document.getElementById('pipeline-lock-note-' + l.id);
+  // Pipeline header — use card-scoped querySelector to avoid duplicate-ID collision
+  // (same IDs exist in hidden grid AND modal simultaneously; getElementById returns first match)
+  const titleEl      = card.querySelector('#pipeline-title-' + l.id);
+  const statusBadge  = card.querySelector('#pipeline-status-badge-' + l.id);
+  const dealBadge    = card.querySelector('#pipeline-deal-badge-' + l.id);
+  const lockBadge    = card.querySelector('#pipeline-lock-badge-' + l.id);
+  const nextActionEl = card.querySelector('#pipeline-next-action-' + l.id);
+  const lockNoteEl   = card.querySelector('#pipeline-lock-note-' + l.id);
 
   if (titleEl)      titleEl.textContent      = l.businessName || '—';
   if (statusBadge) {
@@ -688,13 +691,15 @@ function populateLeadCard(l) {
   }
 }
 
-function applyLockedUI(l) {
-  const card = document.getElementById('card-' + l.id);
+function applyLockedUI(l, root) {
+  const card = root
+    ? root.querySelector('#card-' + l.id)
+    : document.getElementById('card-' + l.id);
   if (!card) return;
 
   // Show lock banner
-  const banner = document.getElementById('lock-banner-' + l.id);
-  const meta   = document.getElementById('lock-meta-' + l.id);
+  const banner = card.querySelector('#lock-banner-' + l.id);
+  const meta   = card.querySelector('#lock-meta-' + l.id);
   if (banner) banner.style.display = 'flex';
   if (meta) {
     const lockedDate = l.lockedAt ? new Date(l.lockedAt).toLocaleDateString('en-MY') : '';
@@ -726,7 +731,7 @@ function applyLockedUI(l) {
     '.btn-followup', '.btn-won', '.btn-lost'
   ];
   disabledIds.forEach(btnId => {
-    const b = document.getElementById(btnId);
+    const b = card.querySelector('#' + btnId);
     if (b) { b.disabled = true; b.classList.add('btn-locked'); }
   });
   disabledSelectors.forEach(sel => {
@@ -735,11 +740,11 @@ function applyLockedUI(l) {
   });
 
   // Lock the DM textarea
-  const ta = document.getElementById('dm-' + l.id);
+  const ta = card.querySelector('#dm-' + l.id);
   if (ta) ta.setAttribute('readonly', true);
 
   // Show amendment input for locked record
-  const amendBox = document.getElementById('amendment-input-box-' + l.id);
+  const amendBox = card.querySelector('#amendment-input-box-' + l.id);
   if (amendBox) amendBox.style.display = 'block';
 }
 
