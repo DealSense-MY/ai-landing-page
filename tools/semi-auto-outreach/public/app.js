@@ -198,7 +198,7 @@ function selectProspect(id) {
 
 // ── Phase 6B: Card Modal ──────────────────────────────────────
 function openCardModal(id) {
-  const lead = _allLeads.find(l => l.id === id);
+  const lead = _allLeads.find(l => l.id === id) || _archivedLeads.find(l => l.id === id);
   if (!lead) return;
   _selectedId = id;
 
@@ -865,7 +865,7 @@ async function openContact(id, message) {
 }
 
 function isLocked(id) {
-  const lead = _allLeads.find(l => l.id === id);
+  const lead = _allLeads.find(l => l.id === id) || _archivedLeads.find(l => l.id === id);
   if (!lead) return false;
   if (lead.locked) return true;
   const closedValues = ['CLOSED_WON', 'CLOSED_LOST'];
