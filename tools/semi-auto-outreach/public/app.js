@@ -1570,15 +1570,189 @@ function toggleAgentSchedule() {
   }
 }
 
+function generateCodexMissionPrompt({ missionId, niche, location, numberOfProspects }) {
+  const schema = {
+    "businessName": "",
+    "businessNickname": "",
+    "area": "",
+    "location": "",
+    "niche": "",
+    "category": "",
+    "ctaMode": "",
+    "businessStyle": "",
+    "languageApproach": "",
+    "googleMapsLink": "",
+    "facebookPageLink": "",
+    "instagramLink": "",
+    "websiteLink": "",
+    "publicContactChannel": "",
+    "whatsappNumber": "",
+    "profileUrl": "",
+    "sourceEvidence": [],
+    "assumptions": [],
+    "weakness": [],
+    "opportunity": [],
+    "missingFields": [],
+    "offerAngle": "",
+    "audit": {
+      "websiteScore": 0,
+      "mobileScore": 0,
+      "ctaScore": 0,
+      "socialScore": 0,
+      "reviewScore": 0
+    },
+    "auditScore": 0,
+    "previewReadinessScore": 0,
+    "priority": "",
+    "prospectStatus": "NEEDS_REVIEW",
+    "replyStatus": "NO_REPLY",
+    "dealStatus": "OPEN",
+    "approvalStatus": "NOT_APPROVED_TO_CONTACT",
+    "sendStatus": "NOT_APPROVED_TO_SEND",
+    "dmDraft": "",
+    "riskNote": "",
+    "nextAction": "Review source and approve manually"
+  };
+
+  return `
+=== CODEX MISSION PACKET ===
+Mission ID: ${missionId}
+Generated: ${new Date().toISOString()}
+
+YOU ARE: DEALSENSE FAST PROSPECT JSON AGENT
+
+MISSION:
+Find ${numberOfProspects} real, verifiable prospects for:
+- Niche: ${niche}
+- Location: ${location}
+- Offer Angle: Mini Website Booking / WhatsApp Landing Page (RM350)
+
+PROSPECT CRITERIA:
+- Active business with social media presence (Facebook/Instagram/Google Maps)
+- Has WhatsApp number publicly listed OR can be found from their page
+- Currently lacks a proper booking/landing page
+- Serves local customers (not online-only)
+- Business has been active for at least 6 months
+
+REJECT CRITERIA:
+- No verifiable public presence
+- Already has a complete professional website with booking system
+- Chain/franchise (focus on independent SMEs)
+- Insufficient public data to fill >60% of required fields
+
+SOURCE VERIFICATION RULES:
+- Every prospect must have at least ONE verifiable source link
+  (Google Maps / Facebook / Instagram / website)
+- Include the source URL in sourceEvidence[]
+- If data is assumed (not directly found), add to assumptions[]
+- If data is missing, add field name to missingFields[]
+- Do NOT invent WhatsApp numbers — leave empty if not publicly listed
+
+SCORING RULES:
+- auditScore: average of websiteScore + mobileScore + ctaScore +
+  socialScore + reviewScore (0-100 each)
+- previewReadinessScore: 0-100 based on how complete the data is
+  (100 = all fields filled with verified data)
+- priority: "HIGH" if auditScore < 40 and whatsappNumber found,
+  "MEDIUM" if auditScore < 60, "LOW" otherwise
+
+APPROVAL STATE (DO NOT CHANGE THESE):
+- prospectStatus: "NEEDS_REVIEW"
+- approvalStatus: "NOT_APPROVED_TO_CONTACT"
+- sendStatus: "NOT_APPROVED_TO_SEND"
+- replyStatus: "NO_REPLY"
+- dealStatus: "OPEN"
+
+SAFETY RULES — ABSOLUTE:
+- Do NOT contact any business
+- Do NOT send any message (WhatsApp/email/DM/form)
+- Do NOT submit any form
+- Do NOT post anything
+- Output JSON only — no explanations, no markdown, no commentary
+- Return a valid JSON array of ${numberOfProspects} prospect objects
+
+REQUIRED OUTPUT FORMAT:
+Return ONLY a valid JSON array using this exact schema for each object:
+${JSON.stringify(schema, null, 2)}
+
+OPERATOR NOTE:
+Paste this prompt into your AI agent (ChatGPT/Claude).
+Agent must return JSON only.
+Import the returned JSON into ApexProspect via the Import Prospects button.
+Every imported prospect will be set to NEEDS_REVIEW — no prospect can be
+contacted without manual operator approval.
+=== END MISSION PACKET ===
+`.trim();
+}
+
 function handleFindNow() {
-  const niche    = document.getElementById('agent-run-niche').value || 'Beauty Spa';
-  const location = document.getElementById('agent-run-location').value || 'Ipoh';
-  const count    = document.getElementById('agent-run-count').value || '30';
-  const prompt   = `You are DEALSENSE FAST PROSPECT JSON AGENT.\nFind ${count} prospects in ${location} for niche: ${niche}.\nOutput full JSON array with operatorLiteLeadData and landingPageEngineData.\nFollow all rules in your system prompt.`;
+  const niche             = document.getElementById('agent-run-niche').value || 'Beauty Spa';
+  const location          = document.getElementById('agent-run-location').value || 'Ipoh';
+  const numberOfProspects = document.getElementById('agent-run-count').value || '30';
+  const missionId         = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                              ? crypto.randomUUID()
+                              : `MISSION-${Date.now()}`;
+
+  const prompt = generateCodexMissionPrompt({ missionId, niche, location, numberOfProspects });
+
   navigator.clipboard.writeText(prompt).catch(() => {});
   document.getElementById('agent-prompt-output').value = prompt;
   document.getElementById('agent-prompt-row').style.display = 'flex';
-  document.getElementById('agent-schedule-status').textContent = '✓ Prompt copied. Paste into ChatGPT agent.';
+  document.getElementById('agent-schedule-status').textContent =
+    '✓ Mission packet copied to clipboard — paste into ChatGPT or Claude. Agent must return JSON only. Import JSON via Import Prospects.';
+}
+
+function handleSampleJSON() {
+  const sample = JSON.stringify([
+    {
+      "businessName": "Contoh Beauty Spa",
+      "businessNickname": "Contoh Spa",
+      "area": "Ipoh",
+      "location": "Ipoh, Perak",
+      "niche": "Beauty Spa / Facial",
+      "category": "Beauty & Wellness",
+      "ctaMode": "WhatsApp",
+      "businessStyle": "Casual Friendly",
+      "languageApproach": "Bahasa Melayu",
+      "googleMapsLink": "https://maps.google.com/?q=Contoh+Beauty+Spa+Ipoh",
+      "facebookPageLink": "https://facebook.com/contohbeautyspa",
+      "instagramLink": "",
+      "websiteLink": "",
+      "publicContactChannel": "Facebook",
+      "whatsappNumber": "601234567890",
+      "profileUrl": "https://facebook.com/contohbeautyspa",
+      "sourceEvidence": ["https://facebook.com/contohbeautyspa"],
+      "assumptions": ["WhatsApp number from Facebook page About section"],
+      "weakness": ["No booking page", "No price list visible online"],
+      "opportunity": ["Active posts", "Positive comments", "No website"],
+      "missingFields": ["instagramLink", "websiteLink"],
+      "offerAngle": "Mini Website Booking WhatsApp RM350",
+      "audit": {
+        "websiteScore": 0,
+        "mobileScore": 30,
+        "ctaScore": 20,
+        "socialScore": 65,
+        "reviewScore": 40
+      },
+      "auditScore": 31,
+      "previewReadinessScore": 70,
+      "priority": "HIGH",
+      "prospectStatus": "NEEDS_REVIEW",
+      "replyStatus": "NO_REPLY",
+      "dealStatus": "OPEN",
+      "approvalStatus": "NOT_APPROVED_TO_CONTACT",
+      "sendStatus": "NOT_APPROVED_TO_SEND",
+      "dmDraft": "Hi Contoh Beauty Spa, saya Aliff. Saya ada buat satu mini page booking WhatsApp untuk Contoh Spa. Boleh saya tunjuk preview?",
+      "riskNote": "",
+      "nextAction": "Review source and approve manually"
+    }
+  ], null, 2);
+
+  navigator.clipboard.writeText(sample).catch(() => {});
+  document.getElementById('agent-prompt-output').value = sample;
+  document.getElementById('agent-prompt-row').style.display = 'flex';
+  document.getElementById('agent-schedule-status').textContent =
+    '✓ Sample JSON copied to clipboard — import via Import Prospects to test.';
 }
 
 function saveAgentSchedule() {

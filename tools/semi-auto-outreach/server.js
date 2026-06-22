@@ -756,6 +756,16 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
         lead.audit.missingFields = getMissingPreviewFields(lead);
       }
 
+      // Safety defaults — always override on import, never trust input
+      lead.prospectStatus  = 'NEEDS_REVIEW';
+      lead.approvalStatus  = 'NOT_APPROVED_TO_CONTACT';
+      lead.sendStatus      = 'NOT_APPROVED_TO_SEND';
+      lead.replyStatus     = lead.replyStatus || 'NO_REPLY';
+      lead.dealStatus      = lead.dealStatus  || 'OPEN';
+      lead.locked          = false;
+      lead.importedAt      = now;
+      lead.importSource    = 'CODEX_AGENT';
+
       existing.push(lead);
       existingIds.add(id);
       existingWaName.add(waNameKey);
