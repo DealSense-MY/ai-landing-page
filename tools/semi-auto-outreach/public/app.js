@@ -27,6 +27,7 @@ const PIPELINE_TABS = [
   { key: 'FOLLOWUP',     label: 'Follow-Up',     match: ['FOLLOW_UP_NEEDED'] },
   { key: 'CLOSED_WON',   label: 'Closed Won',    match: ['CLOSED_WON'] },
   { key: 'CLOSED_LOST',  label: 'Closed Lost',   match: ['CLOSED_LOST'] },
+  { key: 'ENRICHMENT_QUEUE', label: 'Needs Enrichment', match: null, enrichmentQueue: true },
   { key: 'ARCHIVED',     label: 'Archived',      match: null, archived: true },
 ];
 
@@ -108,8 +109,14 @@ function readableStatus(status) {
   return map[status] || status || 'UNKNOWN';
 }
 
+function isEnrichmentNeeded(l) {
+  const cr = l.contactReadiness || '';
+  return cr === 'CONTACT_PARTIAL' || cr === 'CONTACT_MISSING' || cr === 'CONTACT_BLOCKED';
+}
+
 function matchesTab(l, tab) {
-  if (tab.archived) return false; // ARCHIVED tab is handled separately
+  if (tab.archived) return false;        // ARCHIVED tab handled separately
+  if (tab.enrichmentQueue) return false; // ENRICHMENT_QUEUE handled separately
   if (!tab.match) return true;
   const s = getStatus(l);
   return tab.match.includes(s);
@@ -132,6 +139,8 @@ function renderTabs(leads) {
     let count;
     if (tab.archived) {
       count = _archivedLeads.length;
+    } else if (tab.enrichmentQueue) {
+      count = leads.filter(isEnrichmentNeeded).length;
     } else if (tab.match) {
       count = leads.filter(l => matchesTab(l, tab)).length;
     } else {
@@ -147,15 +156,21 @@ function renderTabs(leads) {
 function switchTab(key) {
   _activeTab = key;
   const tab = PIPELINE_TABS.find(t => t.key === key);
+  renderTabs(_allLeads);
   if (tab && tab.archived) {
-    renderTabs(_allLeads);
     const filtered = applySearch(_archivedLeads);
     if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
     renderTable(filtered);
     renderCards(filtered);
     return;
   }
-  renderTabs(_allLeads);
+  if (tab && tab.enrichmentQueue) {
+    const filtered = applySearch(_allLeads.filter(isEnrichmentNeeded));
+    if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
+    renderTable(filtered);
+    renderCards(filtered);
+    return;
+  }
   const filtered = applySearch(_allLeads.filter(l => matchesTab(l, tab)));
   if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
   renderTable(filtered);
@@ -285,6 +300,12 @@ function renderLeads(leads) {
     renderCards(filtered);
     return;
   }
+  if (tab && tab.enrichmentQueue) {
+    const filtered = applySearch(leads.filter(isEnrichmentNeeded));
+    renderTable(filtered);
+    renderCards(filtered);
+    return;
+  }
   const filtered = applySearch(leads.filter(l => matchesTab(l, tab)));
   renderTable(filtered);
   renderCards(filtered);
@@ -361,6 +382,25 @@ function buildLeadCard(l) {
     </div>
 
     ${hasFollowUp}
+
+    <div class="contact-readiness-section" id="cr-section-${id}">
+      <div class="cr-header">📋 Contact Readiness</div>
+      <div class="cr-fields">
+        <div class="cr-row"><span class="cr-label">Readiness</span><span class="cr-badge" id="cr-badge-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Reason</span><span class="cr-value" id="cr-reason-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Next Action</span><span class="cr-value cr-next" id="cr-next-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">WhatsApp</span><span class="cr-value" id="cr-wa-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Public Channel</span><span class="cr-value" id="cr-pubch-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Website</span><span class="cr-value" id="cr-web-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Facebook</span><span class="cr-value" id="cr-fb-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Instagram</span><span class="cr-value" id="cr-ig-${id}">—</span></div>
+        <div class="cr-row"><span class="cr-label">Google Maps</span><span class="cr-value" id="cr-gmap-${id}">—</span></div>
+      </div>
+      <div class="cr-enrichment-row" id="cr-enrich-row-${id}">
+        <button class="btn-enrich-prompt" onclick="copyEnrichmentPrompt('${id}')">📋 Copy Enrichment Prompt</button>
+        <span class="cr-enrich-feedback" id="cr-enrich-fb-${id}"></span>
+      </div>
+    </div>
 
     <div class="preview-engine-section" id="preview-section-${id}">
       <div class="preview-section-label">Landing Page Preview</div>
@@ -498,6 +538,117 @@ function buildLeadCard(l) {
   </div>`;
 }
 
+// ── Phase 3: Contact Readiness ────────────────────────────────
+function renderContactReadiness(l) {
+  const badgeEl  = document.getElementById('cr-badge-'  + l.id);
+  const reasonEl = document.getElementById('cr-reason-' + l.id);
+  const nextEl   = document.getElementById('cr-next-'   + l.id);
+  const waEl     = document.getElementById('cr-wa-'     + l.id);
+  const pubChEl  = document.getElementById('cr-pubch-'  + l.id);
+  const webEl    = document.getElementById('cr-web-'    + l.id);
+  const fbEl2    = document.getElementById('cr-fb-'     + l.id);
+  const igEl     = document.getElementById('cr-ig-'     + l.id);
+  const gmapEl   = document.getElementById('cr-gmap-'   + l.id);
+  if (!badgeEl) return;
+
+  const cr = l.contactReadiness || 'CONTACT_MISSING';
+  badgeEl.textContent  = cr;
+  badgeEl.className    = 'cr-badge cr-badge-' + cr;
+  if (reasonEl) reasonEl.textContent = l.contactReadinessReason || '—';
+  if (nextEl)   nextEl.textContent   = l.contactNextAction      || '—';
+  if (waEl)     waEl.textContent     = l.whatsappNumber || l.whatsapp || 'Not found';
+  if (pubChEl)  pubChEl.textContent  = l.publicContactChannel || l.contactMethod || '—';
+
+  const linkOrDash = (url) => {
+    if (!url) return '—';
+    const safe = safeHref(url);
+    return safe === '#' ? esc(url) : `<a href="${esc(safe)}" target="_blank" rel="noopener">${esc(url)}</a>`;
+  };
+  if (webEl)  webEl.innerHTML  = linkOrDash(l.websiteLink  || l.website);
+  if (fbEl2)  fbEl2.innerHTML  = linkOrDash(l.facebookPageLink || l.facebook);
+  if (igEl)   igEl.innerHTML   = linkOrDash(l.instagramLink    || l.instagram);
+  if (gmapEl) gmapEl.innerHTML = linkOrDash(l.googleMapsLink   || l.googleMapsUrl);
+
+  // Hide enrichment button for CONTACT_READY leads
+  const enrichRow = document.getElementById('cr-enrich-row-' + l.id);
+  if (enrichRow) enrichRow.style.display = cr === 'CONTACT_READY' ? 'none' : 'flex';
+}
+
+function copyEnrichmentPrompt(id) {
+  const lead = _allLeads.find(l => l.id === id) || _archivedLeads.find(l => l.id === id);
+  if (!lead) return;
+
+  const prompt = generateContactEnrichmentPrompt(lead);
+  navigator.clipboard.writeText(prompt).catch(() => {});
+
+  const fb = document.getElementById('cr-enrich-fb-' + id);
+  if (fb) {
+    fb.textContent = '✓ Enrichment prompt copied to clipboard — paste into Claude or ChatGPT.';
+    setTimeout(() => { if (fb) fb.textContent = ''; }, 4000);
+  }
+}
+
+function generateContactEnrichmentPrompt(lead) {
+  const patchSchema = JSON.stringify({
+    id:                    lead.id || '',
+    businessName:          lead.businessName || '',
+    whatsappNumber:        '',
+    publicContactChannel:  '',
+    websiteLink:           '',
+    facebookPageLink:      '',
+    instagramLink:         '',
+    googleMapsLink:        '',
+    sourceEvidence:        [],
+    assumptions:           [],
+    contactReadiness:      '',
+    contactReadinessReason:'',
+    contactNextAction:     '',
+    sendStatus:            'NOT_APPROVED_TO_SEND',
+    approvalStatus:        'NOT_APPROVED_TO_CONTACT'
+  }, null, 2);
+
+  return `=== APEXPROSPECT CONTACT ENRICHMENT PROMPT ===
+Lead ID: ${lead.id}
+Business: ${lead.businessName}
+Niche: ${lead.niche || '—'}
+Location: ${lead.location || lead.lokasi || '—'}
+Current contactReadiness: ${lead.contactReadiness || 'CONTACT_MISSING'}
+
+TASK:
+Research this business and find their official public contact channels.
+
+RULES — ABSOLUTE:
+- Use public research ONLY (Google, Facebook, Instagram, Google Maps, official website)
+- Find OFFICIAL contact channels — no third-party aggregators
+- Do NOT contact this business
+- Do NOT send any message (WhatsApp / email / DM / form)
+- Do NOT submit any form
+- Do NOT click any "contact" or "send" button
+- Separate EVIDENCE (directly found) from ASSUMPTIONS (inferred)
+- If WhatsApp number is NOT publicly listed — leave whatsappNumber empty
+- Return JSON patch ONLY — no explanations, no markdown, no commentary
+
+WHAT TO FIND:
+1. Official WhatsApp number (publicly listed on their page or website)
+2. Primary public contact channel (WhatsApp / Facebook / Instagram / website form)
+3. Website URL
+4. Facebook page URL
+5. Instagram URL
+6. Google Maps link
+
+OUTPUT:
+Return a single JSON patch object using this exact schema:
+${patchSchema}
+
+contactReadiness must be one of:
+- CONTACT_READY — direct WhatsApp number found and verified
+- CONTACT_PARTIAL — social/web presence found but no direct WhatsApp
+- CONTACT_MISSING — no usable public contact path found
+- CONTACT_BLOCKED — source inaccessible, private, or unsafe
+
+=== END ENRICHMENT PROMPT ===`.trim();
+}
+
 function renderPreviewSection(l) {
   const linkEl   = document.getElementById('preview-link-' + l.id);
   const btnWrap  = document.getElementById('preview-btn-wrap-' + l.id);
@@ -600,6 +751,9 @@ function populateLeadCard(l, root) {
       lockNoteEl.style.display = 'none';
     }
   }
+
+  // Phase 3: Contact Readiness section
+  renderContactReadiness(l);
 
   // Preview section
   renderPreviewSection(l);

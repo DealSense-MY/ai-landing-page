@@ -295,6 +295,50 @@ function calculatePriority(score) {
   return 'LOW';
 }
 
+// Phase 3: Contact Readiness classification
+function classifyContactReadiness(lead) {
+  const wa       = (lead.whatsappNumber || lead.whatsapp || '').trim();
+  const facebook = (lead.facebookPageLink || lead.facebook || '').trim();
+  const instagram= (lead.instagramLink   || lead.instagram || '').trim();
+  const website  = (lead.websiteLink     || lead.website   || '').trim();
+  const gmaps    = (lead.googleMapsLink  || lead.googleMapsUrl || '').trim();
+  const pubCh    = (lead.publicContactChannel || lead.contactMethod || '').trim();
+
+  // CONTACT_BLOCKED: no accessible source at all
+  if (!wa && !facebook && !instagram && !website && !gmaps && !pubCh) {
+    return {
+      contactReadiness:       'CONTACT_BLOCKED',
+      contactReadinessReason: 'No public contact path recorded — source inaccessible or unsafe.',
+      contactNextAction:      'Hold until source is rechecked and a verifiable contact is found.'
+    };
+  }
+
+  // CONTACT_READY: direct WhatsApp number available
+  if (wa) {
+    return {
+      contactReadiness:       'CONTACT_READY',
+      contactReadinessReason: 'WhatsApp number available for direct outreach.',
+      contactNextAction:      'Review lead and approve outreach when ready.'
+    };
+  }
+
+  // CONTACT_PARTIAL: social/web channel exists but no direct WhatsApp
+  if (facebook || instagram || website || gmaps) {
+    return {
+      contactReadiness:       'CONTACT_PARTIAL',
+      contactReadinessReason: 'Social or web presence found but no direct WhatsApp number.',
+      contactNextAction:      'Find official WhatsApp via Facebook/Instagram/website before outreach.'
+    };
+  }
+
+  // publicContactChannel only — partial
+  return {
+    contactReadiness:       'CONTACT_PARTIAL',
+    contactReadinessReason: 'Contact channel noted but no direct WhatsApp found: ' + pubCh,
+    contactNextAction:      'Verify website contact page or business inquiry form.'
+  };
+}
+
 function getMissingPreviewFields(lead) {
   const missing = [];
   if (!lead.businessName || !String(lead.businessName).trim()) missing.push('businessName');
@@ -761,6 +805,12 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
       if (lead.audit && typeof lead.audit === 'object') {
         lead.audit.missingFields = getMissingPreviewFields(lead);
       }
+
+      // Phase 3: Contact Readiness classification
+      const cr = classifyContactReadiness(lead);
+      lead.contactReadiness       = cr.contactReadiness;
+      lead.contactReadinessReason = cr.contactReadinessReason;
+      lead.contactNextAction      = cr.contactNextAction;
 
       // Safety defaults — always override on import, never trust input
       lead.prospectStatus  = 'NEEDS_REVIEW';

@@ -2517,3 +2517,77 @@ tr.selected-row td {
   color: #e87a7a;
   font-size: 13px;
 }
+
+/* ── Phase 3: Contact Readiness Section ──────────────────────── */
+.contact-readiness-section {
+  background: #13131A;
+  border: 1px solid #2E2E33;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+.cr-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #9D9DAA;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+.cr-fields { display: flex; flex-direction: column; gap: 5px; }
+.cr-row {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  align-items: baseline;
+}
+.cr-label {
+  min-width: 110px;
+  color: #6B6B7A;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.cr-value { color: #D0D0DA; word-break: break-all; }
+.cr-next  { color: #C8A84B; font-weight: 600; }
+.cr-value a { color: #7B9FD4; text-decoration: none; }
+.cr-value a:hover { text-decoration: underline; }
+
+/* Contact readiness badge colours */
+.cr-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cr-badge-CONTACT_READY   { background: #0E2A1A; color: #4ECB7A; border: 1px solid #2A6640; }
+.cr-badge-CONTACT_PARTIAL { background: #2A220A; color: #C8A84B; border: 1px solid #6B5420; }
+.cr-badge-CONTACT_MISSING { background: #1E1A2A; color: #9B7FD4; border: 1px solid #4A3A7A; }
+.cr-badge-CONTACT_BLOCKED { background: #2A0E0E; color: #E87A7A; border: 1px solid #6A2020; }
+
+/* Enrichment prompt row */
+.cr-enrichment-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.btn-enrich-prompt {
+  background: #1A1A24;
+  border: 1px solid #4A3A7A;
+  color: #C8A8F4;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-enrich-prompt:hover { background: #2A2A3A; }
+.cr-enrich-feedback {
+  font-size: 12px;
+  color: #4ECB7A;
+}
