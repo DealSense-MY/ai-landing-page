@@ -619,22 +619,24 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
       const businessName = (src.businessName || '').trim();
       const niche        = (src.niche        || '').trim();
       const location     = (src.location || src.lokasi || '').trim();
-      const website      = (src.website      || '').trim().toLowerCase();
+      const website      = (src.website || src.websiteLink || '').trim().toLowerCase();
 
       // ── Required field validation ──
       const validationErrors = [];
-      if (!businessName)  validationErrors.push('missing businessName');
-      if (!niche)         validationErrors.push('missing niche');
-      if (!location)      validationErrors.push('missing location');
+      if (!businessName) validationErrors.push('missing businessName — required field');
+      if (!niche)        validationErrors.push('missing niche — required field');
+      if (!location)     validationErrors.push('missing location — required field (use "location" or "lokasi")');
 
-      // At least one contact/source
-      const wa       = (src.whatsapp || src.whatsappNumber || '').replace(/[^0-9+]/g, '');
-      const phone    = (src.phone    || '').replace(/[^0-9+]/g, '');
-      const facebook = (src.facebook  || src.facebookUrl  || '').trim();
-      const instagram = (src.instagram || src.instagramUrl || '').trim();
-      const gmapsUrl  = (src.googleMapsUrl || '').trim();
+      // At least one contact/source — support both legacy and Codex field names
+      const wa        = (src.whatsapp || src.whatsappNumber || '').replace(/[^0-9+]/g, '');
+      const phone     = (src.phone    || '').replace(/[^0-9+]/g, '');
+      const facebook  = (src.facebook  || src.facebookUrl  || src.facebookPageLink || '').trim();
+      const instagram = (src.instagram || src.instagramUrl || src.instagramLink    || '').trim();
+      const gmapsUrl  = (src.googleMapsUrl || src.googleMapsLink || '').trim();
       const hasContact = wa || phone || facebook || instagram || website || gmapsUrl;
-      if (!hasContact) validationErrors.push('missing contact (need whatsapp, phone, facebook, instagram, website, or googleMapsUrl)');
+      if (!hasContact) validationErrors.push(
+        'missing contact — need at least one of: whatsappNumber, phone, facebookPageLink, instagramLink, websiteLink, googleMapsLink'
+      );
 
       if (validationErrors.length) {
         errors.push({ businessName: businessName || '(unknown)', reasons: validationErrors });
@@ -676,7 +678,7 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
 
       // ── Build safe lead status — never use DISCOVERED ──
       const KNOWN_STATUSES = new Set([
-        'NEW','PREVIEW_READY','APPROVED_TO_SEND','APPROVED_EDITED_TO_SEND',
+        'NEW','NEEDS_REVIEW','PREVIEW_READY','APPROVED_TO_SEND','APPROVED_EDITED_TO_SEND',
         'SENT_MANUAL_CONFIRMATION_NEEDED','REPLIED','FOLLOW_UP_NEEDED',
         'REJECTED_NEEDS_REWORK','CLOSED_WON','CLOSED_LOST'
       ]);
@@ -692,15 +694,19 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
         lokasi:         location,
         location:       location,
         niche:          niche,
-        website:        website || src.website || '',
+        website:        website,
+        websiteLink:    website,
         platform:       src.platform    || 'UNKNOWN',
         contactMethod:  src.contact     || src.contactMethod || (wa ? 'WhatsApp' : 'UNKNOWN'),
         whatsappNumber: wa,
         whatsapp:       wa,
         phone:          phone,
         facebook:       facebook,
+        facebookPageLink: facebook,
         instagram:      instagram,
+        instagramLink:  instagram,
         googleMapsUrl:  gmapsUrl,
+        googleMapsLink: gmapsUrl,
         profileUrl:     src.profileUrl  || facebook || instagram || '',
         weakness:       src.kelemahan   || src.weakness || '',
         kelemahan:      src.kelemahan   || src.weakness || '',
@@ -766,6 +772,14 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
       lead.importedAt      = now;
       lead.importSource    = 'CODEX_AGENT';
 
+      // Quality warnings — imported but flagged for operator attention
+      const importWarnings = [];
+      if (!lead.whatsappNumber) importWarnings.push('no WhatsApp number — manual search needed');
+      if ((lead.previewReadinessScore || 0) < 30) importWarnings.push(`low preview readiness score (${lead.previewReadinessScore || 0}) — incomplete data`);
+      const srcEvidence = Array.isArray(raw.sourceEvidence) ? raw.sourceEvidence : [];
+      if (srcEvidence.length === 0) importWarnings.push('no source evidence URLs — verify manually');
+      if (importWarnings.length > 0) lead.importWarnings = importWarnings;
+
       existing.push(lead);
       existingIds.add(id);
       existingWaName.add(waNameKey);
@@ -798,6 +812,9 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
         missingFields:        (l.audit && l.audit.missingFields) || []
       }));
 
+    const warned     = importedLeads.filter(l => l.importWarnings && l.importWarnings.length > 0);
+    const warnedList = warned.map(l => ({ businessName: l.businessName, warnings: l.importWarnings }));
+
     res.json({
       ok:               true,
       batchId,
@@ -806,9 +823,11 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
       skipped:          skipped.length,
       duplicates:       skipped.length,
       closedDuplicates: closedDuplicates.length,
+      warned:           warned.length,
       errors,
       skippedList:      skipped,
       closedDuplicateList: closedDuplicates,
+      warnedList,
       top10
     });
   });

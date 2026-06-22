@@ -1331,6 +1331,16 @@ async function submitImport() {
   try { parsed = JSON.parse(raw); } catch (e) { alert('Invalid JSON: ' + e.message); return; }
   if (!Array.isArray(parsed)) { alert('Must be a JSON array. Example: [{...}, {...}]'); return; }
 
+  const emptyRecords = parsed.filter(r => !r || typeof r !== 'object' || Object.keys(r).length === 0);
+  if (emptyRecords.length > 0) {
+    alert(`Import contains ${emptyRecords.length} empty object(s). Paste valid Codex agent JSON.`);
+    return;
+  }
+  if (parsed.length > 100) {
+    const go = confirm(`Large import: ${parsed.length} records. Continue?`);
+    if (!go) return;
+  }
+
   const res  = await fetch('/api/leads/import', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1348,6 +1358,9 @@ async function submitImport() {
   ];
   if ((data.closedDuplicates || 0) > 0) {
     summaryParts.push(`<span class="import-stat-warn">${data.closedDuplicates} closed-deal duplicate(s) — not imported</span>`);
+  }
+  if ((data.warned || 0) > 0) {
+    summaryParts.push(`<span class="import-stat-warn">${data.warned} imported with warnings</span>`);
   }
   if ((data.errors || []).length) {
     summaryParts.push(`<span class="import-stat-err">${data.errors.length} invalid record(s)</span>`);
@@ -1372,6 +1385,15 @@ async function submitImport() {
     html += `<div class="import-closed-dup-block"><strong>Closed-deal duplicates (skipped, not in Top 10):</strong><ul class="import-err-list">` +
       data.closedDuplicateList.map(e =>
         `<li>${esc(e.businessName)}: ${esc(e.reason)}</li>`
+      ).join('') +
+      `</ul></div>`;
+  }
+
+  // ── Import warnings ──
+  if ((data.warnedList || []).length) {
+    html += `<div class="import-warn-block"><strong>⚠ Imported with warnings (review these first):</strong><ul class="import-err-list">` +
+      data.warnedList.map(w =>
+        `<li><strong>${esc(w.businessName)}</strong>: ${w.warnings.map(esc).join(' · ')}</li>`
       ).join('') +
       `</ul></div>`;
   }
