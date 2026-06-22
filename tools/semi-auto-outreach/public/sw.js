@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apexprospect-shell-v3';
+const CACHE_NAME = 'apexprospect-shell-v5';
 
 // App shell files only — never cache /api/* responses
 // Use versioned URL for app.js to match what index.html requests
@@ -6,7 +6,7 @@ const SHELL_FILES = [
   '/',
   '/index.html',
   '/style.css',
-  '/app.js?v=3',
+  '/app.js?v=5',
   '/manifest.json',
   '/assets/apexprospect-logo-192.png',
   '/assets/apexprospect-logo-512.png'
@@ -26,6 +26,12 @@ self.addEventListener('activate', event => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', event => {
