@@ -1294,6 +1294,82 @@ app.post('/api/leads/:id/enrich', requireAuth, (req, res) => {
   });
 });
 
+// POST apply approval decision — Phase 6
+app.post('/api/leads/:id/approve', requireAuth, (req, res) => {
+  queueWrite(() => {
+    try {
+      backupBeforeWrite();
+      const leads = safeReadJSON(LEADS_FILE);
+      const idx = leads.findIndex(l => l.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+      const lead = leads[idx];
+      if (lead.locked) return res.status(403).json({ error: 'Lead is locked (' + lead.lockReason + ') — cannot apply approval decision' });
+
+      const VALID_DECISIONS = ['APPROVE', 'EDIT_MESSAGE', 'HOLD', 'REJECT', 'NEEDS_MORE_ENRICHMENT'];
+      const { decision } = req.body || {};
+      if (!VALID_DECISIONS.includes(decision)) {
+        return res.status(400).json({ error: 'Invalid decision: ' + decision });
+      }
+
+      const now = new Date().toISOString();
+      const approvalStatusBefore = lead.approvalStatus || 'NOT_APPROVED_TO_CONTACT';
+      const sendStatusBefore     = lead.sendStatus     || 'NOT_APPROVED_TO_SEND';
+
+      if (decision === 'APPROVE') {
+        lead.approvalStatus = 'APPROVED_TO_CONTACT';
+        lead.sendStatus     = 'APPROVED_TO_SEND';
+        lead.approvedAt     = now;
+        lead.approvedBy     = 'Aliff';
+        lead.sendPrepStatus = 'READY_TO_SEND_MANUAL';
+      } else if (decision === 'EDIT_MESSAGE') {
+        lead.approvalStatus = 'APPROVED_TO_CONTACT';
+        lead.sendStatus     = 'NOT_APPROVED_TO_SEND';
+        lead.approvedAt     = now;
+        lead.approvedBy     = 'Aliff';
+        lead.sendPrepStatus = 'EDIT_REQUIRED_BEFORE_SEND';
+      } else if (decision === 'HOLD') {
+        lead.approvalStatus = 'NOT_APPROVED_TO_CONTACT';
+        lead.sendStatus     = 'NOT_APPROVED_TO_SEND';
+        lead.sendPrepStatus = 'ON_HOLD';
+      } else if (decision === 'REJECT') {
+        lead.approvalStatus = 'NOT_APPROVED_TO_CONTACT';
+        lead.sendStatus     = 'NOT_APPROVED_TO_SEND';
+        lead.sendPrepStatus = 'REJECTED';
+        lead.prospectStatus = 'REJECTED_NEEDS_REWORK';
+      } else if (decision === 'NEEDS_MORE_ENRICHMENT') {
+        lead.approvalStatus = 'NOT_APPROVED_TO_CONTACT';
+        lead.sendStatus     = 'NOT_APPROVED_TO_SEND';
+        lead.sendPrepStatus = 'NEEDS_MORE_ENRICHMENT';
+      }
+
+      lead.updatedAt = now;
+      if (!Array.isArray(lead.events)) lead.events = [];
+      const event = {
+        id:        `APPROVAL_DECISION-${Date.now()}`,
+        type:      'APPROVAL_DECISION',
+        leadId:    lead.id,
+        leadName:  lead.businessName || '',
+        timestamp: now,
+        source:    'operator-ui',
+        actor:     'Aliff',
+        metadata:  { decision, approvalStatusBefore, approvalStatusAfter: lead.approvalStatus, sendStatusBefore, sendStatusAfter: lead.sendStatus }
+      };
+      lead.events.push(event);
+      leads[idx] = lead;
+      safeWriteJSON(LEADS_FILE, leads);
+
+      let runLog = []; try { runLog = safeReadJSON(RUN_LOG_FILE); } catch (e) {}
+      if (!Array.isArray(runLog)) runLog = [];
+      runLog.push(event);
+      safeWriteJSON(RUN_LOG_FILE, runLog);
+
+      res.json({ ok: true, lead: leads[idx] });
+    } catch (e) {
+      res.status(500).json({ error: 'Approval decision failed: ' + e.message });
+    }
+  });
+});
+
 // POST mark lead as paid
 app.post('/api/leads/:id/mark-paid', requireAuth, (req, res) => {
   queueWrite(() => {

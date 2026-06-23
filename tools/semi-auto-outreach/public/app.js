@@ -28,6 +28,7 @@ const PIPELINE_TABS = [
   { key: 'CLOSED_WON',   label: 'Closed Won',    match: ['CLOSED_WON'] },
   { key: 'CLOSED_LOST',  label: 'Closed Lost',   match: ['CLOSED_LOST'] },
   { key: 'ENRICHMENT_QUEUE', label: 'Needs Enrichment', match: null, enrichmentQueue: true },
+  { key: 'SEND_BATCH_REVIEW', label: 'Ready to Approve', match: null, sendBatchReview: true },
   { key: 'ARCHIVED',     label: 'Archived',      match: null, archived: true },
 ];
 
@@ -114,9 +115,23 @@ function isEnrichmentNeeded(l) {
   return cr === 'CONTACT_PARTIAL' || cr === 'CONTACT_MISSING' || cr === 'CONTACT_BLOCKED';
 }
 
+const CLOSED_STATUSES = ['CLOSED_WON', 'CLOSED_LOST'];
+
+function isReadyToApprove(l) {
+  if (l.archived) return false;
+  const cr = l.contactReadiness || '';
+  if (cr !== 'CONTACT_READY' && cr !== 'CONTACT_PARTIAL') return false;
+  if (l.sendStatus === 'APPROVED_TO_SEND') return false;
+  if (l.approvalStatus === 'APPROVED_TO_CONTACT') return false;
+  const s = getStatus(l);
+  if (CLOSED_STATUSES.includes(s)) return false;
+  return true;
+}
+
 function matchesTab(l, tab) {
-  if (tab.archived) return false;        // ARCHIVED tab handled separately
-  if (tab.enrichmentQueue) return false; // ENRICHMENT_QUEUE handled separately
+  if (tab.archived) return false;
+  if (tab.enrichmentQueue) return false;
+  if (tab.sendBatchReview) return false;
   if (!tab.match) return true;
   const s = getStatus(l);
   return tab.match.includes(s);
@@ -141,6 +156,8 @@ function renderTabs(leads) {
       count = _archivedLeads.length;
     } else if (tab.enrichmentQueue) {
       count = leads.filter(isEnrichmentNeeded).length;
+    } else if (tab.sendBatchReview) {
+      count = leads.filter(isReadyToApprove).length;
     } else if (tab.match) {
       count = leads.filter(l => matchesTab(l, tab)).length;
     } else {
@@ -158,12 +175,18 @@ function setBatchSectionVisible(visible) {
   if (el) el.style.display = visible ? 'block' : 'none';
 }
 
+function setApprovalSectionVisible(visible) {
+  const el = document.getElementById('approval-review-section');
+  if (el) el.style.display = visible ? 'block' : 'none';
+}
+
 function switchTab(key) {
   _activeTab = key;
   const tab = PIPELINE_TABS.find(t => t.key === key);
   renderTabs(_allLeads);
   if (tab && tab.archived) {
     setBatchSectionVisible(false);
+    setApprovalSectionVisible(false);
     const filtered = applySearch(_archivedLeads);
     if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
     renderTable(filtered);
@@ -172,13 +195,25 @@ function switchTab(key) {
   }
   if (tab && tab.enrichmentQueue) {
     setBatchSectionVisible(true);
+    setApprovalSectionVisible(false);
     const filtered = applySearch(_allLeads.filter(isEnrichmentNeeded));
     if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
     renderTable(filtered);
     renderCards(filtered);
     return;
   }
+  if (tab && tab.sendBatchReview) {
+    setBatchSectionVisible(false);
+    setApprovalSectionVisible(true);
+    renderApprovalSection();
+    const filtered = applySearch(_allLeads.filter(isReadyToApprove));
+    if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
+    renderTable(filtered);
+    renderCards(filtered);
+    return;
+  }
   setBatchSectionVisible(false);
+  setApprovalSectionVisible(false);
   const filtered = applySearch(_allLeads.filter(l => matchesTab(l, tab)));
   if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
   renderTable(filtered);
@@ -304,6 +339,7 @@ function renderLeads(leads) {
   const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
   if (tab && tab.archived) {
     setBatchSectionVisible(false);
+    setApprovalSectionVisible(false);
     const filtered = applySearch(_archivedLeads);
     renderTable(filtered);
     renderCards(filtered);
@@ -311,12 +347,23 @@ function renderLeads(leads) {
   }
   if (tab && tab.enrichmentQueue) {
     setBatchSectionVisible(true);
+    setApprovalSectionVisible(false);
     const filtered = applySearch(leads.filter(isEnrichmentNeeded));
     renderTable(filtered);
     renderCards(filtered);
     return;
   }
+  if (tab && tab.sendBatchReview) {
+    setBatchSectionVisible(false);
+    setApprovalSectionVisible(true);
+    renderApprovalSection();
+    const filtered = applySearch(leads.filter(isReadyToApprove));
+    renderTable(filtered);
+    renderCards(filtered);
+    return;
+  }
   setBatchSectionVisible(false);
+  setApprovalSectionVisible(false);
   const filtered = applySearch(leads.filter(l => matchesTab(l, tab)));
   renderTable(filtered);
   renderCards(filtered);
@@ -659,6 +706,161 @@ function copyBatchEnrichmentPrompt() {
   const prompt = generateBatchEnrichmentPrompt(leads);
   navigator.clipboard.writeText(prompt).catch(() => {});
   showFb(`Batch prompt copied (${leads.length} leads).`, false);
+}
+
+// ── Phase 6: Approval Packet + Send Batch Review ─────────────────
+
+let _approvalSelections = {}; // id → 'APPROVE'|'HOLD'|'REJECT'|'NEEDS_MORE_ENRICHMENT'|null
+
+function generateApprovalPacket(lead) {
+  const channel = lead.whatsappNumber || lead.whatsapp
+    ? 'WhatsApp (' + (lead.whatsappNumber || lead.whatsapp) + ')'
+    : lead.publicContactChannel || lead.contactMethod || '—';
+  const evidence = Array.isArray(lead.sourceEvidence) && lead.sourceEvidence.length
+    ? lead.sourceEvidence.join('; ')
+    : (lead.sourceEvidence || '—');
+  const assumptions = Array.isArray(lead.assumptions) && lead.assumptions.length
+    ? lead.assumptions.join('; ')
+    : (lead.assumptions || '—');
+  const weakness = Array.isArray(lead.weakness) ? lead.weakness.join(', ') : (lead.weakness || '—');
+  const opportunity = Array.isArray(lead.opportunity) ? lead.opportunity.join(', ') : (lead.opportunity || '—');
+  return {
+    businessName:      lead.businessName || '—',
+    niche:             lead.niche || '—',
+    location:          lead.lokasi || lead.location || '—',
+    contactChannel:    channel,
+    sourceEvidence:    evidence,
+    assumptions:       assumptions,
+    weakness:          weakness,
+    opportunity:       opportunity,
+    offerAngle:        lead.offerAngle || '—',
+    riskNote:          lead.riskNote || '—',
+    draftMessage:      lead.lastApprovedMessage || lead.generatedMessage || '—',
+    recommendedChannel: lead.recommendedChannel || (lead.whatsappNumber || lead.whatsapp ? 'WhatsApp' : 'Other'),
+    contactReadiness:  lead.contactReadiness || '—',
+    approvalStatus:    lead.approvalStatus || 'NOT_APPROVED_TO_CONTACT'
+  };
+}
+
+function renderApprovalSection() {
+  const listEl = document.getElementById('approval-packets-list');
+  const summEl = document.getElementById('approval-summary');
+  if (!listEl) return;
+
+  const leads = _allLeads.filter(isReadyToApprove);
+  if (summEl) summEl.textContent = '';
+
+  if (!leads.length) {
+    listEl.innerHTML = '<div class="approval-empty">No contact-ready leads awaiting approval.</div>';
+    return;
+  }
+
+  listEl.innerHTML = leads.map(lead => {
+    const p   = generateApprovalPacket(lead);
+    const sel = _approvalSelections[lead.id] || '';
+    return `<div class="approval-packet-card" id="apc-${esc(lead.id)}">
+      <div class="apc-header">
+        <span class="apc-name">${esc(p.businessName)}</span>
+        <span class="apc-meta">${esc(p.niche)} · ${esc(p.location)}</span>
+        <span class="apc-cr apc-cr-${esc(p.contactReadiness)}">${esc(p.contactReadiness)}</span>
+      </div>
+      <div class="apc-body">
+        <div class="apc-row"><span class="apc-label">Channel</span><span class="apc-val">${esc(p.contactChannel)}</span></div>
+        <div class="apc-row"><span class="apc-label">Evidence</span><span class="apc-val">${esc(p.sourceEvidence)}</span></div>
+        <div class="apc-row"><span class="apc-label">Weakness</span><span class="apc-val">${esc(p.weakness)}</span></div>
+        <div class="apc-row"><span class="apc-label">Opportunity</span><span class="apc-val">${esc(p.opportunity)}</span></div>
+        <div class="apc-row"><span class="apc-label">Offer Angle</span><span class="apc-val">${esc(p.offerAngle)}</span></div>
+        <div class="apc-row"><span class="apc-label">Risk Note</span><span class="apc-val">${esc(p.riskNote)}</span></div>
+        <div class="apc-row"><span class="apc-label">Draft Message</span><span class="apc-val apc-draft">${esc(p.draftMessage)}</span></div>
+        <div class="apc-row"><span class="apc-label">Rec. Channel</span><span class="apc-val">${esc(p.recommendedChannel)}</span></div>
+      </div>
+      <div class="apc-decision-row">
+        ${['APPROVE','EDIT_MESSAGE','HOLD','REJECT','NEEDS_MORE_ENRICHMENT'].map(opt =>
+          `<button class="btn-apc-decision btn-apc-${opt.toLowerCase().replace(/_/g,'-')} ${sel === opt ? 'apc-selected' : ''}"
+            onclick="setApprovalDecision('${esc(lead.id)}','${opt}')">${opt.replace(/_/g,' ')}</button>`
+        ).join('')}
+      </div>
+      <div class="apc-feedback" id="apc-fb-${esc(lead.id)}"></div>
+    </div>`;
+  }).join('');
+}
+
+function setApprovalDecision(id, decision) {
+  _approvalSelections[id] = decision;
+  const card = document.getElementById('apc-' + id);
+  if (!card) return;
+  card.querySelectorAll('.btn-apc-decision').forEach(btn => btn.classList.remove('apc-selected'));
+  const selectedBtn = [...card.querySelectorAll('.btn-apc-decision')]
+    .find(btn => btn.textContent.trim() === decision.replace(/_/g, ' '));
+  if (selectedBtn) selectedBtn.classList.add('apc-selected');
+}
+
+async function batchApprove(forceDecision) {
+  const leads = _allLeads.filter(isReadyToApprove);
+  const summEl = document.getElementById('approval-summary');
+
+  const toProcess = forceDecision
+    ? leads.map(l => ({ id: l.id, decision: forceDecision }))
+    : leads.filter(l => _approvalSelections[l.id]).map(l => ({ id: l.id, decision: _approvalSelections[l.id] }));
+
+  if (!toProcess.length) {
+    if (summEl) { summEl.textContent = forceDecision ? 'No leads to process.' : 'No decisions selected — pick APPROVE / HOLD / REJECT / NEEDS MORE ENRICHMENT for each lead first.'; summEl.style.color = '#E8C97A'; }
+    return;
+  }
+
+  let okCount = 0, failCount = 0;
+  const counts = { APPROVE: 0, EDIT_MESSAGE: 0, HOLD: 0, REJECT: 0, NEEDS_MORE_ENRICHMENT: 0 };
+
+  for (const { id, decision } of toProcess) {
+    const fbEl = document.getElementById('apc-fb-' + id);
+    try {
+      const res  = await fetch('/api/leads/' + encodeURIComponent(id) + '/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (fbEl) { fbEl.textContent = 'FAIL: ' + ((data && data.error) || 'Server error'); fbEl.style.color = '#E87A7A'; }
+        failCount++;
+      } else {
+        const updatedLead = data.lead;
+        const idx = _allLeads.findIndex(l => l.id === id);
+        if (idx !== -1) _allLeads[idx] = updatedLead;
+        if (fbEl) { fbEl.textContent = decision.replace(/_/g, ' ') + ' applied.'; fbEl.style.color = '#4ECB7A'; }
+        counts[decision] = (counts[decision] || 0) + 1;
+        okCount++;
+        delete _approvalSelections[id];
+      }
+    } catch (e) {
+      if (fbEl) { fbEl.textContent = 'Network error.'; fbEl.style.color = '#E87A7A'; }
+      failCount++;
+    }
+  }
+
+  renderTabs(_allLeads);
+  const filteredAfter = applySearch(_allLeads.filter(isReadyToApprove));
+  renderTable(filteredAfter);
+  renderCards(filteredAfter);
+
+  const approved  = counts['APPROVE']  || 0;
+  const edited    = counts['EDIT_MESSAGE'] || 0;
+  const held      = counts['HOLD']     || 0;
+  const rejected  = counts['REJECT']   || 0;
+  const needsMore = counts['NEEDS_MORE_ENRICHMENT'] || 0;
+  const still     = _allLeads.filter(isReadyToApprove).length;
+
+  if (summEl) {
+    summEl.innerHTML =
+      `<span class="apsum-item apsum-approved">✅ Approved: ${approved}</span>` +
+      (edited    ? `<span class="apsum-item apsum-edit">✏ Edit Required: ${edited}</span>` : '') +
+      `<span class="apsum-item apsum-held">⏸ Held: ${held}</span>` +
+      `<span class="apsum-item apsum-rejected">✗ Rejected: ${rejected}</span>` +
+      `<span class="apsum-item apsum-needs">🔍 Needs Enrichment: ${needsMore}</span>` +
+      `<span class="apsum-item apsum-still">⏳ Still Awaiting: ${still}</span>` +
+      (failCount ? `<span class="apsum-item apsum-fail">⚠ Errors: ${failCount}</span>` : '');
+    summEl.style.display = 'flex';
+  }
 }
 
 async function applyEnrichmentPatch(id) {

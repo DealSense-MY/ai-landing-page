@@ -2716,3 +2716,114 @@ tr.selected-row td {
   line-height: 1.7;
 }
 .batch-patch-progress:empty { display: none; }
+
+/* Phase 6: Approval Packet + Send Batch Review */
+.approval-review-section {
+  background: #0E0E1A;
+  border: 1px solid #2A2A4A;
+  border-radius: 10px;
+  padding: 16px 18px 14px;
+  margin: 0 0 14px 0;
+}
+.approval-review-heading {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8888B8;
+  margin: 0 0 12px 0;
+}
+.approval-review-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.btn-approve-all {
+  background: #142A1A; border: 1px solid #4ECB7A; color: #4ECB7A;
+  border-radius: 7px; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer;
+}
+.btn-approve-all:hover { background: #1B3A24; }
+.btn-hold-all {
+  background: #1A1A10; border: 1px solid #C8B840; color: #C8B840;
+  border-radius: 7px; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer;
+}
+.btn-hold-all:hover { background: #28281A; }
+.btn-reject-all {
+  background: #2A1414; border: 1px solid #E87A7A; color: #E87A7A;
+  border-radius: 7px; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer;
+}
+.btn-reject-all:hover { background: #3A1C1C; }
+.btn-needs-enrichment-all {
+  background: #1A1428; border: 1px solid #9B88D8; color: #9B88D8;
+  border-radius: 7px; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer;
+}
+.btn-needs-enrichment-all:hover { background: #231B38; }
+.approval-summary {
+  display: none;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #0A0A14;
+  border-radius: 6px;
+  border: 1px solid #1E1E38;
+}
+.apsum-item { font-size: 12px; font-weight: 600; }
+.apsum-approved { color: #4ECB7A; }
+.apsum-edit     { color: #90C4F4; }
+.apsum-held     { color: #C8B840; }
+.apsum-rejected { color: #E87A7A; }
+.apsum-needs    { color: #9B88D8; }
+.apsum-still    { color: #8888B8; }
+.apsum-fail     { color: #E8A07A; }
+.approval-empty { color: #6666AA; font-size: 13px; padding: 12px 0; }
+.approval-packets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.approval-packet-card {
+  background: #12121E;
+  border: 1px solid #2A2A4A;
+  border-radius: 8px;
+  padding: 12px 14px 10px;
+}
+.apc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.apc-name { font-size: 14px; font-weight: 700; color: #E0E0FF; }
+.apc-meta { font-size: 11px; color: #8888B8; }
+.apc-cr { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.05em; }
+.apc-cr-CONTACT_READY   { background: #1A3A24; color: #4ECB7A; }
+.apc-cr-CONTACT_PARTIAL { background: #2A2414; color: #C8B840; }
+.apc-body { margin-bottom: 10px; }
+.apc-row { display: flex; gap: 8px; font-size: 12px; margin-bottom: 4px; align-items: flex-start; }
+.apc-label { color: #6666AA; min-width: 90px; flex-shrink: 0; font-weight: 600; }
+.apc-val { color: #C8C8E8; word-break: break-word; }
+.apc-draft { color: #90C4F4; font-style: italic; white-space: pre-wrap; }
+.apc-decision-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.btn-apc-decision {
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 5px;
+  cursor: pointer; border: 1px solid #3A3A5A; background: #1A1A2A; color: #8888B8;
+  transition: all 0.12s;
+}
+.btn-apc-decision:hover { border-color: #6666AA; color: #C8C8E8; }
+.btn-apc-decision.apc-selected { background: #2A2A4A; border-color: #9090D8; color: #E0E0FF; }
+.btn-apc-approve.apc-selected         { background: #142A1A; border-color: #4ECB7A; color: #4ECB7A; }
+.btn-apc-edit-message.apc-selected    { background: #1A2430; border-color: #4A90D9; color: #90C4F4; }
+.btn-apc-hold.apc-selected            { background: #1A1A10; border-color: #C8B840; color: #C8B840; }
+.btn-apc-reject.apc-selected          { background: #2A1414; border-color: #E87A7A; color: #E87A7A; }
+.btn-apc-needs-more-enrichment.apc-selected { background: #1A1428; border-color: #9B88D8; color: #9B88D8; }
+.apc-feedback { font-size: 11px; min-height: 16px; margin-top: 2px; }

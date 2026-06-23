@@ -276,6 +276,21 @@
   <div class="batch-patch-progress" id="batch-patch-progress"></div>
 </div>
 
+<!-- Phase 6: Approval Packet + Send Batch Review — shown only when SEND_BATCH_REVIEW tab is active -->
+<div class="approval-review-section" id="approval-review-section" style="display:none;">
+  <h3 class="approval-review-heading">Send Batch Review — Approval Packets</h3>
+  <div class="approval-review-controls">
+    <button type="button" class="btn-approve-all" onclick="batchApprove('APPROVE')">✅ Approve Selected</button>
+    <button type="button" class="btn-hold-all" onclick="batchApprove('HOLD')">⏸ Hold Selected</button>
+    <button type="button" class="btn-reject-all" onclick="batchApprove('REJECT')">✗ Reject Selected</button>
+    <button type="button" class="btn-needs-enrichment-all" onclick="batchApprove('NEEDS_MORE_ENRICHMENT')">🔍 Needs More Enrichment</button>
+  </div>
+  <div class="approval-summary" id="approval-summary"></div>
+  <div class="approval-packets-list" id="approval-packets-list">
+    <!-- Rendered by renderApprovalSection() -->
+  </div>
+</div>
+
 <div class="prospect-table-wrapper">
   <table class="prospect-table" id="prospect-table">
     <thead>
