@@ -1197,6 +1197,103 @@ app.get('/api/logs', requireAuth, (req, res) => {
   }
 });
 
+// POST apply contact enrichment patch — Phase 4
+app.post('/api/leads/:id/enrich', requireAuth, (req, res) => {
+  queueWrite(() => {
+    try {
+      backupBeforeWrite();
+      const leads = safeReadJSON(LEADS_FILE);
+      const idx = leads.findIndex(l => l.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+
+      const lead = leads[idx];
+      if (lead.locked) return res.status(403).json({ error: 'Lead is locked (' + lead.lockReason + ') — cannot apply enrichment patch' });
+
+      const body = req.body || {};
+      const WRITABLE = ['whatsappNumber', 'publicContactChannel', 'websiteLink', 'facebookPageLink', 'instagramLink', 'googleMapsLink', 'sourceEvidence', 'assumptions'];
+      const arrayFields = new Set(['sourceEvidence', 'assumptions']);
+
+      const contactReadinessBefore = lead.contactReadiness || 'CONTACT_MISSING';
+      const fieldsApplied = [];
+
+      for (const field of WRITABLE) {
+        const val = body[field];
+        if (val === undefined || val === null) continue;
+        if (arrayFields.has(field)) {
+          if (Array.isArray(val) && val.length > 0) {
+            lead[field] = val;
+            fieldsApplied.push(field);
+          }
+        } else {
+          const str = String(val).trim();
+          if (str !== '') {
+            lead[field] = str;
+            // keep dual-key fields in sync
+            if (field === 'whatsappNumber') lead.whatsapp = str;
+            if (field === 'websiteLink')    lead.website  = str;
+            if (field === 'facebookPageLink') lead.facebook  = str;
+            if (field === 'instagramLink')    lead.instagram = str;
+            if (field === 'googleMapsLink')   lead.googleMapsUrl = str;
+            if (field === 'publicContactChannel') lead.contactMethod = str;
+            fieldsApplied.push(field);
+          }
+        }
+      }
+
+      // Re-classify contact readiness server-side — never trust client value
+      const cr = classifyContactReadiness(lead);
+      lead.contactReadiness       = cr.contactReadiness;
+      lead.contactReadinessReason = cr.contactReadinessReason;
+      lead.contactNextAction      = cr.contactNextAction;
+
+      // Recompute scores
+      lead.auditScore            = calculateAuditScore(lead);
+      lead.previewReadinessScore = calculatePreviewReadinessScore(lead);
+      lead.priority              = calculatePriority(lead.auditScore);
+      if (lead.audit && typeof lead.audit === 'object') {
+        lead.audit.missingFields = getMissingPreviewFields(lead);
+      }
+
+      // Force safety fields — unconditional
+      lead.approvalStatus = 'NOT_APPROVED_TO_CONTACT';
+      lead.sendStatus     = 'NOT_APPROVED_TO_SEND';
+
+      const now = new Date().toISOString();
+      lead.updatedAt = now;
+
+      if (!Array.isArray(lead.events)) lead.events = [];
+      const event = {
+        id:        `ENRICHMENT_PATCH_APPLIED-${Date.now()}`,
+        type:      'ENRICHMENT_PATCH_APPLIED',
+        leadId:    lead.id,
+        leadName:  lead.businessName || '',
+        timestamp: now,
+        source:    'operator-ui',
+        actor:     'Aliff',
+        metadata: {
+          fieldsApplied,
+          contactReadinessBefore,
+          contactReadinessAfter: lead.contactReadiness
+        }
+      };
+      lead.events.push(event);
+      leads[idx] = lead;
+
+      safeWriteJSON(LEADS_FILE, leads);
+
+      let runLog = [];
+      try { runLog = safeReadJSON(RUN_LOG_FILE); } catch (e) {}
+      if (!Array.isArray(runLog)) runLog = [];
+      runLog.push(event);
+      safeWriteJSON(RUN_LOG_FILE, runLog);
+
+      res.json({ ok: true, lead: leads[idx] });
+    } catch (e) {
+      res.status(500).json({ error: 'Enrichment patch failed: ' + e.message });
+    }
+  });
+});
+
 // POST mark lead as paid
 app.post('/api/leads/:id/mark-paid', requireAuth, (req, res) => {
   queueWrite(() => {

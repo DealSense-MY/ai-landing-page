@@ -2591,3 +2591,39 @@ tr.selected-row td {
   font-size: 12px;
   color: #4ECB7A;
 }
+.cr-patch-textarea {
+  width: 100%;
+  min-height: 120px;
+  background: #0F0F18;
+  border: 1px solid #3A3A5A;
+  border-radius: 7px;
+  color: #C8C8E8;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 8px 10px;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-top: 8px;
+}
+.cr-patch-textarea:focus {
+  outline: none;
+  border-color: #4A90D9;
+}
+.btn-apply-patch {
+  background: #1A2A3A;
+  border: 1px solid #4A90D9;
+  color: #90C4F4;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 6px;
+}
+.btn-apply-patch:hover { background: #1E3550; }
+.cr-patch-feedback {
+  font-size: 12px;
+  margin-top: 4px;
+  min-height: 18px;
+}

@@ -399,6 +399,9 @@ function buildLeadCard(l) {
       <div class="cr-enrichment-row" id="cr-enrich-row-${id}">
         <button class="btn-enrich-prompt" onclick="copyEnrichmentPrompt('${id}')">📋 Copy Enrichment Prompt</button>
         <span class="cr-enrich-feedback" id="cr-enrich-fb-${id}"></span>
+        <textarea class="cr-patch-textarea" id="cr-patch-input-${id}" placeholder="Paste JSON patch from AI here..." style="display:none;"></textarea>
+        <button class="btn-apply-patch" id="cr-patch-btn-${id}" onclick="applyEnrichmentPatch('${id}')" style="display:none;">✅ Apply Enrichment Patch</button>
+        <div class="cr-patch-feedback" id="cr-patch-fb-${id}"></div>
       </div>
     </div>
 
@@ -569,9 +572,14 @@ function renderContactReadiness(l) {
   if (igEl)   igEl.innerHTML   = linkOrDash(l.instagramLink    || l.instagram);
   if (gmapEl) gmapEl.innerHTML = linkOrDash(l.googleMapsLink   || l.googleMapsUrl);
 
-  // Hide enrichment button for CONTACT_READY leads
-  const enrichRow = document.getElementById('cr-enrich-row-' + l.id);
-  if (enrichRow) enrichRow.style.display = cr === 'CONTACT_READY' ? 'none' : 'flex';
+  // Hide enrichment section for CONTACT_READY leads; show patch input for others
+  const enrichRow  = document.getElementById('cr-enrich-row-'   + l.id);
+  const patchInput = document.getElementById('cr-patch-input-'  + l.id);
+  const patchBtn   = document.getElementById('cr-patch-btn-'    + l.id);
+  const needsEnrich = isEnrichmentNeeded(l);
+  if (enrichRow)  enrichRow.style.display  = needsEnrich ? 'flex' : 'none';
+  if (patchInput) patchInput.style.display = needsEnrich ? 'block' : 'none';
+  if (patchBtn)   patchBtn.style.display   = needsEnrich ? 'inline-block' : 'none';
 }
 
 function copyEnrichmentPrompt(id) {
@@ -585,6 +593,60 @@ function copyEnrichmentPrompt(id) {
   if (fb) {
     fb.textContent = '✓ Enrichment prompt copied to clipboard — paste into Claude or ChatGPT.';
     setTimeout(() => { if (fb) fb.textContent = ''; }, 4000);
+  }
+}
+
+async function applyEnrichmentPatch(id) {
+  const inputEl = document.getElementById('cr-patch-input-' + id);
+  const fbEl    = document.getElementById('cr-patch-fb-'    + id);
+
+  const showPatchFb = (msg, isError) => {
+    if (!fbEl) return;
+    fbEl.textContent  = msg;
+    fbEl.style.color  = isError ? '#E87A7A' : '#4ECB7A';
+    setTimeout(() => { if (fbEl) fbEl.textContent = ''; }, 5000);
+  };
+
+  if (!inputEl || !inputEl.value.trim()) {
+    showPatchFb('Paste JSON patch first.', true);
+    return;
+  }
+
+  let patch;
+  try {
+    patch = JSON.parse(inputEl.value.trim());
+  } catch (e) {
+    showPatchFb('Invalid JSON — check the patch from AI.', true);
+    return;
+  }
+
+  if (patch.id !== id) {
+    showPatchFb('Lead ID mismatch — wrong patch pasted.', true);
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/enrich', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(patch)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showPatchFb((data && data.error) || 'Server error applying patch.', true);
+      return;
+    }
+    const updatedLead = data.lead;
+    // Update in-memory lead list
+    const idx = _allLeads.findIndex(l => l.id === id);
+    if (idx !== -1) _allLeads[idx] = updatedLead;
+    // Refresh modal and tabs
+    populateLeadCard(updatedLead);
+    renderTabs(_allLeads);
+    showPatchFb('Enrichment patch applied. Contact readiness: ' + (updatedLead.contactReadiness || '—') + '.', false);
+    inputEl.value = '';
+  } catch (e) {
+    showPatchFb('Network error — check server connection.', true);
   }
 }
 
