@@ -3,6 +3,12 @@
 Local dashboard untuk Aliff approve dan hantar outreach DM ke prospects.
 **Ini bukan automation. Semua hantar kena human approval dulu.**
 
+> **⚠ SECURITY WARNING**
+> ApexProspect contains prospect/contact/draft data.
+> Do NOT expose publicly without setting `APEX_OPERATOR_PASSWORD` in `.env`.
+> By default the server binds to `127.0.0.1` (localhost only) — safe for local use.
+> See `sprints/APEXPROSPECT_PHASE_8_LOCAL_PRIVATE_ACCESS_GUIDE.md` for remote access options.
+
 ---
 
 ## Install
