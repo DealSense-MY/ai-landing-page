@@ -2827,3 +2827,125 @@ tr.selected-row td {
 .btn-apc-reject.apc-selected          { background: #2A1414; border-color: #E87A7A; color: #E87A7A; }
 .btn-apc-needs-more-enrichment.apc-selected { background: #1A1428; border-color: #9B88D8; color: #9B88D8; }
 .apc-feedback { font-size: 11px; min-height: 16px; margin-top: 2px; }
+
+/* ── Phase 7: Manual Send Panel ─────────────────────────────── */
+.p7-send-panel { margin: 14px 0; }
+
+.p7-panel-blocked {
+  background: #1A1214;
+  border: 1px solid #3A2828;
+  border-radius: 7px;
+  padding: 12px 14px;
+}
+.p7-panel-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  color: #8888A8; text-transform: uppercase; margin-bottom: 8px;
+}
+.p7-blocked-note { font-size: 12px; color: #E8B8B8; margin-bottom: 6px; }
+.p7-blocked-reasons { list-style: disc; padding-left: 18px; }
+.p7-blocked-reasons li { font-size: 11px; color: #A88888; margin-bottom: 3px; }
+
+.p7-panel-eligible {
+  background: #0F1A14;
+  border: 1px solid #2A3A2A;
+  border-radius: 7px;
+  padding: 12px 14px;
+}
+
+.p7-open-action-row { margin-bottom: 10px; }
+.p7-btn-open {
+  background: #14301C;
+  border: 1px solid var(--action-primary-border, rgba(46,106,79,0.55));
+  color: #4ECB7A;
+  font-size: 13px; font-weight: 700;
+  padding: 8px 16px; border-radius: 6px;
+  cursor: pointer; transition: background 0.12s;
+}
+.p7-btn-open:hover { background: #1C4028; }
+.p7-open-note {
+  font-size: 11px; color: #6688AA; margin-top: 5px;
+}
+.p7-no-open-note { font-size: 12px; color: #A88888; margin-bottom: 4px; }
+
+.p7-confirm-sent-row { margin: 10px 0; }
+.p7-confirm-note { font-size: 11px; color: #C8B840; margin-bottom: 5px; }
+.p7-btn-confirm {
+  background: #2A1C00;
+  border: 1px solid #A87820;
+  color: #E8B840;
+  font-size: 13px; font-weight: 700;
+  padding: 7px 14px; border-radius: 6px;
+  cursor: pointer; transition: background 0.12s;
+}
+.p7-btn-confirm:hover { background: #3A2800; }
+.p7-already-sent { font-size: 12px; color: #4ECB7A; font-weight: 600; }
+
+.p7-edit-draft-row { margin-top: 10px; border-top: 1px solid #242428; padding-top: 10px; }
+.p7-btn-edit-draft {
+  background: #141420;
+  border: 1px solid #2E2E4A;
+  color: #8888B8;
+  font-size: 11px;
+  padding: 5px 12px; border-radius: 5px;
+  cursor: pointer;
+}
+.p7-btn-edit-draft:hover { border-color: #6666AA; color: #C8C8E8; }
+
+.p7-draft-editor { margin-top: 8px; }
+.p7-draft-ta {
+  width: 100%; resize: vertical;
+  background: #0B0B0F;
+  border: 1px solid #2E2E4A;
+  color: #D0D0E8;
+  font-size: 12px; border-radius: 5px;
+  padding: 8px; font-family: inherit;
+  margin-bottom: 6px;
+}
+.p7-draft-warning {
+  font-size: 11px; color: #E8C97A; margin-bottom: 6px;
+}
+.p7-btn-save-draft {
+  background: #1A1428;
+  border: 1px solid #4A3A7A;
+  color: #B090E8;
+  font-size: 11px; font-weight: 600;
+  padding: 5px 12px; border-radius: 5px;
+  cursor: pointer;
+}
+.p7-btn-save-draft:hover { background: #22183A; }
+.p7-draft-fb { font-size: 11px; margin-top: 5px; min-height: 14px; }
+.p7-panel-fb { font-size: 12px; margin-top: 6px; min-height: 16px; }
+
+/* ── Phase 7: Send Log ───────────────────────────────────────── */
+.p7-send-log-section {
+  margin: 12px 0;
+  border: 1px solid #1E2A30;
+  border-radius: 7px;
+  background: #0A0F14;
+  overflow: hidden;
+}
+.p7-send-log-header {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.07em;
+  color: #5588AA; text-transform: uppercase;
+  padding: 8px 12px;
+  border-bottom: 1px solid #1E2A30;
+  background: #0C1418;
+}
+.p7-sendlog-empty { font-size: 11px; color: #4A5A6A; padding: 8px 12px; }
+.p7-sendlog-grid { padding: 8px 12px; }
+.p7-sendlog-row {
+  display: flex; gap: 8px; font-size: 12px;
+  margin-bottom: 5px; align-items: flex-start;
+}
+.p7-sendlog-label {
+  color: #5A7A88; min-width: 120px; flex-shrink: 0;
+  font-weight: 600; font-size: 11px;
+}
+.p7-sendlog-val { color: #B8C8D8; word-break: break-word; }
+.p7-sendlog-sent { color: #4ECB7A; font-weight: 700; }
+.p7-sendlog-msg { align-items: flex-start; }
+.p7-sendlog-msg-text {
+  color: #90B0C8; white-space: pre-wrap;
+  font-size: 11px; background: #0B1418; padding: 5px 7px;
+  border-radius: 4px; border: 1px solid #1E2A30; flex: 1;
+}

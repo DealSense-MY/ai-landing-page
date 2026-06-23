@@ -1370,6 +1370,147 @@ app.post('/api/leads/:id/approve', requireAuth, (req, res) => {
   });
 });
 
+// POST Phase 7: Confirm Sent — operator explicitly confirms manual send completed
+app.post('/api/leads/:id/confirm-sent', requireAuth, (req, res) => {
+  queueWrite(() => {
+    try {
+      backupBeforeWrite();
+      const leads = safeReadJSON(LEADS_FILE);
+      const idx = leads.findIndex(l => l.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+      const lead = leads[idx];
+      if (lead.locked) return res.status(403).json({ error: 'Lead is locked (' + lead.lockReason + ') — cannot confirm sent' });
+
+      // Safety: must be approved before confirming sent
+      if (lead.approvalStatus !== 'APPROVED_TO_CONTACT') {
+        return res.status(400).json({ error: 'Lead is not approved to contact — cannot confirm sent' });
+      }
+      if (lead.sendStatus !== 'APPROVED_TO_SEND') {
+        return res.status(400).json({ error: 'Lead sendStatus is not APPROVED_TO_SEND — cannot confirm sent' });
+      }
+
+      const { sendChannel, sentMessage } = req.body || {};
+      const now = new Date().toISOString();
+
+      lead.sendStatus      = 'SENT_CONFIRMED_BY_OPERATOR';
+      lead.sentAt          = now;
+      lead.sentBy          = 'Aliff';
+      lead.sendChannel     = sendChannel || lead.sendChannel || 'WhatsApp';
+      lead.sentMessage     = sentMessage || lead.draftMessage || lead.dmDraft || lead.lastApprovedMessage || '';
+      lead.replyStatus     = lead.replyStatus || 'NO_REPLY';
+      // Set followUpDueAt +2 days as safe default if not already set
+      if (!lead.followUpDueAt) {
+        const followUpDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+        lead.followUpDueAt = followUpDate.toISOString();
+      }
+      lead.lastActionAt = now;
+
+      // prospectStatus becomes CONTACTED only after Confirm Sent
+      if (lead.prospectStatus !== 'CLOSED_WON' && lead.prospectStatus !== 'CLOSED_LOST') {
+        lead.prospectStatus = 'CONTACTED';
+      }
+
+      if (!Array.isArray(lead.events)) lead.events = [];
+      const event = {
+        id:        `SENT_CONFIRMED_BY_OPERATOR-${Date.now()}`,
+        type:      'SENT_CONFIRMED_BY_OPERATOR',
+        leadId:    lead.id,
+        leadName:  lead.businessName || '',
+        timestamp: now,
+        source:    'operator-ui',
+        actor:     'Aliff',
+        metadata: {
+          sendChannel: lead.sendChannel,
+          sentAt: now,
+          sentBy: 'Aliff',
+          messageLength: (lead.sentMessage || '').length
+        }
+      };
+      lead.events.push(event);
+      leads[idx] = lead;
+      safeWriteJSON(LEADS_FILE, leads);
+
+      let runLog = []; try { runLog = safeReadJSON(RUN_LOG_FILE); } catch (e) {}
+      if (!Array.isArray(runLog)) runLog = [];
+      runLog.push(event);
+      safeWriteJSON(RUN_LOG_FILE, runLog);
+
+      res.json({ ok: true, lead: leads[idx] });
+    } catch (e) {
+      res.status(500).json({ error: 'Confirm sent failed: ' + e.message });
+    }
+  });
+});
+
+// POST Phase 7: Save Draft — operator edits message, invalidates approval if message changed
+app.post('/api/leads/:id/save-draft', requireAuth, (req, res) => {
+  queueWrite(() => {
+    try {
+      backupBeforeWrite();
+      const leads = safeReadJSON(LEADS_FILE);
+      const idx = leads.findIndex(l => l.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
+      const lead = leads[idx];
+      if (lead.locked) return res.status(403).json({ error: 'Lead is locked (' + lead.lockReason + ') — cannot save draft' });
+
+      const { draftMessage } = req.body || {};
+      if (!draftMessage || !String(draftMessage).trim()) {
+        return res.status(400).json({ error: 'draftMessage is required' });
+      }
+
+      const now = new Date().toISOString();
+      const previousDraft = lead.draftMessage || lead.dmDraft || lead.lastApprovedMessage || '';
+      const messageChanged = draftMessage.trim() !== previousDraft.trim();
+
+      lead.draftMessage     = draftMessage.trim();
+      lead.dmDraft          = draftMessage.trim();
+      lead.lastActionAt     = now;
+
+      // If message changed after approval, invalidate — require re-approval
+      if (messageChanged && lead.approvalStatus === 'APPROVED_TO_CONTACT') {
+        lead.approvalStatus = 'NOT_APPROVED_TO_CONTACT';
+        lead.sendStatus     = 'NOT_APPROVED_TO_SEND';
+        lead.sendPrepStatus = 'EDIT_REQUIRED_BEFORE_SEND';
+        if (!Array.isArray(lead.events)) lead.events = [];
+        lead.events.push({
+          id:        `MESSAGE_EDIT_REQUIRES_REAPPROVAL-${Date.now()}`,
+          type:      'MESSAGE_EDIT_REQUIRES_REAPPROVAL',
+          leadId:    lead.id,
+          leadName:  lead.businessName || '',
+          timestamp: now,
+          source:    'operator-ui',
+          actor:     'Aliff',
+          metadata:  { previousLength: previousDraft.length, newLength: draftMessage.trim().length }
+        });
+      } else {
+        if (!Array.isArray(lead.events)) lead.events = [];
+        lead.events.push({
+          id:        `DRAFT_SAVED-${Date.now()}`,
+          type:      'DRAFT_SAVED',
+          leadId:    lead.id,
+          leadName:  lead.businessName || '',
+          timestamp: now,
+          source:    'operator-ui',
+          actor:     'Aliff',
+          metadata:  { messageLength: draftMessage.trim().length, messageChanged }
+        });
+      }
+
+      leads[idx] = lead;
+      safeWriteJSON(LEADS_FILE, leads);
+
+      let runLog = []; try { runLog = safeReadJSON(RUN_LOG_FILE); } catch (e) {}
+      if (!Array.isArray(runLog)) runLog = [];
+      runLog.push(lead.events[lead.events.length - 1]);
+      safeWriteJSON(RUN_LOG_FILE, runLog);
+
+      res.json({ ok: true, requiresReapproval: messageChanged && lead.approvalStatus !== 'APPROVED_TO_CONTACT', lead: leads[idx] });
+    } catch (e) {
+      res.status(500).json({ error: 'Save draft failed: ' + e.message });
+    }
+  });
+});
+
 // POST mark lead as paid
 app.post('/api/leads/:id/mark-paid', requireAuth, (req, res) => {
   queueWrite(() => {

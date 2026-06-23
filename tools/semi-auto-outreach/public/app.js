@@ -520,6 +520,13 @@ function buildLeadCard(l) {
       <button class="btn-save-reply" onclick="saveFollowUp('${id}')">Save Date</button>
     </div>
 
+    <div class="p7-send-panel" id="p7-send-panel-${id}"></div>
+
+    <div class="p7-send-log-section" id="p7-send-log-section-${id}" style="display:none">
+      <div class="p7-send-log-header">📤 Send Log</div>
+      <div id="p7-send-log-${id}"></div>
+    </div>
+
     <div class="lock-banner" id="lock-banner-${id}" style="display:none">
       <span class="lock-badge">LOCKED</span>
       <span class="lock-meta" id="lock-meta-${id}"></span>
@@ -1179,6 +1186,15 @@ function populateLeadCard(l, root) {
 
   // Phase 3: Contact Readiness section
   renderContactReadiness(l);
+
+  // Phase 7: Manual Send Panel
+  renderManualSendPanel(l, root ? root : null);
+
+  // Phase 7: Send Log
+  const sendLogSection = card ? card.querySelector('#p7-send-log-section-' + l.id) : document.getElementById('p7-send-log-section-' + l.id);
+  const hasSendHistory = l.approvedAt || (Array.isArray(l.events) && l.events.some(e => e.type === 'SENT_CONFIRMED_BY_OPERATOR' || e.type === 'CONTACT_OPENED_MANUAL'));
+  if (sendLogSection) sendLogSection.style.display = hasSendHistory ? 'block' : 'none';
+  renderSendLog(l, root ? root : null);
 
   // Preview section
   renderPreviewSection(l);
@@ -2787,6 +2803,277 @@ async function markPaid(id) {
   } catch (e) {
     if (fb) fb.textContent = 'Network error: ' + e.message;
   }
+}
+
+// ── Phase 7: Manual Send Control ─────────────────────────────
+
+// Returns eligibility object: { eligible: bool, reasons: string[] }
+function checkManualSendEligibility(lead) {
+  const reasons = [];
+  if (!lead) return { eligible: false, reasons: ['Lead not found'] };
+  if (lead.archived) reasons.push('Lead is archived');
+  const closedStatuses = ['CLOSED_WON', 'CLOSED_LOST'];
+  if (closedStatuses.includes(lead.prospectStatus) || closedStatuses.includes(lead.dealStatus)) {
+    reasons.push('Lead is closed (' + (lead.prospectStatus || lead.dealStatus) + ')');
+  }
+  if (lead.approvalStatus !== 'APPROVED_TO_CONTACT') {
+    reasons.push('approvalStatus is ' + (lead.approvalStatus || 'NOT_SET') + ' — must be APPROVED_TO_CONTACT');
+  }
+  if (lead.sendStatus !== 'APPROVED_TO_SEND') {
+    reasons.push('sendStatus is ' + (lead.sendStatus || 'NOT_SET') + ' — must be APPROVED_TO_SEND');
+  }
+  if (lead.sendPrepStatus && lead.sendPrepStatus !== 'READY_TO_SEND_MANUAL') {
+    reasons.push('sendPrepStatus is ' + lead.sendPrepStatus + ' — must be READY_TO_SEND_MANUAL');
+  }
+  const cr = lead.contactReadiness || '';
+  if (cr !== 'CONTACT_READY' && cr !== 'CONTACT_PARTIAL') {
+    reasons.push('contactReadiness is ' + (cr || 'NOT_SET') + ' — must be CONTACT_READY or CONTACT_PARTIAL');
+  }
+  const draft = lead.draftMessage || lead.dmDraft || lead.lastApprovedMessage || '';
+  if (!draft.trim()) {
+    reasons.push('No approved draft message — add a message first');
+  }
+  return { eligible: reasons.length === 0, reasons };
+}
+
+// Render Phase 7 Manual Send Panel inside the lead card
+function renderManualSendPanel(l, card) {
+  const panelEl = card ? card.querySelector('#p7-send-panel-' + l.id) : document.getElementById('p7-send-panel-' + l.id);
+  if (!panelEl) return;
+
+  if (l.locked) { panelEl.innerHTML = ''; return; }
+
+  const { eligible, reasons } = checkManualSendEligibility(l);
+  const alreadySent = Array.isArray(l.events) && l.events.some(e => e.type === 'SENT_CONFIRMED_BY_OPERATOR');
+  const waOpened    = Array.isArray(l.events) && l.events.some(e => e.type === 'WHATSAPP_OPENED' || e.type === 'CONTACT_OPENED_MANUAL');
+  const needsEdit   = lead => (lead.sendPrepStatus === 'EDIT_REQUIRED_BEFORE_SEND') || (lead.approvalStatus === 'NOT_APPROVED_TO_CONTACT' && (lead.draftMessage || lead.dmDraft));
+
+  const draftMsg = l.draftMessage || l.dmDraft || l.lastApprovedMessage || '';
+  const safeId = safeClass(l.id);
+  const wa = l.whatsappNumber || l.whatsapp || '';
+  const pubCh = l.publicContactChannel || l.contactMethod || '';
+  const website = l.websiteLink || l.website || '';
+
+  // Determine open action label
+  let openLabel = '';
+  let openNote  = '';
+  if (wa) {
+    openLabel = 'Open WhatsApp Manually';
+    openNote  = 'WhatsApp will open with message pre-filled. You must press Send yourself.';
+  } else if (pubCh || l.facebookPageLink || l.instagramLink) {
+    openLabel = 'Open Contact Channel';
+    openNote  = 'Message copied to clipboard. Open channel and paste manually.';
+  } else if (website) {
+    openLabel = 'Open Contact Page';
+    openNote  = 'Message copied to clipboard. Submit contact form manually.';
+  } else {
+    openLabel = 'No auto-open available';
+    openNote  = 'No WhatsApp, public channel, or website found. Use manual external action.';
+  }
+
+  if (!eligible) {
+    panelEl.innerHTML = `
+      <div class="p7-panel-blocked">
+        <div class="p7-panel-label">Manual Send</div>
+        <div class="p7-blocked-note">Send action blocked — requirements not met:</div>
+        <ul class="p7-blocked-reasons">${reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+      </div>`;
+    return;
+  }
+
+  panelEl.innerHTML = `
+    <div class="p7-panel-eligible">
+      <div class="p7-panel-label">Manual Send Control</div>
+      <div class="p7-open-action-row">
+        ${(wa || pubCh || website || l.facebookPageLink || l.instagramLink) ? `
+        <button class="btn p7-btn-open" onclick="handleManualOpenContact('${safeId}')">
+          ${esc(openLabel)}
+        </button>` : `
+        <div class="p7-no-open-note">${esc(openLabel)}</div>`}
+        <p class="p7-open-note">${esc(openNote)}</p>
+      </div>
+      <div class="p7-confirm-sent-row" id="p7-confirm-row-${safeId}" style="display:${waOpened || alreadySent ? 'block' : 'none'}">
+        ${alreadySent
+          ? `<div class="p7-already-sent">Sent confirmed.</div>`
+          : `<p class="p7-confirm-note">Click only AFTER you pressed Send in WhatsApp / the contact channel.</p>
+             <button class="btn p7-btn-confirm" onclick="handleP7ConfirmSent('${safeId}')">Confirm Sent</button>`
+        }
+      </div>
+      <div class="p7-edit-draft-row">
+        <button class="btn p7-btn-edit-draft" onclick="toggleP7DraftEditor('${safeId}')">Edit Message Draft</button>
+        <div class="p7-draft-editor" id="p7-draft-editor-${safeId}" style="display:none">
+          <textarea class="p7-draft-ta" id="p7-draft-ta-${safeId}" rows="5">${esc(draftMsg)}</textarea>
+          <div class="p7-draft-warning">⚠ Editing this message after approval will invalidate approval and require re-approval.</div>
+          <button class="btn p7-btn-save-draft" onclick="handleP7SaveDraft('${safeId}')">Save Draft (requires re-approval if changed)</button>
+          <div class="p7-draft-fb" id="p7-draft-fb-${safeId}"></div>
+        </div>
+      </div>
+      <div class="p7-panel-fb" id="p7-panel-fb-${safeId}"></div>
+    </div>`;
+}
+
+function toggleP7DraftEditor(id) {
+  const ed = document.getElementById('p7-draft-editor-' + id);
+  if (ed) ed.style.display = ed.style.display === 'none' ? 'block' : 'none';
+}
+
+async function handleManualOpenContact(id) {
+  const lead = _allLeads.find(l => l.id === id);
+  if (!lead) return;
+
+  const { eligible } = checkManualSendEligibility(lead);
+  if (!eligible) {
+    showFeedback(id, 'warning', 'Lead not eligible for manual send. Check approval status.');
+    return;
+  }
+
+  const msg = lead.draftMessage || lead.dmDraft || lead.lastApprovedMessage || '';
+  const wa  = lead.whatsappNumber || lead.whatsapp || '';
+  const pubCh = lead.publicContactChannel || lead.contactMethod || '';
+  const fbUrl = lead.facebookPageLink || lead.facebook || '';
+  const igUrl = lead.instagramLink    || lead.instagram || '';
+  const web   = lead.websiteLink      || lead.website   || '';
+
+  const showP7Fb = (text, isError) => {
+    const el = document.getElementById('p7-panel-fb-' + id);
+    if (el) { el.textContent = text; el.style.color = isError ? '#E87A7A' : '#4ECB7A'; }
+  };
+
+  if (wa) {
+    const encoded = encodeURIComponent(msg);
+    window.open('https://wa.me/' + wa + '?text=' + encoded, '_blank');
+    showP7Fb('WhatsApp opened. Press Send manually, then click Confirm Sent.', false);
+  } else if (pubCh || fbUrl || igUrl) {
+    try { await navigator.clipboard.writeText(msg); } catch (e) {}
+    const openUrl = fbUrl || igUrl || '';
+    if (openUrl) window.open(safeHref(openUrl), '_blank');
+    showP7Fb('Message copied to clipboard. Paste and send manually.', false);
+  } else if (web) {
+    try { await navigator.clipboard.writeText(msg); } catch (e) {}
+    window.open(safeHref(web), '_blank');
+    showP7Fb('Message copied to clipboard. Submit contact form manually.', false);
+  } else {
+    showP7Fb('No contact channel found. Add WhatsApp or public channel first.', true);
+    return;
+  }
+
+  // Log the open event
+  await logEvent(id, 'CONTACT_OPENED_MANUAL', { channel: wa ? 'WhatsApp' : (pubCh || fbUrl || igUrl ? 'Social' : 'Website') });
+
+  // Show confirm-sent row
+  const confirmRow = document.getElementById('p7-confirm-row-' + id);
+  if (confirmRow) confirmRow.style.display = 'block';
+}
+
+async function handleP7ConfirmSent(id) {
+  const lead = _allLeads.find(l => l.id === id);
+  if (!lead) return;
+  if (isLocked(id)) { showFeedback(id, 'warning', 'Lead is locked.'); return; }
+
+  const wa = lead.whatsappNumber || lead.whatsapp || '';
+  const sendChannel = wa ? 'WhatsApp' : (lead.publicContactChannel || 'Manual');
+  const sentMessage = lead.draftMessage || lead.dmDraft || lead.lastApprovedMessage || '';
+
+  const showP7Fb = (text, isError) => {
+    const el = document.getElementById('p7-panel-fb-' + id);
+    if (el) { el.textContent = text; el.style.color = isError ? '#E87A7A' : '#4ECB7A'; }
+  };
+
+  try {
+    const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/confirm-sent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sendChannel, sentMessage })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showP7Fb('Error: ' + (data.error || 'Unknown'), true);
+      return;
+    }
+    const idx = _allLeads.findIndex(l => l.id === id);
+    if (idx !== -1) _allLeads[idx] = data.lead;
+    renderTabs(_allLeads);
+    renderSmartPanel(_allLeads);
+    const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
+    renderTable(_allLeads.filter(l => matchesTab(l, tab)));
+    openCardModal(id);
+    showP7Fb('Send confirmed. Lead is now CONTACTED.', false);
+  } catch (e) {
+    showP7Fb('Network error: ' + e.message, true);
+  }
+}
+
+async function handleP7SaveDraft(id) {
+  const taEl = document.getElementById('p7-draft-ta-' + id);
+  const fbEl = document.getElementById('p7-draft-fb-' + id);
+  if (!taEl) return;
+  const draft = taEl.value.trim();
+  if (!draft) {
+    if (fbEl) { fbEl.textContent = 'Draft cannot be empty.'; fbEl.style.color = '#E87A7A'; }
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/save-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ draftMessage: draft })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (fbEl) { fbEl.textContent = 'Error: ' + (data.error || 'Unknown'); fbEl.style.color = '#E87A7A'; }
+      return;
+    }
+    const idx = _allLeads.findIndex(l => l.id === id);
+    if (idx !== -1) _allLeads[idx] = data.lead;
+    if (fbEl) {
+      if (data.requiresReapproval) {
+        fbEl.textContent = 'Draft saved. Approval invalidated — must re-approve before sending.';
+        fbEl.style.color = '#E8C97A';
+      } else {
+        fbEl.textContent = 'Draft saved.';
+        fbEl.style.color = '#4ECB7A';
+      }
+    }
+    // Refresh modal to reflect updated sendStatus/approvalStatus
+    openCardModal(id);
+  } catch (e) {
+    if (fbEl) { fbEl.textContent = 'Network error: ' + e.message; fbEl.style.color = '#E87A7A'; }
+  }
+}
+
+// ── Phase 7: Send Log Section ─────────────────────────────────
+
+function renderSendLog(l, card) {
+  const el = card ? card.querySelector('#p7-send-log-' + l.id) : document.getElementById('p7-send-log-' + l.id);
+  if (!el) return;
+
+  const approvedAt = l.approvedAt ? new Date(l.approvedAt).toLocaleString('en-MY') : '—';
+  const sentAt     = l.sentAt     ? new Date(l.sentAt).toLocaleString('en-MY')     : '—';
+  const followUpDue = l.followUpDueAt ? new Date(l.followUpDueAt).toLocaleString('en-MY') : '—';
+
+  const openedEvent = Array.isArray(l.events) && l.events.find(e => e.type === 'CONTACT_OPENED_MANUAL' || e.type === 'WHATSAPP_OPENED');
+  const openedAt = openedEvent ? new Date(openedEvent.timestamp).toLocaleString('en-MY') : '—';
+
+  const sentEvent = Array.isArray(l.events) && l.events.find(e => e.type === 'SENT_CONFIRMED_BY_OPERATOR');
+
+  if (!l.approvedAt && !sentEvent) {
+    el.innerHTML = '<div class="p7-sendlog-empty">No send events recorded yet.</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="p7-sendlog-grid">
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Approved At</span><span class="p7-sendlog-val">${esc(approvedAt)}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Approved By</span><span class="p7-sendlog-val">${esc(l.approvedBy || '—')}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">WA/Contact Opened</span><span class="p7-sendlog-val">${esc(openedAt)}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Sent At</span><span class="p7-sendlog-val ${l.sentAt ? 'p7-sendlog-sent' : ''}">${esc(sentAt)}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Sent By</span><span class="p7-sendlog-val">${esc(l.sentBy || '—')}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Send Channel</span><span class="p7-sendlog-val">${esc(l.sendChannel || '—')}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Reply Status</span><span class="p7-sendlog-val">${esc(l.replyStatus || 'NO_REPLY')}</span></div>
+      <div class="p7-sendlog-row"><span class="p7-sendlog-label">Follow-Up Due</span><span class="p7-sendlog-val">${esc(followUpDue)}</span></div>
+      ${l.sentMessage ? `<div class="p7-sendlog-row p7-sendlog-msg"><span class="p7-sendlog-label">Sent Message</span><span class="p7-sendlog-val p7-sendlog-msg-text">${esc(l.sentMessage)}</span></div>` : ''}
+    </div>`;
 }
 
 // ── Start Here helpers ────────────────────────────────────────
