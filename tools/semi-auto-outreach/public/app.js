@@ -153,11 +153,17 @@ function renderTabs(leads) {
   }).join('');
 }
 
+function setBatchSectionVisible(visible) {
+  const el = document.getElementById('batch-enrich-section');
+  if (el) el.style.display = visible ? 'block' : 'none';
+}
+
 function switchTab(key) {
   _activeTab = key;
   const tab = PIPELINE_TABS.find(t => t.key === key);
   renderTabs(_allLeads);
   if (tab && tab.archived) {
+    setBatchSectionVisible(false);
     const filtered = applySearch(_archivedLeads);
     if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
     renderTable(filtered);
@@ -165,12 +171,14 @@ function switchTab(key) {
     return;
   }
   if (tab && tab.enrichmentQueue) {
+    setBatchSectionVisible(true);
     const filtered = applySearch(_allLeads.filter(isEnrichmentNeeded));
     if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
     renderTable(filtered);
     renderCards(filtered);
     return;
   }
+  setBatchSectionVisible(false);
   const filtered = applySearch(_allLeads.filter(l => matchesTab(l, tab)));
   if (_selectedId && !filtered.find(l => l.id === _selectedId)) _selectedId = null;
   renderTable(filtered);
@@ -295,17 +303,20 @@ function renderLeads(leads) {
   renderDailyTracker(leads);
   const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
   if (tab && tab.archived) {
+    setBatchSectionVisible(false);
     const filtered = applySearch(_archivedLeads);
     renderTable(filtered);
     renderCards(filtered);
     return;
   }
   if (tab && tab.enrichmentQueue) {
+    setBatchSectionVisible(true);
     const filtered = applySearch(leads.filter(isEnrichmentNeeded));
     renderTable(filtered);
     renderCards(filtered);
     return;
   }
+  setBatchSectionVisible(false);
   const filtered = applySearch(leads.filter(l => matchesTab(l, tab)));
   renderTable(filtered);
   renderCards(filtered);
@@ -596,6 +607,60 @@ function copyEnrichmentPrompt(id) {
   }
 }
 
+function generateBatchEnrichmentPrompt(leads) {
+  const patchSchemas = leads.map(lead => JSON.stringify({
+    id:                   lead.id,
+    businessName:         lead.businessName || '',
+    whatsappNumber:       '',
+    publicContactChannel: '',
+    websiteLink:          '',
+    facebookPageLink:     '',
+    instagramLink:        '',
+    googleMapsLink:       '',
+    sourceEvidence:       [],
+    assumptions:          []
+  }, null, 2));
+
+  const leadSummaries = leads.map((lead, i) =>
+    `Lead ${i + 1}: ${lead.businessName || lead.id} (${lead.lokasi || lead.location || 'Unknown location'}) — contactReadiness: ${lead.contactReadiness || 'CONTACT_MISSING'}`
+  ).join('\n');
+
+  return `You are a contact enrichment AI. For each lead below, search the web and return a JSON array of enrichment patch objects.
+
+LEADS TO ENRICH (${leads.length} total):
+${leadSummaries}
+
+RETURN FORMAT:
+Return a single JSON array. Each element is an enrichment patch for one lead.
+Only include fields you found — leave others as empty string or empty array.
+Do NOT change the id field.
+Do NOT add any fields outside the schema.
+Do NOT set contactReadiness — the server will compute it.
+
+PATCH SCHEMA PER LEAD (one object per lead in the array):
+${patchSchemas.join(',\n')}
+
+Return ONLY the JSON array. No explanation, no markdown, no code block.`;
+}
+
+function copyBatchEnrichmentPrompt() {
+  const leads = _allLeads.filter(isEnrichmentNeeded);
+  const fbEl  = document.getElementById('batch-prompt-fb');
+
+  const showFb = (msg, isError) => {
+    if (!fbEl) return;
+    fbEl.textContent = msg;
+    fbEl.style.color = isError ? '#E87A7A' : '#4ECB7A';
+    setTimeout(() => { if (fbEl) fbEl.textContent = ''; }, 4000);
+  };
+
+  if (!leads.length) { showFb('No leads need enrichment.', true); return; }
+
+  const prompt = generateBatchEnrichmentPrompt(leads);
+  navigator.clipboard.writeText(prompt).catch(() => {});
+  showFb(`Batch prompt copied (${leads.length} leads).`, false);
+}
+
 async function applyEnrichmentPatch(id) {
   const inputEl = document.getElementById('cr-patch-input-' + id);
   const fbEl    = document.getElementById('cr-patch-fb-'    + id);
@@ -648,6 +713,102 @@ async function applyEnrichmentPatch(id) {
   } catch (e) {
     showPatchFb('Network error — check server connection.', true);
   }
+}
+
+async function applyBatchEnrichmentPatches() {
+  const inputEl    = document.getElementById('batch-patch-input');
+  const progressEl = document.getElementById('batch-patch-progress');
+  const summaryEl  = document.getElementById('batch-patch-summary');
+
+  const appendProgress = (msg, isError) => {
+    if (!progressEl) return;
+    const line = document.createElement('div');
+    line.textContent = msg;
+    line.style.color = isError ? '#E87A7A' : '#C8C8E8';
+    progressEl.appendChild(line);
+    progressEl.scrollTop = progressEl.scrollHeight;
+  };
+
+  if (progressEl) progressEl.innerHTML = '';
+  if (summaryEl)  summaryEl.textContent = '';
+
+  if (!inputEl || !inputEl.value.trim()) {
+    appendProgress('Paste JSON array first.', true);
+    return;
+  }
+
+  let patches;
+  try {
+    patches = JSON.parse(inputEl.value.trim());
+  } catch (e) {
+    appendProgress('Invalid JSON — check the array from AI.', true);
+    return;
+  }
+
+  if (!Array.isArray(patches)) {
+    appendProgress('Expected a JSON array ([ ... ]).', true);
+    return;
+  }
+  if (patches.length === 0) {
+    appendProgress('Array is empty.', true);
+    return;
+  }
+
+  const total = patches.length;
+  let okCount = 0, failCount = 0, skipCount = 0;
+
+  appendProgress(`Applying 0 / ${total} patches...`, false);
+
+  for (let i = 0; i < patches.length; i++) {
+    const patch = patches[i];
+    const num   = i + 1;
+
+    if (!patch || !patch.id) {
+      appendProgress(`Patch #${num} skipped — missing id field.`, true);
+      skipCount++;
+      appendProgress(`Applying ${num} / ${total} patches...`, false);
+      continue;
+    }
+
+    try {
+      const res  = await fetch('/api/leads/' + encodeURIComponent(patch.id) + '/enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        appendProgress(`#${num} ${patch.id} — FAIL: ${(data && data.error) || 'Server error'}`, true);
+        failCount++;
+      } else {
+        const updatedLead = data.lead;
+        const idx = _allLeads.findIndex(l => l.id === patch.id);
+        if (idx !== -1) _allLeads[idx] = updatedLead;
+        appendProgress(`#${num} ${updatedLead.businessName || patch.id} → ${updatedLead.contactReadiness || '—'}`, false);
+        okCount++;
+      }
+    } catch (e) {
+      appendProgress(`#${num} ${patch.id} — FAIL: Network error.`, true);
+      failCount++;
+    }
+
+    appendProgress(`Applying ${num} / ${total} patches...`, false);
+  }
+
+  renderTabs(_allLeads);
+  const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
+  if (tab && tab.enrichmentQueue) {
+    renderTable(applySearch(_allLeads.filter(isEnrichmentNeeded)));
+    renderCards(applySearch(_allLeads.filter(isEnrichmentNeeded)));
+  } else {
+    renderTable(applySearch(_allLeads.filter(l => matchesTab(l, tab))));
+  }
+
+  if (summaryEl) {
+    summaryEl.textContent = `Done. ${okCount} applied, ${failCount} failed, ${skipCount} skipped.`;
+    summaryEl.style.color = failCount > 0 ? '#E8C97A' : '#4ECB7A';
+  }
+  inputEl.value = '';
 }
 
 function generateContactEnrichmentPrompt(lead) {

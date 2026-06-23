@@ -261,6 +261,21 @@
   <!-- Rendered by app.js renderDailyTracker() -->
 </div>
 
+<!-- Phase 5: Batch Enrichment Apply — shown only when ENRICHMENT_QUEUE tab is active -->
+<div class="batch-enrich-section" id="batch-enrich-section" style="display:none;">
+  <h3 class="batch-enrich-heading">Batch Enrichment Apply</h3>
+  <div class="batch-enrich-actions">
+    <button type="button" class="btn-batch-prompt" onclick="copyBatchEnrichmentPrompt()">📋 Copy Batch Prompt</button>
+    <span class="batch-prompt-feedback" id="batch-prompt-fb"></span>
+  </div>
+  <textarea class="batch-patch-textarea" id="batch-patch-input" placeholder="Paste JSON array of enrichment patches from AI here..."></textarea>
+  <div class="batch-enrich-controls">
+    <button type="button" class="btn-batch-apply" onclick="applyBatchEnrichmentPatches()">✅ Apply All Patches</button>
+    <div class="batch-patch-summary" id="batch-patch-summary"></div>
+  </div>
+  <div class="batch-patch-progress" id="batch-patch-progress"></div>
+</div>
+
 <div class="prospect-table-wrapper">
   <table class="prospect-table" id="prospect-table">
     <thead>

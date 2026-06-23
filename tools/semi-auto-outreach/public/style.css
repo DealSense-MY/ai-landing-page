@@ -2627,3 +2627,92 @@ tr.selected-row td {
   margin-top: 4px;
   min-height: 18px;
 }
+
+/* Phase 5: Batch Enrichment Apply */
+.batch-enrich-section {
+  background: #10101C;
+  border: 1px solid #2A2A4A;
+  border-radius: 10px;
+  padding: 16px 18px 14px;
+  margin: 0 0 14px 0;
+}
+.batch-enrich-heading {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8888B8;
+  margin: 0 0 10px 0;
+}
+.batch-enrich-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.batch-prompt-feedback {
+  font-size: 12px;
+  color: #4ECB7A;
+}
+.batch-patch-textarea {
+  width: 100%;
+  min-height: 160px;
+  background: #0F0F18;
+  border: 1px solid #3A3A5A;
+  border-radius: 7px;
+  color: #C8C8E8;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 8px 10px;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+.batch-patch-textarea:focus { outline: none; border-color: #4A90D9; }
+.batch-enrich-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.btn-batch-apply {
+  background: #1A2A3A;
+  border: 1px solid #4A90D9;
+  color: #90C4F4;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-batch-apply:hover { background: #1E3550; }
+.btn-batch-prompt {
+  background: #142214;
+  border: 1px solid #4ECB7A;
+  color: #4ECB7A;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-batch-prompt:hover { background: #1B3020; }
+.batch-patch-summary {
+  font-size: 13px;
+  font-weight: 600;
+}
+.batch-patch-progress {
+  font-family: monospace;
+  font-size: 11px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #09090F;
+  border: 1px solid #1E1E38;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #C8C8E8;
+  line-height: 1.7;
+}
+.batch-patch-progress:empty { display: none; }
