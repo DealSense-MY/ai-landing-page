@@ -141,15 +141,20 @@
 </div>
 
 <!-- Start Here Panel -->
-<div class="start-here-panel" id="start-here-panel">
+<div class="start-here-panel is-collapsed" id="start-here-panel">
   <div class="start-here-inner">
-    <div class="start-here-title">Start Here</div>
+    <div class="start-here-summary">
+      <div class="start-here-title">Start Here</div>
+      <button type="button" class="start-here-toggle" id="start-here-toggle" onclick="toggleStartHere()">Show</button>
+    </div>
+    <div class="start-here-body" id="start-here-body">
     <div class="start-here-subtitle">Move one prospect from review to manual WhatsApp outreach.</div>
     <div class="start-here-actions">
       <button type="button" class="btn-start-action" onclick="toggleAddForm(); switchAddLeadTab('add')">+ Add Prospect</button>
       <button type="button" class="btn-start-action" onclick="toggleAddForm(); switchAddLeadTab('import')">↑ Import Prospects</button>
       <button type="button" class="btn-start-action" onclick="reviewNextProspect()">▶ Review Next Prospect</button>
       <button type="button" class="btn-start-action btn-start-workflow" onclick="toggleWorkflowPanel()">📋 Open Manual Workflow</button>
+    </div>
     </div>
   </div>
 </div>
@@ -248,9 +253,9 @@
 <div class="smart-panel" id="smart-panel">
   <div class="smart-panel-header">
     <span class="smart-panel-title">⚡ Next Actions</span>
-    <button type="button" class="smart-panel-toggle" id="smart-panel-toggle" onclick="toggleSmartPanel()">▾ Hide</button>
+    <button type="button" class="smart-panel-toggle" id="smart-panel-toggle" onclick="toggleSmartPanel()">▸ Show</button>
   </div>
-  <div class="smart-panel-body" id="smart-panel-body">
+  <div class="smart-panel-body collapsed" id="smart-panel-body">
     <!-- Rendered by app.js renderSmartPanel() -->
     <div class="smart-panel-empty">Loading...</div>
   </div>
@@ -341,6 +346,6 @@
   </div>
 </div>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

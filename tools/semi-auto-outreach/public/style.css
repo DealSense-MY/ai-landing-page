@@ -875,6 +875,28 @@ body {
   border-radius: 10px;
 }
 
+.section-toggle {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.section-toggle:hover { color: var(--text-muted); }
+
+.section-toggle-sub {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
 .amendments-label {
   font-size: 10px;
   font-weight: 700;
@@ -2326,6 +2348,12 @@ tr.selected-row td {
   gap: 20px;
   flex-wrap: wrap;
 }
+.start-here-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
 .start-here-title {
   font-size: 12px;
   font-weight: 700;
@@ -2333,6 +2361,26 @@ tr.selected-row td {
   text-transform: uppercase;
   letter-spacing: 0.9px;
   flex-shrink: 0;
+}
+.start-here-toggle {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+  padding: 3px 10px;
+}
+.start-here-toggle:hover { border-color: var(--border-strong); color: var(--text-muted); }
+.start-here-panel.is-collapsed .start-here-body { display: none; }
+.start-here-body {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: wrap;
 }
 .start-here-subtitle {
   font-size: 11px;
@@ -2526,6 +2574,7 @@ tr.selected-row td {
   padding: 14px 16px;
   margin: 12px 0;
 }
+.cr-collapsed-body { margin-top: 10px; }
 .cr-header {
   font-size: 13px;
   font-weight: 700;

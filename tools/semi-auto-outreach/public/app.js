@@ -7,7 +7,37 @@ const DAILY_TARGET = { outreach: 5, followUp: 3 };
 const STALE_DAYS   = 5;   // days since lastActionAt before STALE badge shows
 const OVERDUE_DAYS = 3;   // days since lastActionAt before follow-up overdue
 
-let _smartPanelCollapsed = false;
+let _smartPanelCollapsed = true;
+
+// ── Modal-scoped element lookup ───────────────────────────────
+// The same lead card template renders in BOTH the hidden grid (#leads-grid)
+// and the modal (#card-modal-content), so element IDs are duplicated in the
+// DOM. document.getElementById() returns the first match (the grid), leaving
+// the visible modal stale. These helpers scope lookups to the modal when it
+// is open for the given lead, and fall back to the document grid otherwise.
+function getCardRoot(id) {
+  const overlay = document.getElementById('card-modal-overlay');
+  const modalOpen = overlay && overlay.style.display !== 'none';
+  if (modalOpen && _selectedId === id) {
+    return document.getElementById('card-modal-content');
+  }
+  return null; // null => caller falls back to document (grid)
+}
+function getCardEl(id, selector) {
+  const root = getCardRoot(id);
+  if (root) {
+    const el = root.querySelector(selector);
+    if (el) return el;
+  }
+  // Fallback: selector is an #id reference → strip leading '#' for getElementById
+  if (selector.charAt(0) === '#') {
+    return document.getElementById(selector.slice(1));
+  }
+  return document.querySelector(selector);
+}
+function getCardTextarea(id) {
+  return getCardEl(id, '#dm-' + id);
+}
 
 const STATUSES = [
   'NEW','PREVIEW_READY','APPROVED_TO_SEND','APPROVED_EDITED_TO_SEND',
@@ -38,6 +68,53 @@ let _archivedLeads  = [];
 let _selectedId     = null;
 let _searchQuery    = '';
 
+// P0D: in-memory REWRITE DM variant rotation per lead. NOT persisted to data.
+// Click cycles: Preview First → Problem To Proof → Soft Professional → Value
+// First → Short WhatsApp → loops. Keyed by lead id; lost on reload (by design).
+const REWRITE_MODES = [
+  'PREVIEW_FIRST_DIRECT',
+  'PROBLEM_TO_PROOF',
+  'SOFT_PROFESSIONAL',
+  'VALUE_FIRST',
+  'SHORT_WHATSAPP_PROOF',
+];
+const _rewriteModeIndex = {}; // { [leadId]: nextModeIndex }
+
+// CTA_VARIANTS sprint: preview-first direct outreach mode. When a lead looks
+// like it has a shareable preview ready + a business name, the Rewrite button
+// prefers these 15 link-first variants (server decides shareability and returns
+// the honest fallback if the link is not truly shareable). Separate in-memory
+// rotation index, lost on reload by design.
+const PREVIEW_FIRST_MODE = 'PREVIEW_FIRST_DIRECT_DEALSENSE';
+const PREVIEW_FIRST_VARIANT_COUNT = 15;
+const _previewFirstIndex = {}; // { [leadId]: nextVariantIndex }
+// DOCTRINE_LOCK UI label: shown as the mode name when no server modeLabel.
+// "Shows prepared preview link early, explains customer benefit, then invites
+// owner to reply."
+const PREVIEW_FIRST_UI_LABEL = 'PREVIEW FIRST DIRECT';
+
+// Client-side eligibility heuristic (cheap, non-authoritative). The server is
+// the source of truth on shareability; this just decides which mode to TRY
+// first. Eligible when the lead has a business name and any http(s) preview
+// signal on a non-local host.
+function _looksShareablePreview(v) {
+  if (!v || typeof v !== 'string') return false;
+  const s = v.trim();
+  if (!/^https?:\/\//i.test(s)) return false;
+  try {
+    const host = new URL(s).hostname.toLowerCase();
+    if (['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(host)) return false;
+    if (/^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host)) return false;
+    return true;
+  } catch (_) { return false; }
+}
+function prefersPreviewFirst(lead) {
+  if (!lead) return false;
+  if (!(lead.businessName && String(lead.businessName).trim())) return false;
+  return [lead.shareablePreviewUrl, lead.publicPreviewUrl, lead.trackedPreviewUrl, lead.previewUrl]
+    .some(_looksShareablePreview);
+}
+
 function getStatus(l) {
   return l.prospectStatus || l.status || 'NEW';
 }
@@ -57,9 +134,7 @@ function getLeadStatus(lead) {
   if (s === 'FOLLOW_UP_NEEDED') return 'FOLLOW_UP';
   if (
     s === 'SENT_MANUAL_CONFIRMATION_NEEDED' ||
-    s === 'CONTACTED' ||
-    s === 'APPROVED_TO_SEND' ||
-    s === 'APPROVED_EDITED_TO_SEND'
+    s === 'CONTACTED'
   ) return 'CONTACTED';
   if (s === 'APPROVED_TO_SEND' || s === 'APPROVED_EDITED_TO_SEND') return 'APPROVED';
   if (s === 'PREVIEW_READY') return 'PREVIEW_READY';
@@ -117,6 +192,8 @@ function isEnrichmentNeeded(l) {
 
 const CLOSED_STATUSES = ['CLOSED_WON', 'CLOSED_LOST'];
 
+const REWORK_STATUSES = ['REJECTED_NEEDS_REWORK', 'NEEDS_DM_REWRITE'];
+
 function isReadyToApprove(l) {
   if (l.archived) return false;
   const cr = l.contactReadiness || '';
@@ -125,7 +202,48 @@ function isReadyToApprove(l) {
   if (l.approvalStatus === 'APPROVED_TO_CONTACT') return false;
   const s = getStatus(l);
   if (CLOSED_STATUSES.includes(s)) return false;
+  if (REWORK_STATUSES.includes(s)) return false;
+  if (!l.dmDraft || l.dmDraft.trim() === '') return false;
   return true;
+}
+
+function getModalUiState(lead) {
+  const rawStatuses = [
+    lead.status,
+    lead.prospectStatus,
+    lead.pipelineStatus
+  ].filter(Boolean);
+  const events = Array.isArray(lead.events) ? lead.events : [];
+  const hasSentConfirmed = events.some(e =>
+    e.type === 'SENT_CONFIRMED_BY_OPERATOR' ||
+    e.type === 'SENT_MANUAL_CONFIRMED'
+  );
+  const isRejectedRework = rawStatuses.includes('REJECTED_NEEDS_REWORK');
+  if (isRejectedRework) {
+    return {
+      showMarkReplied: false,
+      showFollowUpDraft: false,
+      showCloseActions: false,
+      showPaymentSection: false
+    };
+  }
+
+  const isContacted = rawStatuses.includes('CONTACTED') || hasSentConfirmed;
+  const isReplied = rawStatuses.includes('REPLIED') ||
+    rawStatuses.includes('REPLIED_UNHANDLED') ||
+    lead.replyStatus === 'REPLIED' ||
+    Boolean(lead.replyNotes);
+  const isFollowUp = rawStatuses.includes('FOLLOW_UP_NEEDED');
+  const isClosedWon = rawStatuses.includes('CLOSED_WON') || lead.dealStatus === 'CLOSED_WON';
+  const isPaid = lead.paymentStatus === 'PAID' || Number(lead.paidAmount || 0) > 0;
+  const hasPaymentData = isPaid || Boolean(lead.paymentProofNote || lead.paidAt);
+
+  return {
+    showMarkReplied: isContacted,
+    showFollowUpDraft: isContacted || isFollowUp,
+    showCloseActions: isContacted || isReplied || isFollowUp,
+    showPaymentSection: isReplied || isClosedWon || hasPaymentData
+  };
 }
 
 function matchesTab(l, tab) {
@@ -442,7 +560,8 @@ function buildLeadCard(l) {
     ${hasFollowUp}
 
     <div class="contact-readiness-section" id="cr-section-${id}">
-      <div class="cr-header">📋 Contact Readiness</div>
+      <button type="button" class="section-toggle" id="cr-toggle-${id}" onclick="toggleSection('cr-body-${id}', 'cr-toggle-${id}', 'Contact Readiness')">&#9658; Contact Readiness</button>
+      <div class="cr-collapsed-body" id="cr-body-${id}" style="display:none">
       <div class="cr-fields">
         <div class="cr-row"><span class="cr-label">Readiness</span><span class="cr-badge" id="cr-badge-${id}">—</span></div>
         <div class="cr-row"><span class="cr-label">Reason</span><span class="cr-value" id="cr-reason-${id}">—</span></div>
@@ -461,6 +580,7 @@ function buildLeadCard(l) {
         <button class="btn-apply-patch" id="cr-patch-btn-${id}" onclick="applyEnrichmentPatch('${id}')" style="display:none;">✅ Apply Enrichment Patch</button>
         <div class="cr-patch-feedback" id="cr-patch-fb-${id}"></div>
       </div>
+      </div>
     </div>
 
     <div class="preview-engine-section" id="preview-section-${id}">
@@ -477,27 +597,27 @@ function buildLeadCard(l) {
       <label>FIRST OUTREACH DM DRAFT</label>
       <p class="dm-helper">This is the first WhatsApp outreach message for this prospect. Review, edit if needed, then approve to open WhatsApp. The system does not send messages automatically.</p>
       <p class="dm-flow-hint">Flow: Review → Edit / Rewrite → Approve → WhatsApp opens → Human presses Send</p>
-      <textarea class="dm-textarea" id="dm-${id}" readonly></textarea>
+      <textarea class="dm-textarea" id="dm-${id}" placeholder="Type your outreach message here..."></textarea>
       <div class="char-count" id="cc-${id}"></div>
       <div class="dm-status-hint" id="dm-status-hint-${id}"></div>
     </div>
 
     <div class="action-bar">
-      <button class="btn btn-yes" id="btn-approve-${id}" onclick="handleYes('${id}')">APPROVE &amp; OPEN WHATSAPP</button>
+      <button type="button" class="btn btn-yes" id="btn-approve-${id}" onclick="handleYes('${id}')">APPROVE &amp; OPEN WHATSAPP</button>
       <p class="dm-approve-helper">WhatsApp will open with the message pre-filled. You still need to press Send yourself.</p>
-      <button class="btn btn-edit" onclick="handleEdit('${id}')">EDIT</button>
-      <button class="btn btn-ok" id="btn-ok-${id}" onclick="handleOk('${id}')" style="display:none">SAVE EDIT</button>
-      <button class="btn btn-no" onclick="handleNo('${id}')">REWRITE DM</button>
+      <button type="button" class="btn btn-edit" onclick="handleEdit('${id}', event)">EDIT</button>
+      <button type="button" class="btn btn-ok" id="btn-ok-${id}" onclick="handleOk('${id}', event)" style="display:none">SAVE EDIT</button>
+      <button type="button" class="btn btn-no" onclick="handleNo('${id}', event)">REWRITE DM</button>
       <p class="dm-remake-helper">Rewrite DM = rewrite the outreach message. This does not reject the prospect.</p>
-      <button class="btn btn-replied" onclick="handleReplied('${id}')">MARK REPLIED</button>
+      <button type="button" class="btn btn-replied" onclick="handleReplied('${id}')">MARK REPLIED</button>
       <p class="dm-replied-helper">Use this only when the prospect has replied to your message.</p>
-      <button class="btn btn-followup" onclick="handleFollowUp('${id}')">FOLLOW-UP DRAFT</button>
+      <button type="button" class="btn btn-followup" onclick="handleFollowUp('${id}')">FOLLOW-UP DRAFT</button>
       <p class="dm-followup-helper">Use Follow-Up Draft after you have contacted the prospect but have not received a reply.</p>
-      <button class="btn btn-won" onclick="handleClose('${id}','CLOSED_WON')">CLOSED WON ✓</button>
-      <button class="btn btn-lost" onclick="handleClose('${id}','CLOSED_LOST')">CLOSED LOST</button>
+      <button type="button" class="btn btn-won" onclick="handleClose('${id}','CLOSED_WON')">CLOSED WON ✓</button>
+      <button type="button" class="btn btn-lost" onclick="handleClose('${id}','CLOSED_LOST')">CLOSED LOST</button>
       <div class="archive-row" id="archive-row-${id}">
-        <button class="btn btn-archive" id="btn-archive-${id}" onclick="handleArchive('${id}')">⬇ ARCHIVE</button>
-        <button class="btn btn-restore" id="btn-restore-${id}" onclick="handleRestore('${id}')" style="display:none">↑ RESTORE</button>
+        <button type="button" class="btn btn-archive" id="btn-archive-${id}" onclick="handleArchive('${id}')">⬇ ARCHIVE</button>
+        <button type="button" class="btn btn-restore" id="btn-restore-${id}" onclick="handleRestore('${id}')" style="display:none">↑ RESTORE</button>
       </div>
     </div>
 
@@ -560,7 +680,8 @@ function buildLeadCard(l) {
         <span class="audit-opportunity-label">Opportunity:</span>
         <span class="audit-opportunity-list" id="audit-opportunity-list-${id}"></span>
       </div>
-      <div class="audit-editor" id="audit-editor-${id}">
+      <button type="button" class="section-toggle section-toggle-sub" id="audit-editor-toggle-${id}" onclick="toggleSection('audit-editor-${id}', 'audit-editor-toggle-${id}', 'Edit Audit')">&#9658; Edit Audit</button>
+      <div class="audit-editor" id="audit-editor-${id}" style="display:none">
         <div class="audit-editor-label">Edit Audit</div>
         <div class="audit-editor-scores">
           <div class="audit-editor-field"><label>Website</label><input type="number" min="0" max="100" class="audit-input" id="ae-website-${id}" placeholder="0–100" /></div>
@@ -585,9 +706,11 @@ function buildLeadCard(l) {
     </div>
 
     <div class="payment-section" id="payment-section-${id}">
-      <div class="payment-header">💰 Payment & Revenue</div>
+      <button type="button" class="section-toggle" id="payment-toggle-${id}" onclick="toggleSection('payment-body-${id}', 'payment-toggle-${id}', 'Payment & Revenue')">&#9658; Payment &amp; Revenue</button>
+      <div class="payment-body" id="payment-body-${id}" style="display:none">
       <div class="payment-fields" id="payment-fields-${id}"></div>
       <div class="payment-actions" id="payment-actions-${id}"></div>
+      </div>
     </div>
 
     <div class="runlog-section" id="runlog-section-${id}">
@@ -596,27 +719,31 @@ function buildLeadCard(l) {
     </div>
 
     <div class="amendments-section" id="amendments-section-${id}">
-      <div class="amendments-label">Amendments</div>
+      <button type="button" class="section-toggle" id="amendments-toggle-${id}" onclick="toggleSection('amendments-body-${id}', 'amendments-toggle-${id}', 'Amendments')">&#9658; Amendments</button>
+      <div class="amendments-body" id="amendments-body-${id}" style="display:none">
       <div class="amendments-list" id="amendments-list-${id}"></div>
       <div class="amendment-input-box" id="amendment-input-box-${id}" style="display:none">
         <textarea class="amendment-ta" id="amend-ta-${id}" placeholder="Add correction note..."></textarea>
         <button class="btn-add-amendment" onclick="handleAddAmendment('${id}')">Add Amendment</button>
+      </div>
       </div>
     </div>
   </div>`;
 }
 
 // ── Phase 3: Contact Readiness ────────────────────────────────
-function renderContactReadiness(l) {
-  const badgeEl  = document.getElementById('cr-badge-'  + l.id);
-  const reasonEl = document.getElementById('cr-reason-' + l.id);
-  const nextEl   = document.getElementById('cr-next-'   + l.id);
-  const waEl     = document.getElementById('cr-wa-'     + l.id);
-  const pubChEl  = document.getElementById('cr-pubch-'  + l.id);
-  const webEl    = document.getElementById('cr-web-'    + l.id);
-  const fbEl2    = document.getElementById('cr-fb-'     + l.id);
-  const igEl     = document.getElementById('cr-ig-'     + l.id);
-  const gmapEl   = document.getElementById('cr-gmap-'   + l.id);
+function renderContactReadiness(l, root) {
+  // Modal-scoped: prefer the passed-in card root (modal) over document (grid)
+  const q = (sel) => (root && root.querySelector(sel)) || document.querySelector(sel);
+  const badgeEl  = q('#cr-badge-'  + l.id);
+  const reasonEl = q('#cr-reason-' + l.id);
+  const nextEl   = q('#cr-next-'   + l.id);
+  const waEl     = q('#cr-wa-'     + l.id);
+  const pubChEl  = q('#cr-pubch-'  + l.id);
+  const webEl    = q('#cr-web-'    + l.id);
+  const fbEl2    = q('#cr-fb-'     + l.id);
+  const igEl     = q('#cr-ig-'     + l.id);
+  const gmapEl   = q('#cr-gmap-'   + l.id);
   if (!badgeEl) return;
 
   const cr = l.contactReadiness || 'CONTACT_MISSING';
@@ -638,13 +765,22 @@ function renderContactReadiness(l) {
   if (gmapEl) gmapEl.innerHTML = linkOrDash(l.googleMapsLink   || l.googleMapsUrl);
 
   // Hide enrichment section for CONTACT_READY leads; show patch input for others
-  const enrichRow  = document.getElementById('cr-enrich-row-'   + l.id);
-  const patchInput = document.getElementById('cr-patch-input-'  + l.id);
-  const patchBtn   = document.getElementById('cr-patch-btn-'    + l.id);
+  const enrichRow  = q('#cr-enrich-row-'   + l.id);
+  const patchInput = q('#cr-patch-input-'  + l.id);
+  const patchBtn   = q('#cr-patch-btn-'    + l.id);
   const needsEnrich = isEnrichmentNeeded(l);
   if (enrichRow)  enrichRow.style.display  = needsEnrich ? 'flex' : 'none';
   if (patchInput) patchInput.style.display = needsEnrich ? 'block' : 'none';
   if (patchBtn)   patchBtn.style.display   = needsEnrich ? 'inline-block' : 'none';
+}
+
+function toggleSection(bodyId, toggleId, label) {
+  const body = document.getElementById(bodyId);
+  const toggle = document.getElementById(toggleId);
+  if (!body || !toggle) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  toggle.innerHTML = (open ? '&#9658; ' : '&#9660; ') + esc(label);
 }
 
 function copyEnrichmentPrompt(id) {
@@ -1136,8 +1272,19 @@ function populateLeadCard(l, root) {
 
   // Status badge — show readable label, not raw internal code
   const canonicalStatus = getLeadStatus(l);
+  const modalUi = getModalUiState(l);
+  const setVisible = (selector, visible) => {
+    const el = card.querySelector(selector);
+    if (el) el.style.display = visible ? '' : 'none';
+  };
   const badgeEl = card.querySelector('[data-field="status"]');
   if (badgeEl) badgeEl.textContent = readableStatus(canonicalStatus);
+  setVisible('.btn-replied', modalUi.showMarkReplied);
+  setVisible('.dm-replied-helper', modalUi.showMarkReplied);
+  setVisible('.btn-followup', modalUi.showFollowUpDraft);
+  setVisible('.dm-followup-helper', modalUi.showFollowUpDraft);
+  setVisible('.btn-won', modalUi.showCloseActions);
+  setVisible('.btn-lost', modalUi.showCloseActions);
 
   card.querySelector('[data-field="screenshotPath"]').textContent = l.screenshotPath || 'None';
 
@@ -1184,8 +1331,8 @@ function populateLeadCard(l, root) {
     }
   }
 
-  // Phase 3: Contact Readiness section
-  renderContactReadiness(l);
+  // Phase 3: Contact Readiness section (pass card so modal-scoped, not grid)
+  renderContactReadiness(l, card);
 
   // Phase 7: Manual Send Panel
   renderManualSendPanel(l, root ? root : null);
@@ -1200,8 +1347,9 @@ function populateLeadCard(l, root) {
   renderPreviewSection(l);
   renderPreviewSignal(l);
 
-  const ta = document.getElementById('dm-' + l.id);
-  const cc = document.getElementById('cc-' + l.id);
+  // Modal-scoped: resolve from the modal card when open (avoids duplicate-ID grid hit)
+  const ta = card.querySelector('#dm-' + l.id) || document.getElementById('dm-' + l.id);
+  const cc = card.querySelector('#cc-' + l.id) || document.getElementById('cc-' + l.id);
   if (ta) {
     let dmValue = l.defaultDm || l.lastApprovedMessage || l.approvedMessage || l.dmDraft || l.outreachMessage || l.message || '';
     // Auto-append preview link if READY and not already present
@@ -1212,16 +1360,23 @@ function populateLeadCard(l, root) {
       }
     }
     ta.value = dmValue;
+    // P0D.3: textarea is read-only by default on modal open. Operator flow is
+    // Review → Edit/Rewrite → Approve. Editing is enabled only after EDIT or
+    // REWRITE DM. readonly (not disabled) still allows select/copy. A fresh
+    // card is built on every open, so no edit state leaks between leads.
+    ta.setAttribute('readonly', true);
+    const okBtnDefault = card.querySelector('#btn-ok-' + l.id) || document.getElementById('btn-ok-' + l.id);
+    if (okBtnDefault) okBtnDefault.style.display = 'none';
     if (!dmValue) {
-      ta.placeholder = 'No DM draft yet. Use REWRITE DM or edit manually before approving.';
+      ta.placeholder = 'No DM draft yet. Use REWRITE DM or click EDIT to write manually.';
     }
   }
-  if (cc) cc.textContent = (document.getElementById('dm-' + l.id) ? document.getElementById('dm-' + l.id).value.length : 0) + ' chars';
+  if (cc) cc.textContent = (ta ? ta.value.length : 0) + ' chars';
 
   // Status-based action hint — if DM is empty, override with empty-state warning
-  const hintEl = document.getElementById('dm-status-hint-' + l.id);
+  const hintEl = card.querySelector('#dm-status-hint-' + l.id) || document.getElementById('dm-status-hint-' + l.id);
   if (hintEl) {
-    const dmEmpty = !document.getElementById('dm-' + l.id)?.value;
+    const dmEmpty = !(ta && ta.value);
     const hintMap = {
       NEW:          'Next step: Generate preview or prepare first outreach DM.',
       PREVIEW_READY:'Next step: Review DM and approve outreach.',
@@ -1260,6 +1415,7 @@ function populateLeadCard(l, root) {
 
   // Payment section
   renderPaymentSection(l);
+  setVisible('#payment-section-' + l.id, modalUi.showPaymentSection);
 
   // Run Log Timeline
   renderRunLog(l);
@@ -1475,9 +1631,30 @@ async function handleYes(id) {
   if (!isOperationOn()) { showFeedback(id, 'warning', 'Operation is OFF. Re-enable it first.'); return; }
   if (!await checkWorkingHours()) return;
   const msg = document.getElementById('dm-' + id).value;
-  await patchLead(id, { status: 'APPROVED_TO_SEND', approvedMessage: msg });
+  if (!msg || msg.trim() === '') {
+    showFeedback(id, 'warning', 'Please type a message first before approving. Click EDIT to write your outreach message.');
+    return;
+  }
+  await patchLead(id, { approvedMessage: msg, dmDraft: msg });
+  const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/approve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ decision: 'APPROVE' })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    showFeedback(id, 'warning', data.error || 'Approval failed. Check draft and try again.');
+    return;
+  }
+  if (data.lead) {
+    const idx = _allLeads.findIndex(l => l.id === id);
+    if (idx !== -1) _allLeads[idx] = data.lead;
+  }
   document.getElementById('badge-' + id).textContent = 'APPROVED_TO_SEND';
   document.getElementById('badge-' + id).className = 'status-badge status-APPROVED_TO_SEND';
+  renderTabs(_allLeads);
+  const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
+  if (tab) renderTable(_allLeads.filter(l => matchesTab(l, tab)));
   await logEvent(id, 'CTA_APPROVED', { messageLength: msg.length });
   await openContact(id, msg);
   await logEvent(id, 'WHATSAPP_OPENED', { via: 'wa.me' });
@@ -1486,14 +1663,26 @@ async function handleYes(id) {
 
 async function handleConfirmSent(id) {
   if (isLocked(id)) { showFeedback(id, 'warning', 'Record is locked. Add an amendment instead.'); return; }
-  await logEvent(id, 'SENT_MANUAL_CONFIRMED', {});
-  document.getElementById('badge-' + id).textContent = 'CONTACTED';
-  document.getElementById('badge-' + id).className = 'status-badge status-APPROVED_TO_SEND';
-  const btn = document.getElementById('confirm-sent-' + id);
-  if (btn) { btn.disabled = true; btn.textContent = 'Sent Confirmed'; }
-  showFeedback(id, 'success', [
-    { text: 'Manual send confirmed. ' }, { text: 'Record updated.', bold: true }
-  ]);
+  // P0A: route through the gated canonical /confirm-sent endpoint.
+  // No optimistic CONTACTED mutation — UI only updates after server confirms.
+  try {
+    const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/confirm-sent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showFeedback(id, 'warning', (data && data.error) || 'Confirm Sent rejected by server.');
+      return;
+    }
+    showFeedback(id, 'success', [
+      { text: 'Send confirmed. ' }, { text: 'Record updated.', bold: true }
+    ]);
+    await loadLeads();
+  } catch (e) {
+    showFeedback(id, 'warning', 'Network error confirming sent: ' + e.message);
+  }
 }
 
 function showConfirmSent(id) {
@@ -1501,54 +1690,142 @@ function showConfirmSent(id) {
   if (box) box.style.display = 'block';
 }
 
-function handleEdit(id) {
+function handleEdit(id, event) {
+  if (event) { try { event.preventDefault(); event.stopPropagation(); } catch (_) {} }
   if (isLocked(id)) { showFeedback(id, 'warning', 'Record is locked. Add an amendment instead.'); return; }
-  const ta = document.getElementById('dm-' + id);
+  const ta = getCardTextarea(id);
+  if (!ta) { showFeedback(id, 'warning', 'Could not find the DM draft field. Re-open the lead and try again.'); return; }
   ta.removeAttribute('readonly');
+  ta.removeAttribute('disabled');
   ta.focus();
-  document.getElementById('btn-ok-' + id).style.display = 'inline-block';
-  showFeedback(id, 'info', 'Edit mode active. Modify the message, then press APPROVE EDIT.');
+  const okBtn = getCardEl(id, '#btn-ok-' + id);
+  if (okBtn) okBtn.style.display = 'inline-block';
+  const isEmpty = !ta.value || ta.value.trim() === '';
+  if (isEmpty) {
+    showFeedback(id, 'info', 'Edit mode active. Type your message, then click APPROVE & OPEN WHATSAPP or SAVE EDIT.');
+  } else {
+    ta.select();
+    showFeedback(id, 'info', 'Edit mode active. Modify the message, then click APPROVE & OPEN WHATSAPP or SAVE EDIT.');
+  }
 }
 
-async function handleOk(id) {
+// SAVE EDIT — saves the DM draft ONLY.
+// P0B.1 regression fix: this previously ran the full approve + open-WhatsApp
+// pipeline. It must NEVER approve, open WhatsApp, confirm sent, or mutate
+// CONTACTED. Approving/opening WhatsApp is exclusively handleYes (APPROVE &
+// OPEN WHATSAPP). Saving persists dmDraft via the existing safe PATCH route.
+async function handleOk(id, event) {
+  if (event) { try { event.preventDefault(); event.stopPropagation(); } catch (_) {} }
   if (isLocked(id)) { showFeedback(id, 'warning', 'Record is locked. Add an amendment instead.'); return; }
-  if (!isOperationOn()) { showFeedback(id, 'warning', 'Operation is OFF. Re-enable it first.'); return; }
-  if (!await checkWorkingHours()) return;
-  const msg = document.getElementById('dm-' + id).value;
-  document.getElementById('dm-' + id).setAttribute('readonly', true);
-  document.getElementById('btn-ok-' + id).style.display = 'none';
-  await patchLead(id, { status: 'APPROVED_EDITED_TO_SEND', approvedMessage: msg });
-  document.getElementById('badge-' + id).textContent = 'APPROVED_EDITED_TO_SEND';
-  document.getElementById('badge-' + id).className = 'status-badge status-APPROVED_EDITED_TO_SEND';
-  await logEvent(id, 'CTA_APPROVED', { messageLength: msg.length, edited: true });
-  await openContact(id, msg);
-  await logEvent(id, 'WHATSAPP_OPENED', { via: 'wa.me', edited: true });
-  showConfirmSent(id);
+  const taOk = getCardTextarea(id);
+  const msg = taOk ? taOk.value : '';
+  if (!msg || msg.trim() === '') {
+    showFeedback(id, 'warning', 'Message is empty — type your outreach message before saving.');
+    return;
+  }
+  // Save draft only (no approve, no WhatsApp).
+  await patchLead(id, { dmDraft: msg.trim() });
+  const idx = _allLeads.findIndex(l => l.id === id);
+  if (idx !== -1) _allLeads[idx].dmDraft = msg.trim();
+  // P0D.3: return textarea to read-only view mode and hide SAVE EDIT after save.
+  if (taOk) taOk.setAttribute('readonly', true);
+  const okBtnSave = getCardEl(id, '#btn-ok-' + id);
+  if (okBtnSave) okBtnSave.style.display = 'none';
+  showFeedback(id, 'success', 'DM draft saved. Click EDIT to change it again, or APPROVE & OPEN WHATSAPP when ready.');
 }
 
-async function handleNo(id) {
+async function handleNo(id, event) {
+  if (event) { try { event.preventDefault(); event.stopPropagation(); } catch (_) {} }
   if (isLocked(id)) { showFeedback(id, 'warning', 'Record is locked. Add an amendment instead.'); return; }
   const lead = _allLeads.find(l => l.id === id);
   const oldStatus = lead ? (lead.prospectStatus || lead.status || 'UNKNOWN') : 'UNKNOWN';
-  await patchLead(id, { status: 'REJECTED_NEEDS_REWORK', prospectStatus: 'REJECTED_NEEDS_REWORK' });
+  // Isu 1 fix: REWRITE DM no longer mutates prospectStatus/status in leads.json.
+  // It only opens the DM textarea for an inline rewrite. The pipeline status stays
+  // unchanged; "Needs DM Rewrite" is a display label derived in getStatus(), not a
+  // persisted state. Log the intent for audit trail only.
   await logEvent(id, 'DM_REWRITE_REQUESTED', {
     oldStatus,
-    newStatus: 'REJECTED_NEEDS_REWORK',
     reason: 'Operator clicked REWRITE DM'
   });
-  // Update local cache so Smart Panel + tabs refresh correctly
-  const idx = _allLeads.findIndex(l => l.id === id);
-  if (idx !== -1) {
-    _allLeads[idx].status = 'REJECTED_NEEDS_REWORK';
-    _allLeads[idx].prospectStatus = 'REJECTED_NEEDS_REWORK';
+
+  // Put the DM textarea into edit mode so the operator can review/rewrite it (modal-scoped).
+  const ta = getCardTextarea(id);
+  if (ta) {
+    ta.removeAttribute('readonly');
+    ta.removeAttribute('disabled');
+    const okBtn = getCardEl(id, '#btn-ok-' + id);
+    if (okBtn) okBtn.style.display = 'inline-block';
   }
-  document.getElementById('badge-' + id).textContent = 'Needs DM Rewrite';
-  document.getElementById('badge-' + id).className = 'status-badge status-REJECTED_NEEDS_REWORK';
-  const tab = PIPELINE_TABS.find(t => t.key === _activeTab);
-  renderTabs(_allLeads);
-  renderSmartPanel(_allLeads);
-  renderTable(_allLeads.filter(l => matchesTab(l, tab)));
-  showFeedback(id, 'warning', 'DM draft rejected. Lead queued for rewrite — edit the DM, then re-approve.');
+
+  // CTA_VARIANTS sprint: prefer preview-first direct variants when the lead has
+  // a shareable preview + business name (rule #5). Otherwise rotate the legacy
+  // P0D proof-led modes. Server stays the source of truth on shareability.
+  // (`lead` is already resolved above.)
+  let mode, genBody;
+  if (prefersPreviewFirst(lead)) {
+    const pfIdx = _previewFirstIndex[id] || 0;
+    _previewFirstIndex[id] = (pfIdx + 1) % PREVIEW_FIRST_VARIANT_COUNT;
+    mode = PREVIEW_FIRST_MODE;
+    genBody = { mode, variantIndex: pfIdx };
+  } else {
+    const modeIdx = _rewriteModeIndex[id] || 0;
+    mode = REWRITE_MODES[modeIdx % REWRITE_MODES.length];
+    _rewriteModeIndex[id] = (modeIdx + 1) % REWRITE_MODES.length;
+    genBody = { mode };
+  }
+
+  // Generate a fresh draft via the local/deterministic variant engine (server
+  // route, no external AI). The route only generates — it changes no status.
+  showFeedback(id, 'info', 'Generating a fresh DM draft…');
+  let draft = '', modeLabel = '', previewState = '', sendReady = false;
+  try {
+    const res = await fetch('/api/leads/' + encodeURIComponent(id) + '/generate-dm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(genBody)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showFeedback(id, 'warning', (data && data.error) || 'Could not generate a draft. Edit the message manually, then click SAVE EDIT.');
+      if (ta) ta.focus();
+      return;
+    }
+    draft        = (data && data.draft) ? data.draft : '';
+    modeLabel    = (data && data.modeLabel) || '';
+    previewState = (data && data.previewState) || '';
+    sendReady    = !!(data && data.sendReady);
+  } catch (e) {
+    showFeedback(id, 'warning', 'Could not reach the draft generator. Edit the message manually, then click SAVE EDIT.');
+    if (ta) ta.focus();
+    return;
+  }
+
+  if (!draft) {
+    showFeedback(id, 'warning', 'No draft was generated. Edit the message manually, then click SAVE EDIT.');
+    if (ta) ta.focus();
+    return;
+  }
+
+  // Show the generated draft in the textarea.
+  if (ta) {
+    ta.value = draft;
+    const cc = getCardEl(id, '#cc-' + id);
+    if (cc) cc.textContent = ta.value.length + ' chars';
+    ta.focus();
+  }
+
+  // Persist via the existing safe PATCH route (dmDraft only — no status mutation).
+  await patchLead(id, { dmDraft: draft });
+  const idx = _allLeads.findIndex(l => l.id === id);
+  if (idx !== -1) _allLeads[idx].dmDraft = draft;
+
+  // Feedback: which mode generated, plus an honest preview-shareability note.
+  let previewNote;
+  if (previewState === 'SHAREABLE_PREVIEW' && sendReady) previewNote = 'Shareable preview link included.';
+  else if (previewState === 'LOCAL_ONLY_PREVIEW')        previewNote = 'Preview not shareable yet — no client link added.';
+  else                                                   previewNote = 'No preview link detected — preparation copy generated.';
+  const shownLabel = modeLabel || (mode === PREVIEW_FIRST_MODE ? PREVIEW_FIRST_UI_LABEL : 'Variant');
+  showFeedback(id, 'success', `Rewrite generated: ${shownLabel}. ${previewNote} Review/edit, then APPROVE & OPEN WHATSAPP when ready.`);
 }
 
 async function handleReplied(id) {
@@ -2503,10 +2780,22 @@ function toggleSmartPanel() {
   const body   = document.getElementById('smart-panel-body');
   const toggle = document.getElementById('smart-panel-toggle');
   if (body)   body.classList.toggle('collapsed', _smartPanelCollapsed);
+  if (!_smartPanelCollapsed) renderSmartPanel(_allLeads);
   if (toggle) toggle.textContent = _smartPanelCollapsed ? '▸ Show' : '▾ Hide';
 }
 
 // ── Phase 7: Daily Target Tracker ────────────────────────────
+
+function toggleStartHere() {
+  const panel = document.getElementById('start-here-panel');
+  const body = document.getElementById('start-here-body');
+  const toggle = document.getElementById('start-here-toggle');
+  if (!panel || !body || !toggle) return;
+  const open = !panel.classList.contains('is-collapsed');
+  panel.classList.toggle('is-collapsed', open);
+  body.style.display = open ? 'none' : 'block';
+  toggle.textContent = open ? 'Show' : 'Hide';
+}
 
 function calcDailyStats(leads) {
   const todayStr = new Date().toDateString();
