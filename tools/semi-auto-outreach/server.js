@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const previewBuilder = require('./modules/previewBuilder');
+const { generateSoftDmDraft, fallbackDmDraft, generateVariant, MODES, generatePreviewFirstVariant, PREVIEW_FIRST_MODE } = require('./lib/outreachCopy');
 
 const app = express();
 const PORT = 3777;
@@ -131,6 +132,14 @@ function safeReadJSON(filePath) {
 
 function safeWriteJSON(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
+// Safety invariant (P0A): no code path may mark a lead CONTACTED / sent-confirmed
+// (contactedAt, sentAt, sendStatus=SENT_*) unless it has passed the approval+send gate.
+function canConfirmSent(lead) {
+  return !!lead &&
+    lead.approvalStatus === 'APPROVED_TO_CONTACT' &&
+    lead.sendStatus     === 'APPROVED_TO_SEND';
 }
 
 function queueWrite(fn) {
@@ -377,6 +386,14 @@ function calculatePreviewReadinessScore(lead) {
   return Math.min(100, Math.max(0, score));
 }
 
+function generateDefaultDmDraft(lead) {
+  try {
+    const draft = generateSoftDmDraft(lead);
+    if (draft && draft.trim()) return draft;
+  } catch (_) { /* fall through */ }
+  return fallbackDmDraft(lead);
+}
+
 function ensureDataFiles() {
   const dataDir = path.join(__dirname, 'data');
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
@@ -586,6 +603,7 @@ app.patch('/api/leads/:id', requireAuth, (req, res) => {
     if (scheduleStatus  !== undefined) leads[idx].scheduleStatus  = scheduleStatus;
     if (scheduledAt     !== undefined) leads[idx].scheduledAt    = scheduledAt;
     if (req.body.prospectStatus !== undefined) leads[idx].prospectStatus = req.body.prospectStatus;
+    if (req.body.dmDraft        !== undefined) leads[idx].dmDraft        = req.body.dmDraft;
     if (req.body.previewClicked !== undefined)        leads[idx].previewClicked        = req.body.previewClicked;
     if (req.body.previewClickCount !== undefined)     leads[idx].previewClickCount     = req.body.previewClickCount;
     if (req.body.lastPreviewClickedAt !== undefined)  leads[idx].lastPreviewClickedAt  = req.body.lastPreviewClickedAt;
@@ -822,6 +840,12 @@ app.post('/api/leads/import', requireAuth, (req, res) => {
       lead.importedAt      = now;
       lead.importSource    = 'CODEX_AGENT';
 
+      // Auto-generate dmDraft if empty — Aliff should review before sending
+      if (!lead.dmDraft || lead.dmDraft.trim() === '') {
+        lead.dmDraft       = generateDefaultDmDraft(lead);
+        lead.dmDraftSource = 'AUTO_GENERATED';
+      }
+
       // Quality warnings — imported but flagged for operator attention
       const importWarnings = [];
       if (!lead.whatsappNumber) importWarnings.push('no WhatsApp number — manual search needed');
@@ -953,6 +977,13 @@ app.post('/api/leads/:id/events', requireAuth, (req, res) => {
     const idx = leads.findIndex(l => l.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Lead not found' });
 
+    // Safety closure (P0A): the legacy SENT_MANUAL_CONFIRMED bypass is retired.
+    // Manual send confirmation must go through the gated /confirm-sent route.
+    // Reject BEFORE any event append, mutation, save, or log write.
+    if (type === 'SENT_MANUAL_CONFIRMED') {
+      return res.status(410).json({ error: 'Use /confirm-sent for manual send confirmation.' });
+    }
+
     const now = new Date().toISOString();
     const event = {
       id:        `${type}-${Date.now()}`,
@@ -968,16 +999,12 @@ app.post('/api/leads/:id/events', requireAuth, (req, res) => {
     if (!Array.isArray(leads[idx].events)) leads[idx].events = [];
     leads[idx].events.push(event);
 
-    if (type === 'SENT_MANUAL_CONFIRMED') {
-      leads[idx].contactedAt   = now;
-      leads[idx].lastActionAt  = now;
-      leads[idx].humanDecision = 'SENT_MANUALLY_CONFIRMED';
-      if (leads[idx].prospectStatus !== 'CLOSED_WON' && leads[idx].prospectStatus !== 'CLOSED_LOST') {
-        leads[idx].prospectStatus = 'CONTACTED';
-      }
-    } else {
-      leads[idx].lastActionAt = now;
-    }
+    // P2 cleanup: the legacy SENT_MANUAL_CONFIRMED writer (set contactedAt /
+    // prospectStatus=CONTACTED here) has been removed. It was already dead code —
+    // the early 410 guard above rejects SENT_MANUAL_CONFIRMED before reaching
+    // this point — but is removed now so a future refactor cannot re-arm the
+    // bypass. CONTACTED is set exclusively by the gated /confirm-sent route.
+    leads[idx].lastActionAt = now;
 
     safeWriteJSON(LEADS_FILE, leads);
 
@@ -1311,6 +1338,13 @@ app.post('/api/leads/:id/approve', requireAuth, (req, res) => {
         return res.status(400).json({ error: 'Invalid decision: ' + decision });
       }
 
+      if (decision === 'APPROVE') {
+        const draft = lead.dmDraft || lead.approvedMessage || lead.lastApprovedMessage || '';
+        if (!draft || draft.trim() === '') {
+          return res.status(400).json({ success: false, error: 'Cannot approve — no draft message set. Add a message first via Edit or direct textarea entry.' });
+        }
+      }
+
       const now = new Date().toISOString();
       const approvalStatusBefore = lead.approvalStatus || 'NOT_APPROVED_TO_CONTACT';
       const sendStatusBefore     = lead.sendStatus     || 'NOT_APPROVED_TO_SEND';
@@ -1318,6 +1352,7 @@ app.post('/api/leads/:id/approve', requireAuth, (req, res) => {
       if (decision === 'APPROVE') {
         lead.approvalStatus = 'APPROVED_TO_CONTACT';
         lead.sendStatus     = 'APPROVED_TO_SEND';
+        lead.prospectStatus = 'APPROVED_TO_SEND';
         lead.approvedAt     = now;
         lead.approvedBy     = 'Aliff';
         lead.sendPrepStatus = 'READY_TO_SEND_MANUAL';
@@ -1381,12 +1416,19 @@ app.post('/api/leads/:id/confirm-sent', requireAuth, (req, res) => {
       const lead = leads[idx];
       if (lead.locked) return res.status(403).json({ error: 'Lead is locked (' + lead.lockReason + ') — cannot confirm sent' });
 
-      // Safety: must be approved before confirming sent
-      if (lead.approvalStatus !== 'APPROVED_TO_CONTACT') {
-        return res.status(400).json({ error: 'Lead is not approved to contact — cannot confirm sent' });
+      // Idempotency (P0A.1): if this lead is already confirmed sent, do NOT append
+      // a duplicate event, restamp sentAt/contactedAt, or write a duplicate log.
+      const alreadyConfirmed =
+        lead.sendStatus === 'SENT_CONFIRMED_BY_OPERATOR' ||
+        lead.prospectStatus === 'CONTACTED' ||
+        (Array.isArray(lead.events) && lead.events.some(e => e && e.type === 'SENT_CONFIRMED_BY_OPERATOR'));
+      if (alreadyConfirmed) {
+        return res.status(409).json({ ok: true, alreadyConfirmed: true, error: 'Send already confirmed for this lead — no changes made.', lead });
       }
-      if (lead.sendStatus !== 'APPROVED_TO_SEND') {
-        return res.status(400).json({ error: 'Lead sendStatus is not APPROVED_TO_SEND — cannot confirm sent' });
+
+      // Safety invariant (P0A): must pass approval+send gate before confirming sent
+      if (!canConfirmSent(lead)) {
+        return res.status(400).json({ error: 'Lead is not gated for send (needs approvalStatus=APPROVED_TO_CONTACT and sendStatus=APPROVED_TO_SEND) — cannot confirm sent' });
       }
 
       const { sendChannel, sentMessage } = req.body || {};
@@ -1509,6 +1551,94 @@ app.post('/api/leads/:id/save-draft', requireAuth, (req, res) => {
       res.status(500).json({ error: 'Save draft failed: ' + e.message });
     }
   });
+});
+
+// POST generate a fresh DM draft for a lead (REWRITE DM).
+// Generation only — uses the existing local/deterministic BM adapter
+// (generateDefaultDmDraft). It does NOT persist anything, does NOT change
+// any status, and does NOT touch leads.json. The client saves the returned
+// draft through the existing safe PATCH /api/leads/:id { dmDraft } route.
+app.post('/api/leads/:id/generate-dm', requireAuth, (req, res) => {
+  try {
+    const leads = safeReadJSON(LEADS_FILE);
+    const lead = leads.find(l => l.id === req.params.id);
+    if (!lead) return res.status(404).json({ error: 'Lead not found' });
+
+    // Optional proof-led variant mode (P0D). When a valid mode is passed, use
+    // the variant engine and return its metadata; otherwise fall back to the
+    // default deterministic draft. No status mutation, no persistence here.
+    const requestedMode = req.body && typeof req.body.mode === 'string' ? req.body.mode : null;
+
+    // Preview-first direct outreach mode (CTA_VARIANTS sprint). Opt-in; only
+    // generates copy. Leads with a SHAREABLE preview link get a link-first
+    // variant; otherwise the honest "send preview when ready" fallback. No
+    // status mutation, no persistence, no auto-send here.
+    if (requestedMode === PREVIEW_FIRST_MODE) {
+      const variantIndex = req.body && Number.isFinite(Number(req.body.variantIndex)) ? Number(req.body.variantIndex) : 0;
+      let variant;
+      try {
+        variant = generatePreviewFirstVariant(lead, variantIndex);
+      } catch (e) {
+        const safe = generateDefaultDmDraft(lead);
+        if (!safe || !String(safe).trim()) {
+          return res.status(422).json({ error: 'Could not generate a DM draft for this lead' });
+        }
+        return res.json({ ok: true, draft: String(safe).trim(), mode: 'SOFT_PROFESSIONAL', modeLabel: 'Soft Professional', previewState: 'NO_PREVIEW', sendReady: false, fallback: true });
+      }
+      if (!variant.draft || !String(variant.draft).trim()) {
+        return res.status(422).json({ error: 'Could not generate a DM draft for this lead' });
+      }
+      return res.json({
+        ok: true,
+        draft: String(variant.draft).trim(),
+        mode: variant.mode,
+        modeLabel: variant.modeLabel,
+        variantId: variant.variantId,
+        riskLevel: variant.riskLevel,
+        previewState: variant.previewState,
+        sendReady: variant.sendReady,
+      });
+    }
+
+    if (requestedMode && MODES.includes(requestedMode)) {
+      let variant;
+      try {
+        variant = generateVariant(lead, requestedMode);
+      } catch (e) {
+        // Fall back to the safe default draft if a variant build throws.
+        const safe = generateDefaultDmDraft(lead);
+        if (!safe || !String(safe).trim()) {
+          return res.status(422).json({ error: 'Could not generate a DM draft for this lead' });
+        }
+        return res.json({ ok: true, draft: String(safe).trim(), mode: 'SOFT_PROFESSIONAL', modeLabel: 'Soft Professional', previewState: 'NO_PREVIEW', sendReady: false, fallback: true });
+      }
+      if (!variant.draft || !String(variant.draft).trim()) {
+        return res.status(422).json({ error: 'Could not generate a DM draft for this lead' });
+      }
+      return res.json({
+        ok: true,
+        draft: String(variant.draft).trim(),
+        mode: variant.mode,
+        modeLabel: variant.modeLabel,
+        previewState: variant.previewState,
+        sendReady: variant.sendReady,
+      });
+    }
+
+    // No mode requested — original behavior (backward-compatible).
+    let draft;
+    try {
+      draft = generateDefaultDmDraft(lead);
+    } catch (e) {
+      return res.status(500).json({ error: 'DM generation failed: ' + e.message });
+    }
+    if (!draft || !String(draft).trim()) {
+      return res.status(422).json({ error: 'Could not generate a DM draft for this lead' });
+    }
+    res.json({ ok: true, draft: String(draft).trim() });
+  } catch (e) {
+    res.status(500).json({ error: 'DM generation failed: ' + e.message });
+  }
 });
 
 // POST mark lead as paid
